@@ -1,0 +1,24 @@
+{% macro status(s) -%}
+{%- if s -%}<span class="status {{ s|sclass }}"><span class="sw" aria-hidden="true"></span>{{ s }}</span>
+{%- else -%}<span class="status s-none">nicht mehr gelistet</span>{%- endif -%}
+{%- endmacro %}
+
+{% macro own() -%}<span class="own-label">Eigene Auswertung</span>{%- endmacro %}
+
+{% macro official(sid) -%}<span class="official-label">Quelle: BASG, Stand {{ sid }}</span>{%- endmacro %}
+
+{% macro legend() %}
+<ul class="legend" aria-label="Legende">
+ <li><svg width="22" height="12" aria-hidden="true"><rect class="tl-band s-nv" width="22" height="12"/></svg>Nicht verfügbar</li>
+ <li><svg width="22" height="12" aria-hidden="true"><rect class="tl-band s-ev" width="22" height="12"/></svg>eingeschränkt verfügbar</li>
+ <li><svg width="22" height="12" aria-hidden="true"><rect class="tl-band s-s4" width="22" height="12"/></svg>verfügbar gemäß §4 (1)</li>
+ <li><svg width="22" height="12" aria-hidden="true"><rect class="tl-unc" width="22" height="12"/></svg>nicht beobachtet (Beginn vor erster Sichtung, Ende zwischen zwei Schnappschüssen)</li>
+ <li><svg width="22" height="12" aria-hidden="true"><line class="tl-resupply" x1="11" x2="11" y1="0" y2="12"/></svg>angekündigte Wiederbelieferung</li>
+ <li><svg width="22" height="12" aria-hidden="true"><line class="tl-shift" x1="2" x2="18" y1="6" y2="6" marker-end="url(#arrow)"/></svg>Verschiebung des Termins (eigene Auswertung)</li>
+ <li><svg width="22" height="12" aria-hidden="true"><line class="tl-obs on" x1="8" x2="8" y1="2" y2="10"/><line class="tl-obs" x1="14" x2="14" y1="2" y2="10"/></svg>Archiv-Schnappschuss (dunkel: Packung gelistet)</li>
+</ul>
+{% endmacro %}
+
+{% macro pkg_cell(p, root) -%}
+<a href="{{ root }}{{ p.path }}">{{ p.label }}</a>{% if p.pzn %} <span class="pzn">PZN <span class="num">{{ p.pzn }}</span></span>{% endif %}
+{%- endmacro %}

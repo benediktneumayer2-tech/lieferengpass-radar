@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Neue und beendete Meldungen der Woche{% endblock %}
+{% block main %}
+{% import "_macros.html" as m %}
+<h1 class="page-title">Neue und beendete Meldungen: {{ week.from|de }}–{{ week.to|de }}</h1>
+<p class="lead">Episoden, die in den letzten 7 Tagen bis zum Stichtag begonnen haben oder deren Ende festgestellt wurde. {{ m.own() }}</p>
+{% set limit = none %}{% set ids = true %}
+{% set hl = 2 %}{% include "_week_lists.html" %}
+{% endblock %}

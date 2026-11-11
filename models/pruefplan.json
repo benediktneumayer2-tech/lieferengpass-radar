@@ -1,0 +1,67 @@
+{
+ "auswertung": "stockout bewertung, monatlich; Bericht zum Go/No-Go am 30.04.2027",
+ "basg_stand": "2026-10-20",
+ "beginn": "2027-01-01",
+ "beste_menge": "Verfahren, deren Brier-Abstand zum besten im 95-%-Intervall über Wirkstoffe 0 einschließt (8 Wochen); alles außer dem Hauptvergleich ist sekundär",
+ "eingefroren_am": "2026-10-21",
+ "ergebnis": "neue BASG-Meldung zum Wirkstoff: eine Meldung beginnt oder erscheint erstmals binnen 28, 56 bzw. 84 Tagen nach dem Stichtag; ein Horizont zählt erst, wenn er im BASG-Stand abgelaufen ist",
+ "hauptvergleich": {
+  "bestanden": "Brier-Score niedriger und Trefferquote der 50 höchsten Wirkstoffe je Stichtag höher als bei stufen_v0 (Punktschätzer, 8 Wochen); 95-%-Intervalle über Wirkstoffe werden berichtet",
+  "gegen": "stufen_v0",
+  "horizont": 56,
+  "k": 50,
+  "modell": "z3_v0"
+ },
+ "lernen": [
+  "2024-01-01",
+  "2025-12-31"
+ ],
+ "nebenkennzahlen": [
+  "Log-Loss",
+  "Kalibrierung in Zehnteln, Achsenabschnitt und Steigung",
+  "AUC",
+  "Average Precision",
+  "Top 25/50/100 je Stichtag: Quote und Anteil aller Meldungen",
+  "Vorlauf: Anteil der neuen Meldungen, deren Wirkstoff am letzten Protokolltag davor unter den 50 höchsten stand, seit wie vielen Tagen ununterbrochen (Median, Anteil mit mindestens 7 Tagen) und ob an irgendeinem Tag der 8 Wochen davor; Gleichstände in fester Reihenfolge je Wirkstoff",
+  "Listenstabilität: Anteil der Top 50, der von einem Tag zum nächsten wechselt"
+ ],
+ "pruefen": [
+  "2026-01-01",
+  "2026-10-20"
+ ],
+ "regeln": [
+  "Es zählen nur Vorhersagen aus dem täglichen Vorhersageprotokoll, die mit diesem Prüfplan (sha256) geschrieben wurden.",
+  "Ab Beginn wird nichts mehr eingefroren oder geändert; eine neue Fassung bekommt einen neuen Namen und einen eigenen Prüfplan.",
+  "z3_v0_mit_de nutzt BfArM-Meldungen und dient nur der internen Bewertung, nicht der Anzeige."
+ ],
+ "schritt_tage": 14,
+ "sha256": "35a230a0a9bd8da4810849d5599442d33bb44769431bfc29be093b8fd6974479",
+ "stichtage": "alle 14 Tage ab Beginn; je Stichtag alle Wirkstoffe des Vorhersageprotokolls dieses Tages",
+ "verfahren": {
+  "mittel_v0": {
+   "datei": "models/mittel_v0.json",
+   "rolle": "Herausforderer: Mittel der Wahrscheinlichkeiten",
+   "sha256": "a85c33189a01ac445f590f364efcaf3bf1b9b5bcca449330432e0e4cd2601015"
+  },
+  "stufen_v0": {
+   "datei": "models/stufen_v0.json",
+   "rolle": "Vergleich: Stufenregel der Frühwarnliste als Quote je Stufe",
+   "sha256": "e9cd505816e6984b6227d193c98e1f7ef56fb1c40cccccb0ca27d978aee1b126"
+  },
+  "z3_v0": {
+   "datei": "models/z3_v0.json",
+   "rolle": "Hauptmodell",
+   "sha256": "4041b80cd0b532356d66db7e838b9ab7d10bc2a423912a849338eef46a5f666a"
+  },
+  "z3_v0_mit_de": {
+   "datei": "models/z3_v0_mit_de.json",
+   "rolle": "Herausforderer mit BfArM-Meldungen, nur intern",
+   "sha256": "c6d82729eed38f77c5a8a85523f01ceaa84f8fe9267b98c47dcbc37533200244"
+  },
+  "z3_v0_ohne_ausland": {
+   "datei": "models/z3_v0_ohne_ausland.json",
+   "rolle": "Diagnose: dasselbe Modell ohne Auslandsmeldungen",
+   "sha256": "2b9b4ffdb3ce545ebb193b81a50f4060df3cf61ffc3bfb3453c7a96e7a0c9cb7"
+  }
+ }
+}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Lage heute{% endblock %}
+{% block main %}
+<h1 class="page-title">Arzneimittel-Engpässe in Österreich: Lage am {{ ref|de }}</h1>
+<p class="lead">Gedächtnis der amtlichen BASG-Liste: Status, Verlauf und angekündigte Termine je Packung. Amtliche Angaben wörtlich, eigene Auswertungen gekennzeichnet.</p>
+
+<section id="search" class="block search-block" aria-labelledby="search-h">
+ <h2 id="search-h">Packung oder Wirkstoff suchen</h2>
+ <form action="{{ root }}wirkstoffe/" method="get" role="search" data-search data-root="{{ root }}">
+  <label for="q">Handelsname, Wirkstoff oder PZN</label>
+  <div class="search-row">
+   <input id="q" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="z. B. Zolpidem oder 2426051" aria-describedby="search-hint" aria-controls="search-results">
+   <button type="submit">Suchen</button>
+  </div>
+  <p id="search-hint" class="hint">Ohne JavaScript führt die Suche zur <a href="{{ root }}wirkstoffe/">Wirkstoffliste A–Z</a>.</p>
+ </form>
+ <div id="search-results" class="search-results" aria-live="polite"></div>
+</section>
+
+<section id="situation-summary" class="block" aria-labelledby="sit-h">
+ <h2 id="sit-h">Lage heute</h2>
+ <p>{{ m.official(sid) }}</p>
+ <p class="summary-line"><span class="num">{{ sit.packages }}</span> Packungen gelistet, davon <strong><span class="num">{{ sit.active }}</span> aktiv eingeschränkt</strong> („Nicht verfügbar“ oder „eingeschränkt verfügbar“); <span class="num">{{ sit.active_with_resupply_date }}</span> davon mit angekündigtem Termin, <a href="{{ root }}ueberfaellig/"><span class="num">{{ n_overdue }}</span> Termine überfällig</a> {{ m.own() }}.</p>
+ <div class="two-col">
+  <div class="table-wrap" tabindex="0">
+   <table class="compact">
+    <caption>Gelistete Packungen nach Status</caption>
+    <thead><tr><th scope="col">Status (BASG)</th><th scope="col" class="r">Packungen</th><th scope="col"><span class="vh">Anteil</span></th></tr></thead>
+    <tbody>
+    {% for s, n in status_rows %}
+     <tr><th scope="row">{{ m.status(s) }}</th><td class="r num">{{ n }}</td><td class="bar-cell"><span class="bar {{ s|sclass }}" style="width:{{ (100 * n / sit.packages)|round(1) }}%"></span></td></tr>
+    {% endfor %}
+    </tbody>
+   </table>
+  </div>
+  <div class="table-wrap" tabindex="0">
+   <table class="compact">
+    <caption>Aktiv eingeschränkt nach ATC-Hauptgruppe {{ m.own() }}</caption>
+    <thead><tr><th scope="col">ATC-Gruppe</th><th scope="col" class="r">Packungen</th><th scope="col"><span class="vh">Anteil</span></th></tr></thead>
+    <tbody>
+    {% for code, name, n in atc_rows %}
+     <tr><th scope="row"><span class="num code">{{ code }}</span> {{ name }}</th><td class="r num">{{ n }}</td><td class="bar-cell"><span class="bar s-acc" style="width:{{ (100 * n / sit.active)|round(1) }}%"></span></td></tr>
+    {% endfor %}
+    </tbody>
+   </table>
+  </div>
+ </div>
+ <p class="hint">„verfügbar gemäß §4 (1)“ beendet keine Meldung: Das BASG listet solche Packungen, weil die Nachfrage nicht gedeckt ist, obwohl der Zulassungsinhaber keine Einschränkung meldet. Sie zählen hier nicht als aktiv eingeschränkt. <a href="{{ root }}methodik/">Methodik</a></p>
+</section>
+
+<section id="early-warning" class="block own" aria-labelledby="ew-h">
+ <h2 id="ew-h">Frühwarnung {{ m.own() }}</h2>
+ <p>In Österreich lieferbar, aber in mindestens zwei anderen Ländern gerade als Engpass gemeldet: <a href="{{ root }}fruehwarnung/"><span class="num">{{ (fw_counts.A or 0) + (fw_counts.B or 0) + (fw_counts.C or 0) }}</span> Wirkstoffe</a>, davon <span class="num">{{ fw_counts.A or 0 }}</span> in fünf oder mehr Ländern (Stufe A). Ein Hinweis, keine Prognose.</p>
+</section>
+
+<section id="weekly-changes" class="block" aria-labelledby="week-h">
+ <h2 id="week-h">Veränderungen der letzten 7 Tage ({{ week.from|de }}–{{ week.to|de }}) {{ m.own() }}</h2>
+ {% set limit = 8 %}{% set ids = false %}
+ {% include "_week_lists.html" %}
+ <p><a href="{{ root }}woche/">Alle neuen und beendeten Meldungen der Woche</a> · <a href="{{ root }}ueberfaellig/">Überfällige Termine ({{ n_overdue }})</a></p>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ root }}assets/search.js" defer></script>{% endblock %}

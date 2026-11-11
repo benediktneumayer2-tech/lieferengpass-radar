@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Überfällige Termine{% endblock %}
+{% block main %}
+<h1 class="page-title">Überfällige Termine am {{ ref|de }}</h1>
+<p class="lead">Aktiv eingeschränkte Packungen („Nicht verfügbar“ oder „eingeschränkt verfügbar“), deren angekündigter Termin für die Wiederbelieferung vor dem Stichtag liegt. Längste Überschreitung zuerst. Status und Termin: {{ m.official(sid) }}; Tage überfällig und Verschiebungen: {{ m.own() }}</p>
+<section class="block" aria-labelledby="od-h">
+<h2 id="od-h" class="vh">Tabelle</h2>
+<div class="table-wrap" tabindex="0">
+<table id="overdue-table" class="rows">
+ <caption><span class="num">{{ overdue|length }}</span> überfällige Termine</caption>
+ <thead><tr><th scope="col">Packung</th><th scope="col">Status (BASG)</th><th scope="col">Angekündigt (BASG)</th><th scope="col" class="r">Tage überfällig</th><th scope="col" class="r">Verschiebungen</th><th scope="col"><span class="vh">Verlauf 12 Monate</span><span aria-hidden="true">Verlauf</span></th></tr></thead>
+ <tbody>
+ {% for o in overdue %}
+  <tr><th scope="row">{{ m.pkg_cell(o.p, root) }}</th><td data-l="Status">{{ m.status(o.status) }}</td><td class="num" data-l="Angekündigt">{{ o.announced }}</td><td class="r num overdue" data-l="Tage überfällig">{{ o.days_overdue }}</td><td class="r num" data-l="Verschiebungen">{{ o.n_shifts if o.n_shifts is not none else "–" }}</td><td class="mini-cell">{{ mini(o.package_key) }}</td></tr>
+ {% else %}
+  <tr><td colspan="6">Keine überfälligen Termine.</td></tr>
+ {% endfor %}
+ </tbody>
+</table>
+</div>
+</section>
+{% endblock %}

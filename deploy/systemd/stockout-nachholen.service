@@ -1,0 +1,9 @@
+[Unit]
+Description=Stockout Forecaster AT: Nachholabruf (nur Quellen, deren letzter Abruf scheiterte)
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/lieferengpass-radar
+ExecStart=%h/lieferengpass-radar/.venv/bin/stockout fetch --nachholen
+Nice=10
+TimeoutStartSec=15min

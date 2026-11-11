@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{% endblock %} – {{ SITE_TITLE }}</title>
+<meta name="description" content="{% block description %}Offenes Archiv und Auswertung der österreichischen Meldungen zu Vertriebseinschränkungen von Arzneimitteln (BASG).{% endblock %}">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="{{ root }}assets/style.css">
+</head>
+<body data-generated="{{ generated }}" data-basg-fetch="{{ basg_fetch }}">
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+ <defs>
+  <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="hatch-bg" width="6" height="6"/><line class="hatch-ln" x1="0" y1="0" x2="0" y2="6"/></pattern>
+  <pattern id="stripes" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect class="stripes-bg" width="5" height="5"/><line class="stripes-ln" x1="0" y1="0" x2="0" y2="5"/></pattern>
+  <pattern id="dots" width="5" height="5" patternUnits="userSpaceOnUse"><rect class="dots-bg" width="5" height="5"/><circle class="dots-dt" cx="2.5" cy="2.5" r="1"/></pattern>
+  <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-head" d="M0,0 L8,4 L0,8 z"/></marker>
+ </defs>
+</svg>
+<header id="header" class="site-header">
+ <div class="wrap header-row">
+  <a class="brand" href="{{ root or './' }}">{{ SITE_TITLE }}</a>
+  <nav aria-label="Hauptnavigation">
+   <ul>
+    <li><a href="{{ root }}fruehwarnung/">Frühwarnung</a></li>
+    <li><a href="{{ root }}ueberfaellig/">Überfällig</a></li>
+    <li><a href="{{ root }}woche/">Woche</a></li>
+    <li><a href="{{ root }}wirkstoffe/">Wirkstoffe A–Z</a></li>
+    <li><a href="{{ root }}methodik/">Methodik</a></li>
+   </ul>
+  </nav>
+ </div>
+</header>
+<div class="wrap">
+ {% if stale %}
+ <p class="banner" role="status"><strong>Daten möglicherweise veraltet:</strong> Der letzte erfolgreiche BASG-Abruf ({{ basg_fetch_local }}) liegt beim Erzeugen dieser Seite mehr als {{ stale_hours }} Stunden zurück.</p>
+ {% endif %}
+ <p class="banner" id="stale-client" role="status" hidden><strong>Daten möglicherweise veraltet:</strong> Diese Seite wurde am {{ generated_local }} erzeugt; der letzte erfolgreiche BASG-Abruf liegt mehr als {{ stale_hours }} Stunden zurück. Maßgeblich ist die aktuelle BASG-Liste.</p>
+</div>
+<script>(function(){var b=document.body,t=Date.parse(b.getAttribute("data-basg-fetch")||b.getAttribute("data-generated"));if(t&&Date.now()-t>{{ stale_hours }}*36e5){document.getElementById("stale-client").hidden={{ 'true' if stale else 'false' }};}})();</script>
+<main id="main" class="wrap" tabindex="-1">
+{% block main %}{% endblock %}
+</main>
+<footer id="footer-sources" class="site-footer">
+ <div class="wrap">
+  <p><strong>Stand der Daten:</strong> BASG-Liste vom <span class="num">{{ sid }}</span> (producedOn) · Stichtag <span class="num">{{ ref|de }}</span> · Seite erzeugt <span class="num">{{ generated_local }}</span> · letzter erfolgreicher BASG-Abruf <span class="num">{{ basg_fetch_local }}</span></p>
+  <p><strong>Quellen:</strong> Bundesamt für Sicherheit im Gesundheitswesen (BASG), <a href="https://webservices.basg.gv.at/medicineshortage/export/v1/download">Vertriebseinschränkungen (Export)</a>; ELGA TermGit, <a href="https://termgit.elga.gv.at/CodeSystem-asp-liste.html">ASP-Liste</a>{% if asp_version %} (Version {{ asp_version }}){% endif %}; Engpasslisten weiterer Behörden für die <a href="{{ root }}fruehwarnung/">Frühwarnliste</a> (siehe <a href="{{ root }}methodik/#fruehwarnung">Methodik</a>). Dieses Angebot ist kein Angebot des BASG.</p>
+  <p>Code: Apache-2.0 · Eigene Texte und Auswertungen: CC BY 4.0 · Daten der Quellen: nach deren Bedingungen (siehe <a href="{{ root }}methodik/#sources">Methodik</a>)</p>
+  <p><strong>Hinweis:</strong> Information für Fachkreise ohne Gewähr. Keine Therapie- oder Austauschempfehlung. Maßgeblich ist die amtliche BASG-Liste.</p>
+  <p><a href="{{ root }}impressum/">Impressum</a> · <a href="{{ root }}datenschutz/">Datenschutz</a> · <a href="{{ root }}methodik/">Methodik und Quellen</a></p>
+ </div>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

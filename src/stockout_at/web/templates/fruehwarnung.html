@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% import "_foreign.html" as f %}
+{% block title %}Frühwarnliste{% endblock %}
+{% block description %}Wirkstoffe, die in Österreich lieferbar und nicht beim BASG gemeldet sind, aber in anderen Ländern gerade als Engpass gemeldet werden; dazu Hinweise aus den BASG-Registern.{% endblock %}
+{% block main %}
+<h1 class="page-title">Frühwarnliste: in Österreich lieferbar, im Ausland gemeldet</h1>
+<p class="lead">Wirkstoffe ohne BASG-Meldung am {{ ref|de }}, von denen laut ASP-Liste mindestens eine Packung lieferbar ist, die aber in anderen Ländern gerade als Engpass gemeldet sind. Ein Hinweis, um Bestände und Alternativen früh zu prüfen. Keine Prognose, keine Bestellempfehlung. {{ m.own() }}</p>
+
+<section id="warning-summary" class="block own" aria-labelledby="ws-h">
+ <h2 id="ws-h">Hinweisstufen und bisherige Trefferquote</h2>
+ <div class="table-wrap" tabindex="0">
+ <table class="rows">
+  <caption>Wie oft folgte bisher eine BASG-Meldung? Rückblick {{ fw.period[0]|de }} bis {{ fw.period[1]|de }}</caption>
+  <thead><tr><th scope="col">Stufe</th><th scope="col">Bedeutung</th><th scope="col" class="r">Wirkstoffe heute</th><th scope="col" class="r">BASG-Meldung binnen 8 Wochen</th><th scope="col" class="r">binnen 12 Wochen</th></tr></thead>
+  <tbody>
+  {% for t in ["A", "B", "C"] %}
+   {% set rt = fw.rates[t] %}
+   <tr><th scope="row"><span class="tier tier-{{ t }}">{{ t }}</span> <span class="vh">Stufe {{ t }}</span></th><td data-l="Bedeutung">{{ TIERS[t] }}</td><td class="r num" data-l="Wirkstoffe heute">{{ fw.counts[t] or 0 }}</td>
+    <td class="r num" data-l="Binnen 8 Wochen">{% if rt %}{{ rt["8_wochen"].quote|pct }} <span class="small">({{ rt["8_wochen"].ki95[0]|pct }}–{{ rt["8_wochen"].ki95[1]|pct }})</span>{% else %}–{% endif %}</td>
+    <td class="r num" data-l="Binnen 12 Wochen">{% if rt %}{{ rt["12_wochen"].quote|pct }} <span class="small">({{ rt["12_wochen"].ki95[0]|pct }}–{{ rt["12_wochen"].ki95[1]|pct }})</span>{% else %}–{% endif %}</td></tr>
+  {% endfor %}
+   <tr><th scope="row">Vergleich</th><td data-l="Bedeutung">Wirkstoffe, die in Österreich schon einmal knapp waren, ohne Blick ins Ausland</td><td class="r" data-l="Wirkstoffe heute">–</td><td class="r num" data-l="Binnen 8 Wochen">{{ fw.base["8_wochen"].quote|pct }}</td><td class="r num" data-l="Binnen 12 Wochen">{{ fw.base["12_wochen"].quote|pct }}</td></tr>
+  </tbody>
+ </table>
+ </div>
+ <p class="small">In Klammern der 95-%-Bereich. Nur ein Land meldet: <span class="num">{{ fw.single }}</span> Wirkstoffe, nicht gelistet, weil ein einzelnes Land bisher keinen messbaren Vorsprung brachte{% if fw.rates["1"] %} (8 Wochen: {{ fw.rates["1"]["8_wochen"].quote|pct }}){% endif %}. <a href="{{ root }}methodik/#fruehwarnung">Wie die Liste entsteht</a></p>
+</section>
+
+{% set reg = fw.register %}
+{% if reg.available %}
+<section id="register-summary" class="block own" aria-labelledby="rs-h">
+ <h2 id="rs-h">Hinweise aus den BASG-Registern</h2>
+ {% if reg.holder_data %}
+ <p>Zwei Ereignisse aus Österreich gingen BASG-Meldungen bisher messbar voraus: eine Änderung beim Zulassungsinhaber eines Produkts und eine Meldung eines anderen Inhabers desselben Wirkstoffs.</p>
+ {% else %}
+ <p>Ein Ereignis aus Österreich ging BASG-Meldungen bisher messbar voraus: eine Meldung eines anderen Inhabers desselben Wirkstoffs.</p>
+ {% endif %}
+ <div class="table-wrap" tabindex="0">
+ <table class="rows">
+  <caption>Wie oft folgte bisher eine BASG-Meldung?{% if reg.rates %} Rückblick {{ reg.rates.period[0]|de }} bis {{ reg.rates.period[1]|de }}{% endif %}</caption>
+  <thead><tr><th scope="col">Hinweis</th><th scope="col">Gemessen wurde</th><th scope="col" class="r">Heute</th><th scope="col" class="r">Binnen 8 Wochen</th><th scope="col" class="r">Binnen 12 Wochen</th><th scope="col" class="r">Gegenüber vergleichbaren Fällen</th></tr></thead>
+  <tbody>
+  {% set ri = reg.rates.inhaberwechsel if reg.rates else none %}
+  {% set ro = reg.rates.anderer_inhaber if reg.rates else none %}
+   {% if reg.holder_data %}
+   <tr><th scope="row"><a href="#holder-changes">Änderung beim Zulassungsinhaber</a></th><td data-l="Gemessen wurde">Lieferbares Produkt, neuer Inhaber oder neuer Name bzw. neue Adresse des Inhabers in den letzten 8 Wochen: BASG-Meldung zum Wirkstoff</td><td class="r num" data-l="Heute">{{ reg.changes|length }} Produkte</td>
+    <td class="r num" data-l="Binnen 8 Wochen">{% if ri %}{{ ri["8_wochen"].quote|pct }} <span class="small">({{ ri["8_wochen"].ki95[0]|pct }}–{{ ri["8_wochen"].ki95[1]|pct }})</span>{% else %}–{% endif %}</td>
+    <td class="r num" data-l="Binnen 12 Wochen">{% if ri %}{{ ri["12_wochen"].quote|pct }} <span class="small">({{ ri["12_wochen"].ki95[0]|pct }}–{{ ri["12_wochen"].ki95[1]|pct }})</span>{% else %}–{% endif %}</td>
+    <td class="r num" data-l="Gegenüber vergleichbaren Fällen">{% if ri %}{{ "%.1f"|format(ri["8_wochen"].sir)|replace(".", ",") }}-fach <span class="small">(8 Wochen)</span>{% else %}–{% endif %}</td></tr>
+   {% endif %}
+   <tr><th scope="row"><a href="#other-holders">Anderer Inhaber gemeldet</a></th><td data-l="Gemessen wurde">Ein anderer Zulassungsinhaber desselben Wirkstoffs hat eine aktive BASG-Meldung: Meldung auch für die Produkte dieses Inhabers</td><td class="r num" data-l="Heute">{{ reg.others|length }} Wirkstoffe</td>
+    <td class="r num" data-l="Binnen 8 Wochen">{% if ro %}{{ ro["8_wochen"].quote|pct }} <span class="small">(ohne Hinweis {{ ro["8_wochen"].ohne|pct }})</span>{% else %}–{% endif %}</td>
+    <td class="r num" data-l="Binnen 12 Wochen">{% if ro %}{{ ro["12_wochen"].quote|pct }} <span class="small">(ohne Hinweis {{ ro["12_wochen"].ohne|pct }})</span>{% else %}–{% endif %}</td>
+    <td class="r num" data-l="Gegenüber vergleichbaren Fällen">{% if ro %}{{ "%.1f"|format(ro["8_wochen"].sir)|replace(".", ",") }}-fach <span class="small">(8 Wochen)</span>{% else %}–{% endif %}</td></tr>
+  </tbody>
+ </table>
+ </div>
+ <p class="small">„Gegenüber vergleichbaren Fällen“ vergleicht mit Wirkstoffen gleicher Produktzahl, gleicher Engpass-Vorgeschichte und gleichen Jahres.{% if reg.holder_data %} Die Quoten der beiden Hinweise sind nicht direkt vergleichbar: Die erste zählt Meldungen zum Wirkstoff, die zweite nur Meldungen der Produkte eines bestimmten Inhabers.{% endif %} <a href="{{ root }}methodik/#fruehwarnung">Wie die Hinweise entstehen</a></p>
+</section>
+{% endif %}
+
+<section id="warning-list" class="block" aria-labelledby="wl-h">
+ <h2 id="wl-h">Liste: <span class="num">{{ fw.rows|length }}</span> Wirkstoffe</h2>
+ <div class="table-wrap" tabindex="0">
+ <table id="warning-table" class="rows">
+  <thead><tr><th scope="col">Wirkstoff</th><th scope="col">Stufe</th><th scope="col">Gemeldet in</th><th scope="col">Gleicher Zulassungsinhaber</th><th scope="col" class="r">Lieferbar in AT (ASP)</th><th scope="col">Letzter Engpass in AT</th></tr></thead>
+  <tbody>
+  {% for r in fw.rows %}
+   <tr>
+    <th scope="row">{% if r.path %}<a href="{{ root }}{{ r.path }}">{{ r.label }}</a>{% else %}{{ r.label }}{% endif %} <span class="pzn">ATC <span class="num">{{ r.atc5 }}</span></span>
+     <details class="fw-details"><summary>Meldungen im Ausland</summary>{{ f.groups_list(r.groups) }}</details></th>
+    <td data-l="Stufe"><span class="tier tier-{{ r.tier }}">{{ r.tier }}</span></td>
+    <td data-l="Gemeldet in">{{ r.country_names|join(", ") }}</td>
+    <td data-l="Gleicher Zulassungsinhaber">{% for h in r.holder_hits %}{{ h.holder }} ({% for c in h.countries %}<abbr title="{{ COUNTRY_NAMES[c] }}">{{ c }}</abbr>{% if not loop.last %}, {% endif %}{% endfor %}){% if not loop.last %}; {% endif %}{% else %}–{% endfor %}</td>
+    <td class="r num" data-l="Lieferbar in AT">{{ r.lieferbar }} von {{ r.packages }}</td>
+    <td class="num" data-l="Letzter Engpass in AT">{{ r.last_at|de if r.last_at else "keiner im Archiv" }}</td>
+   </tr>
+  {% else %}
+   <tr><td colspan="6">Derzeit kein Wirkstoff mit Meldungen aus mindestens zwei Ländern.</td></tr>
+  {% endfor %}
+  </tbody>
+ </table>
+ </div>
+</section>
+
+{% if reg.available and reg.holder_data %}
+<section id="holder-changes" class="block" aria-labelledby="hc-h">
+ <h2 id="hc-h">Änderung beim Zulassungsinhaber: <span class="num">{{ reg.changes|length }}</span> lieferbare Produkte</h2>
+ <p>Änderungen der letzten 8 Wochen laut Verlautbarungsregister des BASG, nur Produkte mit mindestens einer laut ASP-Liste lieferbaren Packung und ohne BASG-Meldung zum Wirkstoff. Name und Adresse des Inhabers stehen auf der Packung; auch eine bloße Namens- oder Adressänderung erzwingt eine Umstellung.</p>
+ <div class="table-wrap" tabindex="0">
+ <table id="holder-change-table" class="rows">
+  <thead><tr><th scope="col">Produkt</th><th scope="col">Wirkstoff</th><th scope="col">Genehmigt am</th><th scope="col">Inhaber bisher → jetzt</th><th scope="col" class="r">Lieferbar in AT (ASP)</th></tr></thead>
+  <tbody>
+  {% for r in reg.changes %}
+   <tr>
+    <th scope="row">{{ r.name }} <span class="pzn">Zulassung <span class="num">{{ r.zl }}</span></span></th>
+    <td data-l="Wirkstoff">{% if r.path %}<a href="{{ root }}{{ r.path }}">{{ r.label }}</a>{% else %}{{ r.label }}{% endif %} <span class="pzn">ATC <span class="num">{{ r.atc5 }}</span></span></td>
+    <td class="num" data-l="Genehmigt am">{{ r.date|de }}</td>
+    <td data-l="Inhaber bisher → jetzt">{% if r.same_company %}{{ r.now }} <span class="small">(neuer Name oder neue Adresse)</span>{% else %}{{ r.prev }} → {{ r.now }}{% endif %}</td>
+    <td class="r num" data-l="Lieferbar in AT">{{ r.lieferbar }} von {{ r.packages }}</td>
+   </tr>
+  {% else %}
+   <tr><td colspan="5">Derzeit keine Änderung beim Zulassungsinhaber eines lieferbaren Produkts in den letzten 8 Wochen.</td></tr>
+  {% endfor %}
+  </tbody>
+ </table>
+ </div>
+</section>
+{% endif %}
+
+{% if reg.available %}
+<section id="other-holders" class="block" aria-labelledby="oh-h">
+ <h2 id="oh-h">Anderer Inhaber gemeldet: <span class="num">{{ reg.others|length }}</span> Wirkstoffe</h2>
+ <p>Wirkstoffe mit aktiver BASG-Meldung, von denen andere Zulassungsinhaber laut ASP-Liste noch lieferbare Packungen ohne eigene Meldung haben. Wenige verbleibende Inhaber zuerst.</p>
+ <div class="table-wrap" tabindex="0">
+ <table id="other-holder-table" class="rows">
+  <thead><tr><th scope="col">Wirkstoff</th><th scope="col">Beim BASG gemeldet von</th><th scope="col">Noch lieferbar von (Packungen laut ASP)</th></tr></thead>
+  <tbody>
+  {% for o in reg.others %}
+   <tr>
+    <th scope="row">{% if o.path %}<a href="{{ root }}{{ o.path }}">{{ o.label }}</a>{% else %}{{ o.label }}{% endif %} <span class="pzn">ATC <span class="num">{{ o.atc5 }}</span></span></th>
+    <td data-l="Gemeldet von">{{ o.reported|join("; ") }}</td>
+    <td data-l="Noch lieferbar von">{% for h in o.remaining %}{{ h.holder }} (<span class="num">{{ h.lieferbar }}</span>){% if not loop.last %}; {% endif %}{% endfor %}</td>
+   </tr>
+  {% else %}
+   <tr><td colspan="3">Derzeit kein gemeldeter Wirkstoff mit lieferbaren Produkten anderer Inhaber.</td></tr>
+  {% endfor %}
+  </tbody>
+ </table>
+ </div>
+</section>
+{% endif %}
+
+<section id="warning-method" class="block notice-block" aria-labelledby="wm-h">
+ <h2 id="wm-h">So ist die Liste zu lesen</h2>
+ <ul>
+  <li>Auch in der höchsten Stufe folgte bisher nur auf {% if fw.rates.A %}{{ fw.rates.A["12_wochen"].quote|pct }}{% else %}einen kleinen Teil{% endif %} der Hinweise binnen 12 Wochen eine BASG-Meldung. Die Liste eignet sich, um Bestände und Alternativen früh zu prüfen, nicht für Vorratskäufe: Hamsterkäufe verschärfen Engpässe.</li>
+  <li>Die Trefferquoten stammen aus einem Rückblick mit bekannten Verzerrungen (lückenhafte ältere Daten, einige Länderlisten ohne beendete Meldungen). Eine Prüfung mit den täglich archivierten Daten folgt.</li>
+  <li>„Gleicher Zulassungsinhaber“ vergleicht das erste unterscheidende Wort des Firmennamens; Konzernzugehörigkeiten werden nicht erkannt.</li>
+  <li>Die Registerhinweise beruhen auf einem eigenen Rückblick mit den BASG-Daten seit 2022 und sind ebenso wenig eine Prognose. Ein gemeldeter Wirkstoff mit lieferbaren anderen Inhabern zeigt vor allem, wo Alternativen bestehen; deren eigenes Meldungsrisiko ist erhöht, aber klein.</li>
+  <li>Meldungen des BfArM (Deutschland) sind bis zu dessen Zustimmung nicht berücksichtigt.</li>
+ </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% import "_macros.html" as m %}
+
+{% macro groups_list(groups) %}
+<ul class="fw-groups">
+{% for g in groups %}
+ <li><strong>{{ g.name }}</strong> ({{ g.source_names }}, <a href="{{ g.source_url }}">Quelle</a>): {{ g.products|join("; ") }}{% if g.more %} und {{ g.more }} weitere{% endif %}{% if g.holders %} · Inhaber: {{ g.holders|join(", ") }}{% endif %}{% if g.since %} · gemeldet seit {{ g.since|de }}{% endif %}{% if g.until %} · erwartet bis {{ g.until|de }}{% endif %}</li>
+{% endfor %}
+</ul>
+{% endmacro %}
+
+{% macro foreign_section(groups, atc, show_match) %}
+<section id="foreign-reports" class="block own" aria-labelledby="fr-h">
+ <h2 id="fr-h">Meldungen im Ausland {{ m.own() }}</h2>
+ {% if groups %}
+ <p class="small">Laufende Engpassmeldungen anderer Behörden zum selben Wirkstoff (ATC {{ atc }}). Produktnamen und Daten wie von der jeweiligen Behörde veröffentlicht; die Zuordnung über den ATC-Code ist eine eigene Auswertung und kein Beleg für einen Engpass in Österreich. Meldungen des BfArM (Deutschland) werden erst nach dessen Zustimmung gezeigt.</p>
+ <div class="table-wrap" tabindex="0">
+ <table class="rows">
+  <thead><tr><th scope="col">Land</th><th scope="col">Produkte laut Behörde</th><th scope="col">Zulassungsinhaber</th><th scope="col">Gemeldet seit</th><th scope="col">Erwartet bis</th>{% if show_match %}<th scope="col">Bezug zu dieser Packung</th>{% endif %}</tr></thead>
+  <tbody>
+  {% for g in groups %}
+   <tr>
+    <th scope="row">{{ g.name }} <span class="small">({{ g.source_names }}, <a href="{{ g.source_url }}">Quelle</a>)</span></th>
+    <td data-l="Produkte">{{ g.products|join("; ") }}{% if g.more %} und {{ g.more }} weitere{% endif %}</td>
+    <td data-l="Zulassungsinhaber">{{ g.holders|join(", ") or "–" }}</td>
+    <td class="num" data-l="Gemeldet seit">{{ g.since|de if g.since else "–" }}</td>
+    <td class="num" data-l="Erwartet bis">{{ g.until|de if g.until else "–" }}</td>
+    {% if show_match %}<td data-l="Bezug">{% if g.holder_match %}gleicher Zulassungsinhaber{% endif %}{% if g.holder_match and g.strength_match %}, {% endif %}{% if g.strength_match %}gleiche Stärke{% endif %}{% if not g.holder_match and not g.strength_match %}nur gleicher Wirkstoff{% endif %}</td>{% endif %}
+   </tr>
+  {% endfor %}
+  </tbody>
+ </table>
+ </div>
+ {% else %}
+ <p>Keine laufenden Meldungen im Ausland zum selben Wirkstoff{% if atc %} (ATC {{ atc }}){% endif %}.</p>
+ {% endif %}
+</section>
+{% endmacro %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% import "_foreign.html" as f %}
+{% block title %}{{ p.label }}{% if p.pzn %} (PZN {{ p.pzn }}){% endif %}{% endblock %}
+{% block main %}
+<div class="pkg-head">
+ <h1 class="pkg-name">{{ p.label }}</h1>
+ <dl class="facts">
+  {% if p.pzn %}<div><dt>PZN</dt><dd class="num">{{ p.pzn }}</dd></div>{% endif %}
+  {% if p.zulassungsnummer %}<div><dt>Zulassungsnummer</dt><dd class="num">{{ p.zulassungsnummer }}</dd></div>{% endif %}
+  {% if p.substance %}<div><dt>Wirkstoff</dt><dd>{{ p.substance }}</dd></div>{% endif %}
+  {% if p.darreichungsform %}<div><dt>Darreichungsform</dt><dd>{{ p.darreichungsform }}{% if p.staerke %}, {{ p.staerke }}{% endif %}</dd></div>{% endif %}
+  {% if p.atc5 or p.atc3 %}<div><dt>ATC</dt><dd class="num">{{ p.atc5 or p.atc3 }}</dd></div>{% endif %}
+  <div><dt>Status (BASG)</dt><dd>{{ m.status(p.current_status) }}</dd></div>
+  {% if p.announced %}<div><dt>Angekündigt (BASG)</dt><dd class="num">{{ p.announced }}</dd></div>{% endif %}
+  {% if p.overdue %}<div><dt>Überfällig {{ m.own() }}</dt><dd class="num overdue">seit {{ p.overdue.days_overdue }} Tagen</dd></div>{% endif %}
+ </dl>
+</div>
+
+{% if sparse %}
+<p class="notice"><strong>Lückenhafte Vorgeschichte:</strong> Vor Beginn der täglichen Archivierung{% if daily_start %} am {{ daily_start|de }}{% endif %} liegen nur einzelne Schnappschüsse vor. Beginn und Ende von Episoden aus dieser Zeit sind nur als Intervall bekannt und in der Zeitleiste schraffiert. Diese Packung ist in <span class="num">{{ n_listed }}</span> von <span class="num">{{ n_archive }}</span> Schnappschüssen gelistet ({{ listed_first }} bis {{ listed_last }}).</p>
+{% endif %}
+
+<section id="timeline" class="block timeline-block" aria-labelledby="tl-h">
+ <h2 id="tl-h">Verlauf</h2>
+ <div class="tl-wide">{{ tl_wide }}</div>
+ <div class="tl-narrow">{{ tl_narrow }}</div>
+ {{ m.legend() }}
+ {% if episodes %}
+ <div class="table-wrap" tabindex="0">
+ <table class="events">
+  <caption>Verlauf als Text <span class="small">(Ereignisse mit Kennzeichnung „Eigene Auswertung“ sind abgeleitet, alle übrigen stammen aus der BASG-Liste)</span></caption>
+  <thead><tr><th scope="col">Datum</th><th scope="col">Ereignis</th></tr></thead>
+  {% for e in episodes %}
+  <tbody>
+   <tr class="ep-row"><th scope="colgroup" colspan="2">Episode {{ e.seq_no }}{% if e.sparse %} · lückenhafte Vorgeschichte{% endif %}{% if e.active %} · noch gemeldet{% endif %}</th></tr>
+   {% for when, text, derived in e.events %}
+   <tr><th scope="row" class="num">{{ when }}</th><td>{{ text }}{% if derived %} {{ m.own() }}{% endif %}</td></tr>
+   {% endfor %}
+  </tbody>
+  {% endfor %}
+ </table>
+ </div>
+ {% else %}
+ <p>Für diese Packung wurde keine Engpass-Episode abgeleitet: Sie war nur mit Status „verfügbar“ ohne Beginn einer Vertriebseinschränkung gelistet (z. B. Vorankündigung oder eine unbeobachtet begonnene und beendete Einschränkung zwischen zwei Schnappschüssen).</p>
+ {% endif %}
+</section>
+
+<div class="split">
+<section id="official-entry" class="block official" aria-labelledby="off-h">
+ <h2 id="off-h">Amtlicher Eintrag</h2>
+ <p>{{ m.official(official_sid) }}</p>
+ {% if not is_current %}<p class="notice">In der aktuellen BASG-Liste (Stand <span class="num">{{ sid }}</span>) nicht mehr enthalten. Gezeigt wird der letzte Eintrag.</p>{% endif %}
+ <dl class="fields">
+ {% for label, value in official %}
+  <div><dt>{{ label }}</dt><dd>{% if value %}{{ value }}{% else %}<span aria-hidden="true">–</span><span class="vh">kein Eintrag</span>{% endif %}</dd></div>
+ {% endfor %}
+ </dl>
+ <p class="small">Wörtlich aus der BASG-Datei; Telefonnummern werden nicht angezeigt.</p>
+</section>
+
+<section id="own-analysis" class="block own" aria-labelledby="own-h">
+ <h2 id="own-h">Auswertung {{ m.own() }}</h2>
+ {% if episodes %}
+ <div class="table-wrap" tabindex="0">
+ <table class="compact">
+  <caption>Episoden dieser Packung</caption>
+  <thead><tr><th scope="col">Episode</th><th scope="col">Beginn</th><th scope="col">Ende</th><th scope="col">Dauer</th><th scope="col" class="r">Verschiebungen</th></tr></thead>
+  <tbody>
+  {% for e in episodes %}
+   <tr><th scope="row" class="num">{{ e.seq_no }}</th><td class="num">{{ e.start }}</td><td class="num">{{ e.end }}</td><td class="num">{{ e.duration }}</td><td class="r num">{{ e.shifts }}</td></tr>
+  {% endfor %}
+  </tbody>
+ </table>
+ </div>
+ {% if p.overdue %}<p>Der aktuell angekündigte Termin ({{ p.overdue.announced|de }}) ist seit <strong class="num">{{ p.overdue.days_overdue }} Tagen</strong> überschritten (Stichtag {{ ref|de }}).</p>{% endif %}
+ <p class="small">Dauer bei unsicherem Ende als Spanne zwischen frühestem und spätestem möglichem Ende. Jede Änderung des angekündigten Termins zählt als Verschiebung.</p>
+ {% else %}
+ <p>Keine Episode, daher keine Auswertung.</p>
+ {% endif %}
+</section>
+</div>
+
+<section id="substance-link" class="block" aria-labelledby="sub-h">
+ <h2 id="sub-h">Wirkstoff</h2>
+ {% if p.sub_path %}
+ <p><a href="{{ root }}{{ p.sub_path }}">Alle gemeldeten Packungen mit {{ p.substance }} und nicht gemeldete gleichwertige Packungen</a></p>
+ {% else %}
+ <p>Für diese Packung ist kein Wirkstoff angegeben.</p>
+ {% endif %}
+</section>
+
+{{ f.foreign_section(foreign, p.atc5, true) }}
+
+<section class="block no-forecast" aria-labelledby="fc-h">
+ <h2 id="fc-h">Prognose</h2>
+ <p><strong>Noch keine Prognose.</strong> Eine Einschätzung, ob der angekündigte Termin hält, wird erst angezeigt, wenn sie an genügend täglichen Daten geprüft und gut kalibriert ist. <a href="{{ root }}methodik/#prognose">Mehr in der Methodik</a></p>
+</section>
+{% endblock %}

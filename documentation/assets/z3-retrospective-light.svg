@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="432" viewBox="0 0 820 432" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<title id="t">Retrospective 2026: hits among the 50 top-ranked active substances</title>
+<desc id="d">Share of the 50 active substances with the highest estimate per reference date that received a new BASG shortage report within 8 weeks. Z3 v0 20.2% (AUC 0.819); without foreign data 19.2% (AUC 0.810); tier rule by number of reporting countries 13.8% (AUC 0.728); only past shortages in Austria 7.2% (AUC 0.733); random selection 3.0% (AUC 0.5). Trained 2024–2025, tested 2026, 23,461 cases, 714 reports. Retrospective, not a prospective test. Source: reports/Z3 v0 Prüfbericht.md.</desc>
+<rect x="0.5" y="0.5" width="819" height="431" rx="8" fill="#fcfcfb" stroke="#e1e0d9"/>
+<text x="24" y="38" font-size="17" font-weight="600" fill="#0b0b0b">Retrospective 2026: hits among the 50 top-ranked active substances</text>
+<text x="24" y="62" font-size="13" fill="#52514e">Share with a new BASG shortage report within 8 weeks; per reference date, the 50 substances with the highest estimate</text>
+<text x="290" y="106" font-size="12" font-weight="600" fill="#52514e">Hit rate, top 50</text>
+<text x="796" y="106" font-size="12" font-weight="600" fill="#52514e" text-anchor="end">AUC</text>
+<line x1="362.0" y1="116" x2="362.0" y2="334" stroke="#e1e0d9" stroke-width="1"/>
+<text x="362.0" y="350" font-size="11" fill="#6f6e69" text-anchor="middle">5%</text>
+<line x1="434.0" y1="116" x2="434.0" y2="334" stroke="#e1e0d9" stroke-width="1"/>
+<text x="434.0" y="350" font-size="11" fill="#6f6e69" text-anchor="middle">10%</text>
+<line x1="506.0" y1="116" x2="506.0" y2="334" stroke="#e1e0d9" stroke-width="1"/>
+<text x="506.0" y="350" font-size="11" fill="#6f6e69" text-anchor="middle">15%</text>
+<line x1="578.0" y1="116" x2="578.0" y2="334" stroke="#e1e0d9" stroke-width="1"/>
+<text x="578.0" y="350" font-size="11" fill="#6f6e69" text-anchor="middle">20%</text>
+<line x1="650.0" y1="116" x2="650.0" y2="334" stroke="#e1e0d9" stroke-width="1"/>
+<text x="650.0" y="350" font-size="11" fill="#6f6e69" text-anchor="middle">25%</text>
+<text x="290" y="350" font-size="11" fill="#6f6e69" text-anchor="middle">0</text>
+<text x="24" y="134" font-size="14" font-weight="600" fill="#0b0b0b">Z3 v0 (model)</text>
+<text x="24" y="150" font-size="12" fill="#6f6e69">main model</text>
+<path d="M290.0,124.0 H576.9 A4,4 0 0 1 580.9,128.0 V140.0 A4,4 0 0 1 576.9,144.0 H290.0 Z" fill="#2a78d6"/>
+<text x="588.9" y="139" font-size="14" font-weight="600" fill="#0b0b0b">20.2%</text>
+<text x="796" y="139" font-size="14" font-weight="600" fill="#0b0b0b" text-anchor="end">0.819</text>
+<text x="24" y="178" font-size="14" font-weight="400" fill="#0b0b0b">Z3 v0 without foreign data</text>
+<text x="24" y="194" font-size="12" fill="#6f6e69">diagnostic</text>
+<path d="M290.0,168.0 H562.5 A4,4 0 0 1 566.5,172.0 V184.0 A4,4 0 0 1 562.5,188.0 H290.0 Z" fill="#898781"/>
+<text x="574.5" y="183" font-size="14" font-weight="400" fill="#0b0b0b">19.2%</text>
+<text x="796" y="183" font-size="14" font-weight="400" fill="#0b0b0b" text-anchor="end">0.810</text>
+<text x="24" y="222" font-size="14" font-weight="400" fill="#0b0b0b">Tier rule (country count)</text>
+<text x="24" y="238" font-size="12" fill="#6f6e69">comparator in the test plan</text>
+<path d="M290.0,212.0 H484.7 A4,4 0 0 1 488.7,216.0 V228.0 A4,4 0 0 1 484.7,232.0 H290.0 Z" fill="#898781"/>
+<text x="496.7" y="227" font-size="14" font-weight="400" fill="#0b0b0b">13.8%</text>
+<text x="796" y="227" font-size="14" font-weight="400" fill="#0b0b0b" text-anchor="end">0.728</text>
+<text x="24" y="266" font-size="14" font-weight="400" fill="#0b0b0b">Only past shortages in AT</text>
+<text x="24" y="282" font-size="12" fill="#6f6e69">simple rule</text>
+<path d="M290.0,256.0 H389.7 A4,4 0 0 1 393.7,260.0 V272.0 A4,4 0 0 1 389.7,276.0 H290.0 Z" fill="#898781"/>
+<text x="401.7" y="271" font-size="14" font-weight="400" fill="#0b0b0b">7.2%</text>
+<text x="796" y="271" font-size="14" font-weight="400" fill="#0b0b0b" text-anchor="end">0.733</text>
+<text x="24" y="310" font-size="14" font-weight="400" fill="#0b0b0b">Random selection</text>
+<text x="24" y="326" font-size="12" fill="#6f6e69">base rate</text>
+<path d="M290.0,300.0 H329.2 A4,4 0 0 1 333.2,304.0 V316.0 A4,4 0 0 1 329.2,320.0 H290.0 Z" fill="#898781"/>
+<text x="341.2" y="315" font-size="14" font-weight="400" fill="#0b0b0b">3.0%</text>
+<text x="796" y="315" font-size="14" font-weight="400" fill="#0b0b0b" text-anchor="end">0.5</text>
+<line x1="290" y1="116" x2="290" y2="334" stroke="#c3c2b7" stroke-width="1"/>
+<text x="24" y="388" font-size="12" fill="#52514e">Retrospective, not a prospective test: trained 2024–2025, tested 2026, 23,461 cases, 714 reports.</text>
+<text x="24" y="410" font-size="12" fill="#52514e">AUC: how well the whole ranking separates (0.5 = chance, 1 = perfect). Source: reports/Z3 v0 Prüfbericht.md</text>
+</svg>

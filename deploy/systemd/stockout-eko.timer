@@ -1,0 +1,9 @@
+[Unit]
+Description=Stockout Forecaster AT: EKO-Abruf werktags am Abend (RIS-Zeiten ab 20 Uhr)
+
+[Timer]
+OnCalendar=Mon..Fri 21:30:00
+RandomizedDelaySec=1800
+
+[Install]
+WantedBy=timers.target

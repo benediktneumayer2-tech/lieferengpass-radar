@@ -1,0 +1,9 @@
+[Unit]
+Description=Stockout Forecaster AT: EKO-Änderungen aus dem RIS (Nachtlauf werktags)
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/lieferengpass-radar
+ExecStart=%h/lieferengpass-radar/.venv/bin/stockout fetch --eko
+Nice=10
+TimeoutStartSec=30min

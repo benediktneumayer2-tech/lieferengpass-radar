@@ -1,0 +1,36 @@
+{% import "_macros.html" as m %}
+<div class="week-lists">
+<section {% if ids %}id="new-reports" {% endif %}aria-labelledby="wn-h{{ 'w' if ids else 's' }}">
+ <h{{ hl|default(3) }} id="wn-h{{ 'w' if ids else 's' }}">Neu gemeldet: <span class="num">{{ week.new|length }}</span></h{{ hl|default(3) }}>
+ {% if week.new %}
+ <div class="table-wrap" tabindex="0">
+ <table class="rows">
+  <thead><tr><th scope="col">Packung</th><th scope="col">Status (BASG)</th><th scope="col">Beginn</th><th scope="col"><span class="vh">Verlauf 12 Monate</span><span aria-hidden="true">Verlauf</span></th></tr></thead>
+  <tbody>
+  {% for e in (week.new[:limit] if limit else week.new) %}
+   <tr><th scope="row">{{ m.pkg_cell(e.p, root) }}</th><td data-l="Status">{{ m.status(e.status) }}</td><td class="num" data-l="Beginn">{{ e.start|de }} <span class="small">({{ START_SHORT[e.start_source] }})</span></td><td class="mini-cell">{{ mini(e.p.package_key) }}</td></tr>
+  {% endfor %}
+  </tbody>
+ </table>
+ </div>
+ {% if limit and week.new|length > limit %}<p class="small">… und {{ week.new|length - limit }} weitere.</p>{% endif %}
+ {% else %}<p>Keine neuen Meldungen in diesem Zeitraum.</p>{% endif %}
+</section>
+<section {% if ids %}id="ended-reports" {% endif %}aria-labelledby="we-h{{ 'w' if ids else 's' }}">
+ <h{{ hl|default(3) }} id="we-h{{ 'w' if ids else 's' }}">Beendet: <span class="num">{{ week.ended|length }}</span></h{{ hl|default(3) }}>
+ <p class="small">Ende festgestellt im Zeitraum. Bei lückenhafter Vorgeschichte liegt das tatsächliche Ende irgendwo im angegebenen Intervall; tagesgenau erst mit täglichen Daten.</p>
+ {% if week.ended %}
+ <div class="table-wrap" tabindex="0">
+ <table class="rows">
+  <thead><tr><th scope="col">Packung</th><th scope="col">zuletzt (BASG)</th><th scope="col">Ende</th><th scope="col"><span class="vh">Verlauf 12 Monate</span><span aria-hidden="true">Verlauf</span></th></tr></thead>
+  <tbody>
+  {% for e in (week.ended[:limit] if limit else week.ended) %}
+   <tr><th scope="row">{{ m.pkg_cell(e.p, root) }}</th><td data-l="zuletzt">{{ m.status(e.status) }}</td><td class="num" data-l="Ende">{% if e.end_lower and e.end_lower != e.end_upper %}zwischen {{ e.end_lower|de }} und {{ e.end_upper|de }}{% else %}{{ e.end_upper|de }}{% endif %}</td><td class="mini-cell">{{ mini(e.p.package_key) }}</td></tr>
+  {% endfor %}
+  </tbody>
+ </table>
+ </div>
+ {% if limit and week.ended|length > limit %}<p class="small">… und {{ week.ended|length - limit }} weitere.</p>{% endif %}
+ {% else %}<p>Keine beendeten Meldungen in diesem Zeitraum.</p>{% endif %}
+</section>
+</div>

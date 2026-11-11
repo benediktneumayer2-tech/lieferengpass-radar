@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Methodik und Quellen{% endblock %}
+{% block main %}
+<h1 class="page-title">Methodik und Quellen</h1>
+
+<section id="method-text" class="block prose" aria-labelledby="meth-h">
+ <h2 id="meth-h">Methodik</h2>
+ <h3>Quelle und Archiv</h3>
+ <p>Grundlage ist die vom Bundesamt für Sicherheit im Gesundheitswesen (BASG) täglich veröffentlichte Datei der gemeldeten Vertriebseinschränkungen. Sie zeigt nur den jeweils aktuellen Stand; beendete Meldungen verschwinden. Dieses Archiv ruft die Datei zweimal täglich ab und speichert jede neue Fassung unverändert mit Zeitstempel und Prüfsumme. Aus den gespeicherten Fassungen (Schnappschüssen) werden alle Auswertungen jederzeit neu berechnet.</p>
+ <h3>Amtlich und abgeleitet</h3>
+ <p>Amtliche Felder werden wörtlich gezeigt und mit „Quelle: BASG, Stand &lt;producedOn&gt;“ gekennzeichnet. Alles Abgeleitete – Episoden, Dauern, Verschiebungen, überfällige Tage, Wirkstoffgruppierung und gleichwertige Packungen – trägt die Kennzeichnung {{ m.own() }}. Telefonnummern aus der BASG-Datei werden nicht veröffentlicht.</p>
+ <h3>Engpass-Episode</h3>
+ <p>Eine Episode ist der zusammenhängende Meldezeitraum einer Packung (PZN). Sie beginnt mit dem amtlichen „Beginn der Vertriebseinschränkung“, ersatzweise mit dem Meldedatum oder dem ersten Auftreten im Archiv. Sie enthält die Folge der Status und der angekündigten Termine; jede Änderung des angekündigten Termins zählt als Verschiebung. Sie endet mit dem ersten Schnappschuss im Status „verfügbar“, mit dem Verschwinden aus einer vollständigen Datei oder mit einer neuen Meldung derselben Packung.</p>
+ <h3>„verfügbar gemäß §4 (1)“</h3>
+ <p>Dieser Status beendet keine Episode. Nach § 4 (1) der Verordnung über die Sicherstellung der Arzneimittelversorgung listet das BASG Packungen, bei denen der Bedarf nicht gedeckt ist, obwohl der Zulassungsinhaber keine Einschränkung der Vertriebsfähigkeit meldet. Als „aktiv eingeschränkt“ zählen in den Übersichten nur „Nicht verfügbar“ und „eingeschränkt verfügbar“.</p>
+ <h3>Überfällig</h3>
+ <p>Ein Termin ist überfällig, wenn eine Packung aktiv eingeschränkt ist und der aktuell angekündigte Termin der Wiederbelieferung vor dem Stichtag liegt. Angezeigt wird die Zahl der Tage seit dem Termin.</p>
+ <h3>Lückenhafte Vorgeschichte und unvollständige Schnappschüsse</h3>
+ <p>Vor Beginn der täglichen Archivierung liegen nur einzelne Fassungen vor: lokal gesicherte Altdateien und Aufnahmen des Internet Archive. Einige dieser Aufnahmen brechen nach etwa 1 MiB ab. Solche unvollständigen Schnappschüsse belegen nur, dass eine Packung gelistet war, nie, dass sie fehlte.</p>
+ <h3>Intervallzensierung</h3>
+ <p>Endet eine Episode zwischen zwei weit auseinanderliegenden Schnappschüssen, ist ihr Ende nur als Intervall bekannt („zwischen X und Y“). Dauern werden dann als Spanne angegeben, und die Zeitleisten zeigen nicht beobachtete Zeiträume schraffiert. Erst mit täglichen Daten ist ein Ende tagesgenau bekannt.</p>
+ <h3>Wirkstoffe und gleichwertige Packungen</h3>
+ <p>Wirkstoffnamen werden konservativ auf den Grundstoff zusammengeführt (z. B. ZOLPIDEMTARTRAT zu ZOLPIDEM). Gleichwertig heißt: gleiche Wirkstoffe, gleiche Stärke und gleiche Darreichungsform laut ASP-Liste. Das ist ein Hinweis für Rückfragen, keine Austauschempfehlung.</p>
+ <h3 id="prognose">Prognose</h3>
+ <p>Es gibt noch keine Prognose. Geplant sind Wahrscheinlichkeiten dafür, ob ein angekündigter Termin hält (±7 Tage) und ob eine Meldung binnen 4, 8 oder 12 Wochen endet. Sie werden erst angezeigt, wenn sie an zeitlich getrennten Daten geprüft und gut kalibriert sind; der Prüfbericht wird in jedem Fall veröffentlicht.</p>
+ <h3>Grenzen</h3>
+ <ul>
+  <li>Eine Hauptquelle: Was nicht an das BASG gemeldet ist, fehlt.</li>
+  <li>Kurze tägliche Historie; ältere Episoden sind nur grob datiert.</li>
+  <li>Die ASP-Liste erscheint etwa monatlich (täglich abgerufen); ihre Angabe „lieferbar“ wird nicht geprüft.</li>
+  <li>Die Wirkstoffzuordnung ist regelbasiert und kann Einzelfälle falsch zusammenführen oder trennen.</li>
+ </ul>
+</section>
+
+<section id="archive-coverage" class="block" aria-labelledby="cov-h">
+ <h2 id="cov-h">Archivabdeckung</h2>
+ {% if coverage %}
+ <dl class="facts">
+  <div><dt>Tägliche Archivierung seit</dt><dd class="num">{{ coverage.basg_first_live_day|de if coverage.basg_first_live_day else "–" }}</dd></div>
+  <div><dt>BASG-Fassungen (täglicher Abruf)</dt><dd class="num">{{ coverage.sources.basg.versions }}</dd></div>
+  <div><dt>Fehlende Tage seit Beginn</dt><dd class="num">{{ coverage.basg_missing_days|length }}</dd></div>
+  <div><dt>Letzter erfolgreicher BASG-Abruf</dt><dd class="num">{{ basg_fetch_local }}</dd></div>
+ </dl>
+ <div class="table-wrap" tabindex="0">
+ <table class="compact">
+  <caption>Letzter erfolgreicher Abruf je Quelle</caption>
+  <thead><tr><th scope="col">Quelle</th><th scope="col">letzter Erfolg (UTC)</th><th scope="col" class="r">Fassungen</th><th scope="col" class="r">Fehlversuche 7 Tage</th></tr></thead>
+  <tbody>
+  {% for name, src in coverage.sources.items() %}
+   <tr><th scope="row">{{ {"basg": "BASG", "bfarm": "BfArM (nur privat archiviert)", "ema": "EMA"}.get(name, name) }}</th><td class="num">{{ src.last_ok or "–" }}</td><td class="r num">{{ src.versions }}</td><td class="r num">{{ src.failures_7d }}</td></tr>
+  {% endfor %}
+  </tbody>
+ </table>
+ </div>
+ {% else %}
+ <p>Archivzustand beim Erzeugen nicht verfügbar.</p>
+ {% endif %}
+ <div class="table-wrap" tabindex="0">
+ <table class="compact">
+  <caption>Alle BASG-Schnappschüsse in der Datenbank: <span class="num">{{ snapshots|length }}</span>, davon <span class="num">{{ n_complete }}</span> vollständig</caption>
+  <thead><tr><th scope="col">producedOn</th><th scope="col">Herkunft</th><th scope="col">Datei</th><th scope="col" class="r">Packungen</th></tr></thead>
+  <tbody>
+  {% for s in snapshots %}
+   <tr><th scope="row" class="num">{{ s.snapshot_id }}</th><td>{{ {"wayback": "Internet Archive", "legacy_local": "Altdatei", "live": "täglicher Abruf"}.get(s.origin, s.origin) }}</td><td>{{ "vollständig" if s.complete else "abgeschnitten (nur Anwesenheit belegt)" }}</td><td class="r num">{{ s.n_packages }}</td></tr>
+  {% endfor %}
+  </tbody>
+ </table>
+ </div>
+</section>
+
+<section id="fruehwarnung" class="block prose" aria-labelledby="fw-h">
+ <h2 id="fw-h">Frühwarnung aus Meldungen anderer Länder</h2>
+ <p>Viele Engpässe treffen mehrere Länder, aber nicht gleichzeitig. Zweimal täglich werden deshalb auch die öffentlichen Engpasslisten der unten genannten Behörden unverändert archiviert und in einheitliche Meldungen übersetzt. Laufende Meldungen werden über den ATC-Code (Ebene 5) mit österreichischen Packungen der ASP-Liste verknüpft; fehlt der ATC-Code, wird er vorsichtig über den Wirkstoff- oder Handelsnamen abgeleitet, nur bei eindeutigem Treffer. Für Tschechien und Spanien ergänzen die Produktregister der Behörden (SÚKL-Arzneimitteldatenbank, AEMPS CIMA) fehlenden ATC-Code, Produkt und Zulassungsinhaber über die nationale Produktnummer; der Inhaber ist der heutige laut Register. Dauerhafte Vertriebseinstellungen zählen nicht als Engpass.</p>
+ <p>Auf der <a href="{{ root }}fruehwarnung/">Frühwarnliste</a> stehen Wirkstoffe ohne aktive BASG-Meldung mit mindestens einer laut ASP-Liste lieferbaren Packung. Die Stufe richtet sich nach einem Rückblick ({{ fw.period[0]|de }} bis {{ fw.period[1]|de }}), wie oft danach binnen 4, 8 oder 12 Wochen eine BASG-Meldung folgte: A = fünf oder mehr Länder, B = drei oder vier Länder, C = zwei Länder. Meldet derselbe Zulassungsinhaber in mehreren Ländern, steht das bei den Ländern; als derselbe Inhaber zählen auch Firmen desselben Konzerns, etwa Sandoz, Hexal und 1 A Pharma oder Teva, ratiopharm und Actavis. Bis Oktober 2026 war das die Stufe A; bei gleicher Zahl der Länder brachte es aber keinen Vorsprung, der 2026 hielt, während fünf oder mehr Länder bei gleicher Trefferquote deutlich mehr spätere BASG-Meldungen erfassten (Regel an 2024–2025 gelernt, an 2026 geprüft). Ebenfalls geprüft und ohne Gewinn: unterschiedliche Gewichte für einzelne Länder, der Grund der Auslandsmeldung (Herstellung, Nachfrage, kommerziell) und ob Stärke und Darreichungsform zu den österreichischen Packungen passen. Ein einzelnes Land brachte gegenüber Wirkstoffen, die in Österreich schon einmal knapp waren, keinen messbaren Vorsprung und wird nicht gelistet. Die Zahlen sind verzerrt: Die BASG-Daten vor dem 17.10.2026 sind lückenhaft, und einige Länderlisten enthalten nur laufende Meldungen. Eine Prüfung mit den täglich archivierten Daten folgt; eine echte Prognose erscheint erst danach.</p>
+ <p>Meldungen des BfArM (Deutschland) werden archiviert, aber bis zu einer schriftlichen Zustimmung des BfArM weder angezeigt noch in Stufen und Trefferquoten auf dieser Website verwendet.</p>
+ <p>Dazu kommt ein Hinweis aus der BASG-Liste und der ASP-Liste: Wirkstoffe, bei denen ein Inhaber beim BASG gemeldet ist und andere Inhaber noch lieferbare Packungen haben. Er wurde rückblickend seit 2022 gegen neue BASG-Meldungen geprüft und mit vergleichbaren Wirkstoffen verglichen (gleiche Produktzahl, gleiche Engpass-Vorgeschichte, gleiches Jahr). Andere geprüfte Ereignisse brachten keinen verwertbaren Vorsprung: Marktaustritte anderer Produkte laut ASP-Liste, Streichungen aus dem Erstattungskodex (RIS, seit 2004), Preisband-Runden und Engpässe bei Wirkstoffen derselben ATC-4-Gruppe. GMP-Mängel bei Wirkstoffherstellern (Nichtkonformitätsberichte in EudraGMDP) werden täglich mitgeschrieben; für eine Aussage gibt es bisher zu wenige Fälle.</p>
+ <div class="table-wrap" tabindex="0">
+ <table class="compact">
+  <caption>Auslandsquellen</caption>
+  <thead><tr><th scope="col">Land</th><th scope="col">Quelle</th><th scope="col">Bedingungen laut Anbieter</th></tr></thead>
+  <tbody>
+  {% for country, title, url, terms in foreign_sources %}
+   <tr><th scope="row">{{ country }}</th><td><a href="{{ url }}">{{ title }}</a></td><td>{{ terms }}</td></tr>
+  {% endfor %}
+  </tbody>
+ </table>
+ </div>
+</section>
+
+<section id="sources" class="block prose" aria-labelledby="src-h">
+ <h2 id="src-h">Quellen und Lizenzen</h2>
+ <ul>
+  <li>BASG, Vertriebseinschränkungen von Arzneispezialitäten: <a href="https://webservices.basg.gv.at/medicineshortage/export/v1/download">Export (XML)</a>, <a href="https://www.basg.gv.at/fuer-unternehmen/datenbereitstellung-vertriebseinschraenkungen">Datenbereitstellung</a>, <a href="https://www.basg.gv.at/fuer-unternehmen/online-service/nutzungshinweise">Nutzungshinweise</a></li>
+  <li>ELGA TermGit, <a href="https://termgit.elga.gv.at/CodeSystem-asp-liste.html">ASP-Liste</a> (Verzeichnis der Arzneispezialitäten) als Nenner für gleichwertige Packungen{% if asp_version %}, verwendete Version {{ asp_version }}{% endif %}</li>
+ </ul>
+ <p><strong>Lizenzen:</strong> Der Code steht unter der <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache-Lizenz 2.0</a>. Eigene Texte und Auswertungen dieser Website stehen unter <a href="https://creativecommons.org/licenses/by/4.0/deed.de">CC BY 4.0</a>. Die Daten der Quellen gelten nach deren Bedingungen: für die BASG-Daten die Nutzungshinweise des BASG (oben verlinkt; Quellenangabe „Datenquelle: BASG“), für die Auslandsquellen die Angaben in der Tabelle „Auslandsquellen“. Dieses Angebot ist unabhängig und kein Angebot des BASG.</p>
+</section>
+{% endblock %}

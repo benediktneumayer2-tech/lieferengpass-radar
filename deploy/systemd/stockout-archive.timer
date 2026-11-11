@@ -1,0 +1,11 @@
+[Unit]
+Description=Stockout Forecaster AT: Tagesarchiv zweimal täglich
+
+[Timer]
+OnCalendar=*-*-* 06:15:00
+OnCalendar=*-*-* 18:15:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

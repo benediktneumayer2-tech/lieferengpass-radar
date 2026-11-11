@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Wirkstoffe A–Z{% endblock %}
+{% block main %}
+<h1 class="page-title">Wirkstoffe A–Z</h1>
+<p class="lead">Alle Wirkstoffe mit mindestens einer Packung im Archiv der BASG-Liste. In Klammern: Packungen gesamt / davon aktuell aktiv eingeschränkt. Die Suche auf der <a href="{{ root }}">Startseite</a> findet auch Handelsnamen und PZN.</p>
+<nav aria-label="Buchstaben" class="letters"><ul>{% for letter, items in letters %}<li><a href="#l-{{ 'x' if letter == '#' else letter }}">{{ letter }}</a></li>{% endfor %}</ul></nav>
+{% for letter, items in letters %}
+<section class="block letter-block" aria-labelledby="l-{{ 'x' if letter == '#' else letter }}">
+ <h2 id="l-{{ 'x' if letter == '#' else letter }}">{{ letter }}</h2>
+ <ul class="sub-list">
+ {% for s in items %}<li><a href="{{ root }}{{ s.path }}">{{ s.label }}</a> <span class="small num">({{ s.packages|length }} / {{ s.active }})</span></li>
+ {% endfor %}
+ </ul>
+</section>
+{% endfor %}
+{% endblock %}

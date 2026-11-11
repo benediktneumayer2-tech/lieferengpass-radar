@@ -1,0 +1,27 @@
+{
+ "art": "mittel",
+ "aus": [
+  "z3_v0",
+  "z3_v0_mit_de",
+  "stufen_v0"
+ ],
+ "basg_stand": "2026-10-20",
+ "eingefroren_am": "2026-10-21",
+ "horizonte": {
+  "28": {},
+  "56": {},
+  "84": {}
+ },
+ "lernen": [
+  "2024-01-01",
+  "2025-12-31"
+ ],
+ "name": "mittel_v0",
+ "pruefen": [
+  "2026-01-01",
+  "2026-10-20"
+ ],
+ "rolle": "Herausforderer: Mittel der Wahrscheinlichkeiten",
+ "schritt_tage": 14,
+ "sha256": "a85c33189a01ac445f590f364efcaf3bf1b9b5bcca449330432e0e4cd2601015"
+}

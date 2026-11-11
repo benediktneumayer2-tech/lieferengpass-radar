@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stockout-at"
+version = "0.1.0"
+description = "Offenes Archiv und Auswertung der österreichischen Arzneimittel-Engpassmeldungen"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+dependencies = ["jinja2>=3.1", "xlrd>=2.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.urls]
+Repository = "https://github.com/benediktneumayer2-tech/lieferengpass-radar"
+
+[project.scripts]
+stockout = "stockout_at.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools.package-data]
+stockout_at = ["web/templates/*.html", "web/assets/*"]

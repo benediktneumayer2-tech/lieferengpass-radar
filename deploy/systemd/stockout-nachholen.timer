@@ -1,0 +1,9 @@
+[Unit]
+Description=Stockout Forecaster AT: Nachholabruf am Mittag
+
+[Timer]
+OnCalendar=*-*-* 12:15:00
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

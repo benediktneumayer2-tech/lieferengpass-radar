@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Lieferengpass-Radar"
+abstract: "Early warning of medicine shortages in Austria from public data, with pre-registered, openly tested forecast models (research prototype)."
+authors:
+  - given-names: Benedikt
+    family-names: Neumayer
+license: Apache-2.0
+repository-code: "https://github.com/benediktneumayer2-tech/lieferengpass-radar"
+version: "0.1-prereg"
+date-released: "2026-11-12"
+keywords:
+  - medicine shortages
+  - drug shortages
+  - Austria
+  - forecasting
+  - open data
+  - pre-registration

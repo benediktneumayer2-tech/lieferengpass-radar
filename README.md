@@ -1,5 +1,7 @@
 # Lieferengpass-Radar
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24168686.svg)](https://doi.org/10.5281/zenodo.24168686)
+
 **An early-warning tool for medicine shortages in Austria: a Python command-line tool for Linux that archives public shortage registers every day and turns them into shortage histories, an early-warning list and a static website.**
 
 The website is meant for pharmacies, hospital pharmacies, physicians and public-health staff; it is not online yet, so you build it yourself. *Lieferengpass* is German for "supply shortage". Austria's official shortage register, published by the Federal Office for Safety in Health Care (BASG), shows only today's state:
@@ -127,7 +129,7 @@ flowchart LR
     C --> G["Go/no-go<br/>30 Apr 2027"]
 ```
 
-From 1 Jan 2027 only what the daily log recorded on the reference dates counts; a missed day cannot be made up. The go/no-go on 30 Apr 2027 is the first report under the plan. **The results will be published either way, including a no-go.** A release archive with a persistent identifier will follow. How to recompute the hashes, including a quirk in three model files: [Vorab-Registrierung](documentation/MODELL_UND_BEWERTUNG.md#12-vorab-registrierung).
+From 1 Jan 2027 only what the daily log recorded on the reference dates counts; a missed day cannot be made up. The go/no-go on 30 Apr 2027 is the first report under the plan. **The results will be published either way, including a no-go.** The frozen state is archived on Zenodo as release `v0.1-prereg`: [doi:10.5281/zenodo.24168687](https://doi.org/10.5281/zenodo.24168687). How to recompute the hashes, including a quirk in three model files: [Vorab-Registrierung](documentation/MODELL_UND_BEWERTUNG.md#12-vorab-registrierung).
 
 ## Data integrity
 

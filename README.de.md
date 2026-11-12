@@ -1,5 +1,7 @@
 # Lieferengpass-Radar
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24168686.svg)](https://doi.org/10.5281/zenodo.24168686)
+
 **Ein Frühwarnwerkzeug für Arzneimittel-Lieferengpässe in Österreich: eine Python-Kommandozeile für Linux, die öffentliche Engpassregister täglich sichert und daraus Engpassverläufe, eine Frühwarnliste und eine statische Website erzeugt.**
 
 Die Website ist für Apotheken, Spitalapotheken, Ärzt:innen und das öffentliche Gesundheitswesen gedacht; sie ist noch nicht online und wird lokal gebaut. Im Register des BASG (Bundesamt für Sicherheit im Gesundheitswesen) stehen täglich die Lieferengpässe, die Zulassungsinhaber für einzelne Arzneimittel-Packungen gemeldet haben, mit Status und angekündigtem Liefertermin. Das Register zeigt aber nur den heutigen Stand:
@@ -127,7 +129,7 @@ flowchart LR
     C --> G["Go/No-Go<br/>30.04.2027"]
 ```
 
-Ab dem 01.01.2027 zählt nur, was an den Stichtagen im täglichen Protokoll stand; ein verpasster Tag lässt sich nicht nachholen. Das Go/No-Go am 30.04.2027 ist der erste Bericht nach dem Prüfplan. **Die Ergebnisse werden in jedem Fall veröffentlicht, auch bei No-Go.** Ein Release-Archiv mit dauerhafter Kennung folgt. Wie sich die Hashes nachrechnen lassen, samt einer Eigenheit in drei Modelldateien: [Vorab-Registrierung](documentation/MODELL_UND_BEWERTUNG.md#12-vorab-registrierung).
+Ab dem 01.01.2027 zählt nur, was an den Stichtagen im täglichen Protokoll stand; ein verpasster Tag lässt sich nicht nachholen. Das Go/No-Go am 30.04.2027 ist der erste Bericht nach dem Prüfplan. **Die Ergebnisse werden in jedem Fall veröffentlicht, auch bei No-Go.** Der eingefrorene Stand ist auf Zenodo als Release `v0.1-prereg` archiviert: [doi:10.5281/zenodo.24168687](https://doi.org/10.5281/zenodo.24168687). Wie sich die Hashes nachrechnen lassen, samt einer Eigenheit in drei Modelldateien: [Vorab-Registrierung](documentation/MODELL_UND_BEWERTUNG.md#12-vorab-registrierung).
 
 ## Datenintegrität
 

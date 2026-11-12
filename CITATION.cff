@@ -7,6 +7,7 @@ authors:
   - given-names: Benedikt
     family-names: Neumayer
 license: Apache-2.0
+doi: 10.5281/zenodo.24168686
 repository-code: "https://github.com/benediktneumayer2-tech/lieferengpass-radar"
 version: "0.1-prereg"
 date-released: "2026-11-12"

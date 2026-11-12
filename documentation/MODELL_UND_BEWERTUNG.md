@@ -241,7 +241,7 @@ Die fünf Verfahren und der Prüfplan wurden am **21.10.2026** eingefroren, vor 
    pruefplan True 35a230a0a9bd
    ```
 
-**Was der Hash belegt und was nicht.** Er belegt, dass Modelle und Prüfplan seit dem Einfrieren unverändert sind. Das Datum belegt er allein nicht: Dafür steht die öffentliche Fassung mit diesen Dateien vor dem 01.01.2027 auf GitHub, und ein Release-Archiv mit dauerhafter Kennung folgt. `load_plan` prüft die Hashes beim Laden nicht nach. Merkmalscode, Parser, Quellenliste und Daten sind nicht eingefroren ([Abschnitt 14](#14-was-geprüft-ist-und-was-nicht)).
+**Was der Hash belegt und was nicht.** Er belegt, dass Modelle und Prüfplan seit dem Einfrieren unverändert sind. Das Datum belegt er allein nicht: Dafür stehen diese Dateien seit dem 12.11.2026 öffentlich auf GitHub und im Zenodo-Archiv des Releases `v0.1-prereg` ([doi:10.5281/zenodo.24168687](https://doi.org/10.5281/zenodo.24168687)). `load_plan` prüft die Hashes beim Laden nicht nach. Merkmalscode, Parser, Quellenliste und Daten sind nicht eingefroren ([Abschnitt 14](#14-was-geprüft-ist-und-was-nicht)).
 
 **Zeitplan:**
 

@@ -148,14 +148,14 @@ Zusätzlich zu den Quellen oben archiviert die Referenzinstanz:
 - die CEP-Datei der EDQM (`edqm`, Eignungszertifikate der Wirkstoffhersteller);
 - vier Exporte aus „Medikamente Info Austria“ des BASG (`mia_asp`, `mia_abst`, `mia_verl`, `mia_ve`).
 
-Die öffentliche Fassung lässt sie weg, bis die Nutzung mit den Betreibern geklärt ist. Ihre Parser bleiben im Code, damit bereits archivierte Dateien lesbar bleiben; finnische Meldungen blendet die Website der öffentlichen Fassung aber aus (`site.HIDDEN_SOURCES`).
+Die öffentliche Fassung lässt sie weg, bis die Nutzung mit den Betreibern geklärt ist. Ihre Parser bleiben im Code, damit bereits archivierte Dateien lesbar bleiben; finnische Meldungen blendet die Website aber aus (`site.SITE_HIDDEN_SOURCES`).
 
 **Was sich dadurch ändert** (abgeleitet aus dem Code):
 
 | Quelle | Wofür die Referenzinstanz sie nutzt | Folge in der öffentlichen Fassung |
 |---|---|---|
 | `fimea`, `fimea_reg` | Finnland zählt als Land: in den Ländermerkmalen der Modelle (`laender_*`, `inhaber_*`, `ausland_neu_28`), in den Stufen der Frühwarnliste und damit in `stufen_v0` und `mittel_v0`. Das Register liefert ATC, Produkt und Inhaber der finnischen Meldungen. | Finnland fehlt in Frühwarnliste und Ländermerkmalen. Im Merkmalsprotokoll der Referenzinstanz vom 11.11.2026 hatten 177 von 1.482 Wirkstoffen ohne aktive Meldung Finnland unter den meldenden Ländern; ohne Finnland hätten 108 eine andere Stufe gehabt, 27 davon B statt A. |
-| `mia_verl` | Merkmal `inhaberwechsel_56` (Änderung beim Zulassungsinhaber in den letzten 56 Tagen) und der Registerhinweis „Änderung beim Zulassungsinhaber“ auf der Website | Merkmal immer 0; die Website zeigt den Hinweis nur, wenn archivierte Verlautbarungen vorliegen, sonst entfällt er |
+| `mia_verl` | Merkmal `inhaberwechsel_56` (Änderung beim Zulassungsinhaber in den letzten 56 Tagen) und der Registerhinweis „Änderung beim Zulassungsinhaber“ auf der Website | Merkmal immer 0; den Hinweis zeigt die Website nicht (`site.SITE_HOLDER_CHANGES`, auch in der Referenzinstanz ausgeblendet, bis das BASG die Nutzung erlaubt) |
 | `mia_asp`, `edqm` | nur Schattenspalten im Merkmalsprotokoll (§ 21 AMG, CEP) | keine Wirkung auf Modelle, Vorhersagen oder Website |
 | `mia_abst`, `mia_ve` | nur archiviert | keine |
 

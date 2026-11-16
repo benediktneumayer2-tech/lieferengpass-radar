@@ -16,6 +16,11 @@ predictions. `models/pruefplan.json` fixes the methods (by sha256), the main com
 the prospective check starts on 2027-01-01. The daily prediction log (`<archive>/protokoll/vorhersagen/`) holds
 every method's prediction per substance, and `bewerten` scores it once the horizons have passed. Nothing of this
 is shown on the website.
+
+Learning and the retrospective run can be made point in time (`zeitpunktgenau`, off by default = as frozen): a BASG
+report counts only from its publication (`published`) in the case selection, the history and the outcome ("begins or
+first appears", as in the plan), and the ASP version only from the day it was captured. The daily run needs neither:
+on the day itself the database knows only published reports and captured versions.
 """
 from __future__ import annotations
 
@@ -71,14 +76,43 @@ MAIN = {"modell": "z3_v0", "gegen": "stufen_v0", "horizont": 56, "k": 50}
 VARIANTS = sorted({frozenset(m["ohne_quellen"]) for m in METHODS.values() if "ohne_quellen" in m}, key=sorted)
 
 
-class Knowledge:
-    """Everything needed to compute features on any day; each lookup only uses entries dated before that day."""
+def published(s: date, fs: date, dm: date | None, complete: list[date]) -> date:
+    """Publication day of a BASG report: min(first sighting, max(start, Datum_Meldung + 1)), but never before the day
+    after the last complete snapshot before the first sighting (it was missing there). In the daily archive this is
+    the first sighting. Same rule as in the model search (November 2026)."""
+    pub = min(fs, max(s, dm + timedelta(days=1) if dm else s))
+    i = bisect.bisect_left(complete, fs) - 1
+    return max(pub, complete[i] + timedelta(days=1)) if i >= 0 else pub
 
-    def __init__(self, conn: sqlite3.Connection, archive: Archive):
+
+def _published_reports(conn: sqlite3.Connection, latest: date) -> dict[str, list[tuple[date, date, date]]]:
+    """ATC5 -> (start, publication, end) of every Austrian report, ends as in `rueckblick._episode_rows`."""
+    complete = [_d(d) for d, in conn.execute("SELECT snapshot_date FROM snapshots WHERE complete = 1 ORDER BY snapshot_date")]
+    out: dict[str, list[tuple[date, date, date]]] = defaultdict(list)
+    for atc5, s, fs, dm, end_upper, active in conn.execute(
+            "SELECT e.atc5, e.start_date, e.first_seen, substr(sp.Datum_Meldung, 1, 10), e.end_upper, e.active "
+            "FROM episodes e JOIN snapshot_packages sp ON sp.snapshot_id = e.first_snapshot "
+            "AND sp.package_key = e.package_key WHERE e.atc5 IS NOT NULL"):
+        s = _d(s)
+        e = latest if active or not end_upper else _d(end_upper)
+        if s and e and s <= latest:
+            out[atc5].append((s, published(s, _d(fs), _d(dm), complete), max(e, s)))
+    return dict(out)
+
+
+class Knowledge:
+    """Everything needed to compute features on any day; each lookup only uses entries dated before that day.
+    With `zeitpunktgenau`, BASG reports count from their publication and ASP versions from their capture."""
+
+    pit: dict[str, list[tuple[date, date, date]]] | None = None  # with the switch: (start, publication, end) per ATC5
+    _known: tuple | None = None
+
+    def __init__(self, conn: sqlite3.Connection, archive: Archive, zeitpunktgenau: bool = False):
         latest = _d(conn.execute("SELECT max(snapshot_date) FROM snapshots").fetchone()[0])
         self.latest = latest
         eps = rueckblick._episode_rows(conn, latest)
         self.subst = Intervals([(e["atc5"], e["start"], e["end"]) for e in eps])
+        self.pit = _published_reports(conn, latest) if zeitpunktgenau else None
         self.hist = rueckblick.AspHistory.load(archive)
         self.items: dict[str, list[dict]] = defaultdict(list)
         for source, its in vorlauf._signals(conn, latest).items():
@@ -105,7 +139,7 @@ class Knowledge:
         """Substances marketed in the ASP version before t: number of marketed products and holder keys."""
         if self._version and self._version[0] == t:
             return self._version[1]
-        prods = self.hist.before(t) or {}
+        prods = (self.hist.before(t) if self.pit is None else self.hist.known_before(t)) or {}
         out: dict[str, dict] = {}
         for zl, (m, a, h) in prods.items():
             if m and a:
@@ -121,12 +155,32 @@ class Knowledge:
         i = bisect.bisect_left(ds, t)  # strictly before t
         return i > 0 and ds[i - 1] >= t - timedelta(days=days)
 
+    def _basg(self, a: str, t: date) -> tuple[bool, list[tuple[date, date]]]:
+        """Is a report on a active on day t, and the merged report intervals of a (with the switch: known on day t)."""
+        if self.pit is None:
+            return self.subst.active(a, t), self.subst.intervals.get(a, [])
+        if self._known and self._known[0] == (a, t):
+            return self._known[1]
+        known = [(s, e) for s, p, e in self.pit.get(a, []) if p <= t]
+        out = any(s <= t <= e for s, e in known), Intervals([(a, s, e) for s, e in known]).intervals.get(a, [])
+        self._known = ((a, t), out)
+        return out
+
+    def onset_within(self, a: str, t: date, h: int) -> bool:
+        """Outcome: start of a merged report interval in (t, t+h]; with the switch as in the plan: a report begins or
+        first appears in (t, t+h]."""
+        if self.pit is None:
+            return self.subst.onset_within(a, t, h)
+        end = t + timedelta(days=h)
+        return any(t < s <= end or t < p <= end for s, p, _ in self.pit.get(a, []))
+
     def _active(self, a: str, t: date, hidden: frozenset) -> list[dict]:
         return [it for it in self.items.get(a, []) if it["date"] < t <= it["until"] and it["source"] not in hidden]
 
     def features(self, a: str, t: date, at: dict, hidden: frozenset = frozenset()) -> list[str] | None:
         """Names of the features that are 1 for substance a on day t, None outside the universe."""
-        if self.subst.active(a, t):
+        reported, ivs = self._basg(a, t)
+        if reported:
             return None
         act = self._active(a, t, hidden)
         countries = {it["country"] for it in act}
@@ -141,7 +195,6 @@ class Knowledge:
             best = max((len(cs) for cs in same.values()), default=0)
             f += ["inhaber_1plus"] * (best >= 1) + ["inhaber_3plus"] * (best >= 3)
             f += ["ausland_neu_28"] * any(it["date"] >= t - timedelta(days=28) for it in act)
-        ivs = self.subst.intervals.get(a, [])
         if any(s < t for s, _ in ivs):
             f.append("frueher_engpass")
             f += ["engpass_365"] * any(t - timedelta(days=365) <= s < t for s, _ in ivs)
@@ -181,7 +234,7 @@ def table(k: Knowledge, start: date, end: date, step: int = STEP) -> list[dict]:
             c = k.case(a, t, at)
             if c is not None:
                 rows.append({"t": t, "atc5": a, **c,
-                             "y": {h: k.subst.onset_within(a, t, h) for h in HORIZONS if t + timedelta(days=h) <= k.latest}})
+                             "y": {h: k.onset_within(a, t, h) for h in HORIZONS if t + timedelta(days=h) <= k.latest}})
         t += timedelta(days=step)
     return rows
 
@@ -655,9 +708,9 @@ def bewerten(conn: sqlite3.Connection, root: Path, start: date, end: date | None
 
 # --- runs -----------------------------------------------------------------------------------------
 
-def measure(conn: sqlite3.Connection, archive: Archive) -> tuple[dict, Knowledge]:
+def measure(conn: sqlite3.Connection, archive: Archive, zeitpunktgenau: bool = False) -> tuple[dict, Knowledge]:
     """Learn every method on 2024–2025 and score all of them on the same 2026 cases."""
-    k = Knowledge(conn, archive)
+    k = Knowledge(conn, archive, zeitpunktgenau)
     rows = table(k, START, k.latest - timedelta(days=min(HORIZONS)))
     methods = learn_methods(rows)
     test = [r for r in rows if r["t"] >= TEST_START]
@@ -732,10 +785,11 @@ def render_bewertung(r: dict) -> str:
     return "\n".join(lines)
 
 
-def run(db_path: Path, archive: Archive, json_path: Path | None = None, freeze_models: Path | None = None) -> dict:
+def run(db_path: Path, archive: Archive, json_path: Path | None = None, freeze_models: Path | None = None,
+        zeitpunktgenau: bool = False) -> dict:
     conn = sqlite3.connect(db_path)
     try:
-        result, _ = measure(conn, archive)
+        result, _ = measure(conn, archive, zeitpunktgenau)
     finally:
         conn.close()
     if freeze_models:

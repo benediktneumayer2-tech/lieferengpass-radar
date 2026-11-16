@@ -6,7 +6,7 @@
 
 - Die Website wird bei jedem Tageslauf **lokal** in den Ordner `site/` erzeugt (nicht in Git).
 - Sie ist noch **nicht öffentlich bereitgestellt**.
-- Die Seiten tragen noch den Arbeitstitel **„Stockout Forecaster AT“** (`site.SITE_TITLE`, laut Kommentar die einzige Stelle, an der der Name steht).
+- Die Seiten tragen den Namen **„Lieferengpass-Radar“** (`site.SITE_TITLE`) und oben den Hinweis „Für Fachkreise“.
 - Impressum und Datenschutzerklärung enthalten Platzhalter „vor Veröffentlichung eintragen“ (Medieninhaber, Verantwortliche, Angaben des Hosting-Anbieters).
 
 Beobachtet in der Referenzinstanz am 10.11.2026: 5.558 Seiten (Start 1, Packungen 4.680, Wirkstoffe 870, Listen 4, Texte 3), 149 MB, erzeugt in 4,4 s.
@@ -21,7 +21,7 @@ Beobachtet in der Referenzinstanz am 10.11.2026: 5.558 Seiten (Start 1, Packunge
 | `/wirkstoffe/` | `substances.html` | Wirkstoffe A–Z |
 | `/ueberfaellig/` | `overdue.html` | aktive Meldungen, deren angekündigter Termin vor dem Stichtag liegt |
 | `/woche/` | `week.html` | neue und beendete Meldungen der letzten 7 Tage |
-| `/fruehwarnung/` | `fruehwarnung.html` | Frühwarnliste (Stufen A/B/C mit bisheriger Trefferquote), Hinweise aus den BASG-Registern (anderer Inhaber gemeldet; Änderung beim Zulassungsinhaber nur, wenn archivierte MIA-Verlautbarungen vorliegen, [Unterschiede](DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz)), Lesehilfe |
+| `/fruehwarnung/` | `fruehwarnung.html` | Frühwarnliste (Stufen A/B/C mit bisheriger Trefferquote), Hinweise aus den BASG-Registern (anderer Inhaber gemeldet; die Änderung beim Zulassungsinhaber ist ausgeblendet, `site.SITE_HOLDER_CHANGES`, [Unterschiede](DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz)), Lesehilfe |
 | `/methodik/` | `method.html` | Methodik, Archivabdeckung je Quelle, Frühwarnung, Quellen und Lizenzen der Auslandslisten (`site.FOREIGN_SOURCES`); beschreibt nur die Quellen, die die öffentliche Fassung abruft |
 | `/impressum/`, `/datenschutz/` | `impressum.html`, `datenschutz.html` | Rechtstexte mit Platzhaltern |
 | `/search-index.json` | – | Suchindex für die clientseitige Suche |
@@ -39,7 +39,7 @@ Packungen ohne PZN (alte Dateien) bekommen den Pfad `packung/z-<hash>/` (`site.p
 ## Regeln der Darstellung (umgesetzt)
 
 - **Amtlich und eigen getrennt:** amtliche BASG-Felder wörtlich mit Quelle und Stand; abgeleitete Werte mit dem Kennzeichen „Eigene Auswertung“ (`_macros.html` `own()`).
-- **Ausgeblendet:** das BASG-Feld `Zulassungsinhaber_Tel` (`site.HIDDEN_FIELDS`, Test `test_no_phone_numbers`) und alle BfArM-Meldungen (`site.HIDDEN_SOURCES`, Test `test_early_warning_hides_bfarm_and_lists_only_unreported`). `site.HIDDEN_SOURCES` enthält außerdem `fimea`, für den Fall archivierter finnischer Dateien, die die öffentliche Fassung nicht abruft.
+- **Ausgeblendet:** das BASG-Feld `Zulassungsinhaber_Tel` (`site.HIDDEN_FIELDS`, Test `test_no_phone_numbers`) und alle BfArM-Meldungen (`site.HIDDEN_SOURCES`, Test `test_early_warning_hides_bfarm_and_lists_only_unreported`). Nur auf der Website blendet `site.SITE_HIDDEN_SOURCES` außerdem `fimea` aus, für den Fall archivierter finnischer Dateien, die die öffentliche Fassung nicht abruft; Merkmals- und Vorhersageprotokoll nutzen weiter `site.HIDDEN_SOURCES`.
 - **Keine Prognose angezeigt:** Die Z3-Wahrscheinlichkeiten stehen nur in den Protokollen.
 - **Nüchterne Sprache:** Die Frühwarnliste heißt ausdrücklich „Hinweis … Keine Prognose, keine Bestellempfehlung“.
 - **Veraltete Daten:** Liegt der letzte erfolgreiche BASG-Abruf beim Erzeugen mehr als 36 Stunden zurück, erscheint ein Hinweis. Ein kleines Skript in `base.html` prüft dasselbe beim Lesen im Browser.

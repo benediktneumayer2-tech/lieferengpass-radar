@@ -179,5 +179,5 @@ Das Radar wurde mit KI-Coding-Agenten (Claude Code) entwickelt. Vom Autor stamme
 ## Lizenz und Kontakt
 
 - **Lizenz:** Code unter Apache-2.0 ([LICENSE](LICENSE)); eigene Texte und abgeleitete Daten (Auswertungen) unter CC BY 4.0; Daten der Quellen nach den Bedingungen der jeweiligen Quelle ([DATENQUELLEN.md](documentation/DATENQUELLEN.md)).
-- **Namen:** Paket `stockout_at`, Befehl `stockout` und der Website-Titel „Stockout Forecaster AT“ stammen aus der Arbeitsphase.
+- **Namen:** Paket `stockout_at`, Befehl `stockout` und der Arbeitstitel „Stockout Forecaster AT“ in den systemd-Beschreibungen stammen aus der Arbeitsphase; die Website heißt „Lieferengpass-Radar“.
 - **Kontakt:** [GitHub-Issues](https://github.com/benediktneumayer2-tech/lieferengpass-radar/issues).

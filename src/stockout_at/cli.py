@@ -254,7 +254,7 @@ def cmd_modell(args) -> int:
     from . import modell
 
     result = modell.run(Path(args.db), Archive(Path(args.archive)), Path(args.json) if args.json else None,
-                        modell.MODELS if args.einfrieren else None)
+                        modell.MODELS if args.einfrieren else None, args.zeitpunktgenau)
     print(modell.render(result))
     if args.einfrieren:
         print(f"Eingefroren: {', '.join(result['verfahren'])} und Prüfplan {modell.PLAN} (sha256 {result['pruefplan'][:12]})")
@@ -276,8 +276,8 @@ def cmd_bewertung(args) -> int:
     conn = sqlite3.connect(args.db)
     try:
         if args.rueckblick:
-            root = Path(args.db).parent / "vorhersagen_rueckblick"
-            k = modell.Knowledge(conn, archive)
+            root = Path(args.db).parent / ("vorhersagen_rueckblick_zeitpunktgenau" if args.zeitpunktgenau else "vorhersagen_rueckblick")
+            k = modell.Knowledge(conn, archive, args.zeitpunktgenau)
             n = modell.simulate(k, methods, modell.TEST_START, k.latest, root)
             print(f"Rückblick: {n} Tagesprotokolle 2026 mit den geprüften Parametern nach {root}")
             result = modell.bewerten(conn, root, modell.TEST_START)
@@ -413,12 +413,16 @@ def main(argv: list[str] | None = None) -> int:
     mo.add_argument("--db", default=db_default)
     mo.add_argument("--json", metavar="DATEI", help="Ergebnis zusätzlich als JSON schreiben")
     mo.add_argument("--einfrieren", action="store_true", help="eingefrorene Fassung schreiben (nur vor der prospektiven Prüfung)")
+    mo.add_argument("--zeitpunktgenau", action="store_true",
+                    help="BASG-Meldungen erst ab Veröffentlichung, ASP-Fassung erst ab Erfassung (Standard: wie eingefroren)")
     mo.set_defaults(func=cmd_modell)
 
     bw = sub.add_parser("bewertung", help="Vorhersageprotokoll bewerten (ab Beginn des Prüfplans); --rueckblick: simuliertes Protokoll 2026")
     bw.add_argument("--db", default=db_default)
     bw.add_argument("--von", metavar="JJJJ-MM-TT", help="Beginn (Standard: Beginn des Prüfplans, nur Zeilen dieses Plans)")
     bw.add_argument("--rueckblick", action="store_true", help="2026 mit den geprüften Parametern simulieren und bewerten")
+    bw.add_argument("--zeitpunktgenau", action="store_true",
+                    help="nur mit --rueckblick: Fälle und Merkmale zeitpunktgenau wie bei stockout modell --zeitpunktgenau")
     bw.add_argument("--json", metavar="DATEI", help="Ergebnis zusätzlich als JSON schreiben")
     bw.set_defaults(func=cmd_bewertung)
 

@@ -35,29 +35,29 @@ Die editierbare Installation ist nötig, weil `modell.MODELS` den Ordner `models
 
 ## Tests
 
-**Befehl und Ergebnis** (11.11.2026, öffentliche Fassung ohne `data/`, also wie in einem frischen Klon):
+**Befehl und Ergebnis** (16.11.2026, öffentliche Fassung ohne `data/`, also wie in einem frischen Klon):
 
 ```text
 $ .venv/bin/python -m pytest -q
-....................................................................ssss [ 97%]
-ss                                                                       [100%]
-68 passed, 6 skipped in 0.75s
+.......................................................................s [ 92%]
+ssssss                                                                   [100%]
+71 passed, 7 skipped in 2.34s
 ```
 
-Die 6 übersprungenen Tests sind die Website-Tests, die eine echte Datenbank mit Auslands- und ASP-Daten brauchen. In der Referenzinstanz mit echter Datenbank liefen am 10.11.2026 alle Tests des damaligen Stands durch (72 bestanden). CI (`.github/workflows/ci.yml`) führt bei jedem Push und Pull Request `pip install -e ".[dev]"` und `pytest -q` mit Python 3.12 aus.
+Die 7 übersprungenen Tests sind die Website-Tests, die eine echte Datenbank mit Auslands- und ASP-Daten brauchen. In der Referenzinstanz mit echter Datenbank liefen am 10.11.2026 alle Tests des damaligen Stands durch (72 bestanden). CI (`.github/workflows/ci.yml`) führt bei jedem Push und Pull Request `pip install -e ".[dev]"` und `pytest -q` mit Python 3.12 aus.
 
 | Datei | Tests | Was geprüft wird |
 |---|---:|---|
-| `tests/test_archive.py` | 16 | Abruf mit Dubletten und Fehlversuchen, JSONL-Seiten, fehlendes `producedOn`, Wartungsseite (Wiederholung, nicht als Erfolg), EudraGMDP-Sitzung, Kennungen, 20-h-Sperre, Kopie und Prüfsummen, fehlendes Laufwerk, leere Einstellung bedeutet keine Kopie, fehlende BASG-Tage, EKO-Abendlauf, Nachholabruf, Alarmregel 36 h, keine Abrufe der Quellen, die nur die Referenzinstanz nutzt, User-Agent mit Kontakt nur bei gesetztem `STOCKOUT_CONTACT`, `import-legacy` ohne Datenpaket mit klarer Meldung |
+| `tests/test_archive.py` | 17 | Abruf mit Dubletten und Fehlversuchen, JSONL-Seiten, fehlendes `producedOn`, Wartungsseite (Wiederholung, nicht als Erfolg), veraltete Abrufe (nicht in der Datenbank, neuer als Fehlabruf), EudraGMDP-Sitzung, Kennungen, 20-h-Sperre, Kopie und Prüfsummen, fehlendes Laufwerk, leere Einstellung bedeutet keine Kopie, fehlende BASG-Tage, EKO-Abendlauf, Nachholabruf, Alarmregel 36 h, keine Abrufe der Quellen, die nur die Referenzinstanz nutzt, User-Agent mit Kontakt nur bei gesetztem `STOCKOUT_CONTACT`, `import-legacy` ohne Datenpaket mit klarer Meldung |
 | `tests/test_build.py` | 8 | Episodenregeln (Beginn, Verschiebung, Ende durch Status, Verschwinden als Intervall, abgeschnittene Schnappschüsse, Neumeldung, § 4 (1), Vorankündigung), Wirkstoff-Normalisierung, toleranter Parser, deterministischer Aufbau, überfällig |
 | `tests/test_foreign.py` | 12 | Hilfsfunktionen, BfArM (PZN gruppiert, keine Kontaktspalten), Zusammenführen über Dateien, Ereignisprotokolle CZ/SK/SI, CIMA-JSONL, AIFA, konservative ATC-Ableitung, Vorlauf und Länderkombinationen, FDA |
 | `tests/test_fruehwarnung.py` | 6 | Registerhinweise (Inhaberwechsel, andere Inhaber), Stufen, § 21-Erstsichtung, Konzernschlüssel, Hilfen von `schaerfe` |
 | `tests/test_gmp_ansm.py` | 3 | ANSM-Zeilen, Wirkstoffname → alle ATC-Codes, CEP- und NCR-Zuordnung |
-| `tests/test_modell.py` | 4 | Merkmale nur aus Daten vor dem Stichtag, Ridge-Fit, Einfrieren/Prüfplan/Protokoll als Rundlauf (inkl. Sperre ab 01.01.2027), Kennzahlen und Vorlauf |
+| `tests/test_modell.py` | 6 | Merkmale nur aus Daten vor dem Stichtag, Ridge-Fit, Einfrieren/Prüfplan/Protokoll als Rundlauf (inkl. Sperre ab 01.01.2027), Kennzahlen und Vorlauf, Schalter `zeitpunktgenau` (rückdatierte Meldung, spät erfasste ASP-Fassung) |
 | `tests/test_polen.py` | 3 | Tabellenzeilen aus PDF-Koordinaten, lateinische Wirkstoffnamen, Listungen über Ausgaben |
 | `tests/test_registers.py` | 3 | SÚKL-DLP, CIMA-Antworten und Füllregel, Parser für archivierte Fimea-Registerdateien |
 | `tests/test_rueckblick.py` | 12 | Ereignisfälle, Vergleich innerhalb von Schichten, Wellenstatus, MIA-Ereignisse, Marktaustritte, ASP FHIR = SVS, EKO-Parser und -Namensabgleich, EKO-Zeitfenster, 90-Tage-Regel, Verteilung des Nachladens, Wiederholung bei Serverfehler |
-| `tests/test_site.py` | 7 | Kürzel; auf der echten Datenbank: Regionen je Seite, Links ohne externe Ressourcen, keine Telefonnummern, Überfällig und Suchindex, BfArM ausgeblendet, Registerhinweise |
+| `tests/test_site.py` | 8 | Kürzel; auf der echten Datenbank: Regionen je Seite, Links ohne externe Ressourcen, keine Telefonnummern, Überfällig und Suchindex, BfArM ausgeblendet, Registerhinweise, Regeln der Website (Name, Hinweis für Fachkreise, ohne Fimea und Inhaberwechsel) |
 
 **Aufbau:** Netzwerkzugriffe werden ersetzt, nicht ausgeführt: `fetch_source` und `fetch_all` nehmen `opener` und `sleep`, `eko.sync` nimmt `get`, `sleep`, `now`, `rand`, `legacy` und `registers` nehmen `get`. Archive entstehen in `tmp_path`; Beispieldaten stehen klein im Testcode (z. B. `BASG`, `opener_for` in `tests/test_archive.py`).
 
@@ -115,7 +115,7 @@ Neues Verfahren in `modell.METHODS` eintragen (Art `logit`, `stufen` oder `mitte
 - Die öffentliche Fassung ruft einige Quellen der Referenzinstanz nicht ab; Merkmale und Frühwarnstufen weichen deshalb ab ([DATENQUELLEN.md](DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz)).
 
 **Veröffentlichung**
-- Website-Titel und systemd-Beschreibungen tragen noch den Arbeitstitel „Stockout Forecaster AT“; Impressum und Datenschutz haben Platzhalter.
+- Die systemd-Beschreibungen tragen noch den Arbeitstitel „Stockout Forecaster AT“; Impressum und Datenschutz haben Platzhalter.
 - Ein eigenes `data/` darf nicht veröffentlicht werden: Die Datenbank enthält die BASG-Telefonspalte und das Archiv BfArM-Rohdaten.
 - Die Website ist groß (in der Referenzinstanz 149 MB, eine Seite je Packung); für das Hosting zu bedenken.
 

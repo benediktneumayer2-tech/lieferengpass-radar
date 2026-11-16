@@ -179,5 +179,5 @@ The detailed documentation is in German: [overview](documentation/PROJECT_OVERVI
 ## Licence and contact
 
 - **Licence:** code under Apache-2.0 ([LICENSE](LICENSE)); own texts and derived data (analyses) under CC BY 4.0; data from the sources under each source's own terms ([DATENQUELLEN.md](documentation/DATENQUELLEN.md)).
-- **Names:** the package `stockout_at`, the command `stockout` and the website title "Stockout Forecaster AT" date from the working phase.
+- **Names:** the package `stockout_at`, the command `stockout` and the working title "Stockout Forecaster AT" in the systemd descriptions date from the working phase; the website is titled "Lieferengpass-Radar".
 - **Contact:** [GitHub issues](https://github.com/benediktneumayer2-tech/lieferengpass-radar/issues).

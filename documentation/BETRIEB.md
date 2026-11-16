@@ -153,15 +153,15 @@ Abruf (wie `fetch`), Datenbank mit JSON-Export (Standard `<db-Ordner>/json`), R�
 stockout vorlauf    [--db DB] [--von JJJJ-MM-TT] [--bis JJJJ-MM-TT] [--json DATEI]   # Standard ab 2024-01-01
 stockout rueckblick [--db DB] [--von JJJJ-MM-TT] [--bis JJJJ-MM-TT] [--json DATEI]   # Standard ab 2022-01-01
 stockout schaerfe   [--db DB] [--json DATEI]
-stockout modell     [--db DB] [--json DATEI] [--einfrieren]
+stockout modell     [--db DB] [--json DATEI] [--einfrieren] [--zeitpunktgenau]
 ```
 
-Messungen auf der Datenbank (`rueckblick` und `modell` lesen auch das Archiv), Ausgabe als Text. Inhalt: [MODELL_UND_BEWERTUNG.md](MODELL_UND_BEWERTUNG.md). **`modell --einfrieren`** überschreibt `models/*.json` und `models/pruefplan.json` mit neuer sha256; danach schreibt der Tageslauf mit dem neuen Prüfplan. Ab 01.01.2027 verweigert der Code das Einfrieren. Vorher nur bewusst verwenden: Es ersetzt die veröffentlichten Modelle, danach stimmen `models/SHA256SUMS` und der Prüfplan-Hash `35a230a0a9bd` nicht mehr ([Vorab-Registrierung](MODELL_UND_BEWERTUNG.md#12-vorab-registrierung)).
+Messungen auf der Datenbank (`rueckblick` und `modell` lesen auch das Archiv), Ausgabe als Text. Inhalt: [MODELL_UND_BEWERTUNG.md](MODELL_UND_BEWERTUNG.md). **`modell --einfrieren`** überschreibt `models/*.json` und `models/pruefplan.json` mit neuer sha256; danach schreibt der Tageslauf mit dem neuen Prüfplan. Ab 01.01.2027 verweigert der Code das Einfrieren. Vorher nur bewusst verwenden: Es ersetzt die veröffentlichten Modelle, danach stimmen `models/SHA256SUMS` und der Prüfplan-Hash `35a230a0a9bd` nicht mehr ([Vorab-Registrierung](MODELL_UND_BEWERTUNG.md#12-vorab-registrierung)). **`--zeitpunktgenau`** lernt und prüft mit BASG-Meldungen erst ab Veröffentlichung und der ASP-Fassung erst ab Erfassung (Standard: wie eingefroren; [MODELL_UND_BEWERTUNG.md](MODELL_UND_BEWERTUNG.md#9-z3-verfahren)).
 
 ### `bewertung`
 
 ```text
-stockout bewertung [--db DB] [--von JJJJ-MM-TT] [--rueckblick] [--json DATEI]
+stockout bewertung [--db DB] [--von JJJJ-MM-TT] [--rueckblick [--zeitpunktgenau]] [--json DATEI]
 ```
 
 Bewertet das Vorhersageprotokoll; Varianten und Kennzahlen in [MODELL_UND_BEWERTUNG.md](MODELL_UND_BEWERTUNG.md#11-bewertung-stockout-bewertung). Vor dem 26.02.2027 gibt es keine 8-Wochen-Fälle des Prüfplans. Für diese Dokumentation nicht ausgeführt.
@@ -203,7 +203,7 @@ Beobachtet in der Referenzinstanz am 10.11.2026 (`systemctl --user list-timers '
 - **FEHLER**, wenn die Quelle `basg` ist, wenn sie noch nie erfolgreich war oder wenn ihr letzter Erfolg mehr als 36 Stunden zurückliegt (`status.STALE_HOURS`);
 - sonst **WARNUNG** mit dem Alter des letzten Erfolgs, z. B. `WARNUNG ogyei: … (letzter Erfolg vor 12 h, FEHLER erst nach 36 h)`.
 
-Als Erfolg zählt ein Live-Abruf, der die Formatprüfung bestanden hat. FEHLER entsteht außerdem bei einem gescheiterten EKO-Dokument, einem Fehler im CIMA-Register und einer gescheiterten Kopie. Jeder FEHLER führt zu Exit-Code 1, und die systemd-Unit gilt dann als `failed`. Eine WARNUNG allein lässt den Lauf erfolgreich enden.
+Als Erfolg zählt ein Live-Abruf, der die Formatprüfung bestanden hat. Seit 16.11.2026 scheitert auch eine veraltete Antwort: neue Bytes mit einem Last-Modified, das älter ist als das eines früheren Live-Abrufs derselben Quelle (`archive._stale`, Meldung `Formatprüfung: veraltete Fassung: …`). Sie wird wiederholt und dann als Fehlabruf mit aufbewahrter Antwort vermerkt; Nachholabruf und Alarmregel greifen wie bei einer Wartungsseite. Eine Quelle, die dauerhaft eine ältere Fassung liefert, wird so nach 36 h zum FEHLER. Quellen ohne Last-Modified (BASG) und Antworten mit schon genutzten Bytes sind nicht betroffen. FEHLER entsteht außerdem bei einem gescheiterten EKO-Dokument, einem Fehler im CIMA-Register und einer gescheiterten Kopie. Jeder FEHLER führt zu Exit-Code 1, und die systemd-Unit gilt dann als `failed`. Eine WARNUNG allein lässt den Lauf erfolgreich enden.
 
 **Benachrichtigung:** Der Code verschickt keine Nachrichten. Probleme sieht man über
 
@@ -237,7 +237,7 @@ Die Kopie ist optional und standardmäßig aus. Ist `STOCKOUT_MIRROR` bzw. `--mi
 
 ## Wenn eine Quelle Format oder Adresse ändert
 
-1. **Erkennen:** Im Journal erscheinen `WARNUNG` bzw. nach 36 h `FEHLER <quelle>` mit `HTTP …`, `URLError …` oder `Formatprüfung: …` und dem Pfad der aufbewahrten Antwort („Antwort aufbewahrt: …“). `stockout status` zeigt Fehlversuche und nach 36 h eine Warnung. Ein Parser, der an einer *bestandenen* Datei scheitert, meldet sich nicht; Anzeichen sind ausbleibende neue Meldungen der Quelle (`foreign_items.last_seen`, `still_listed`).
+1. **Erkennen:** Im Journal erscheinen `WARNUNG` bzw. nach 36 h `FEHLER <quelle>` mit `HTTP …`, `URLError …` oder `Formatprüfung: …` (auch `veraltete Fassung`) und dem Pfad der aufbewahrten Antwort („Antwort aufbewahrt: …“). `stockout status` zeigt Fehlversuche und nach 36 h eine Warnung. Ein Parser, der an einer *bestandenen* Datei scheitert, meldet sich nicht; Anzeichen sind ausbleibende neue Meldungen der Quelle (`foreign_items.last_seen`, `still_listed`).
 2. **Ansehen:** aufbewahrte Antwort lesen, z. B. `zcat data/archive/<pfad>.gz | head`; Manifest-Einträge der Quelle in `data/archive/manifest.jsonl` prüfen.
 3. **Adresse geändert:** URL in `archive.SOURCES` anpassen; bei Quellen mit eigener Abruffunktion auch dort (`_get_sukl_dlp`, `_get_pl_mz`, `_get_eudragmdp`). Beispiel: der SÚKL-Domainwechsel im Oktober 2026 ([DATENQUELLEN.md](DATENQUELLEN.md#tschechien-súkl)).
 4. **Format geändert:** Parser anpassen (`foreign.parse_<quelle>`, `registers.parse_*`, `gmp.parse_*`, `eko.parse`, `asp.parse`, `basg.parse`). Alte Dateien bleiben im Archiv; der Parser muss deshalb **beide** Formate lesen, weil `build` alles neu einliest. Bei Bedarf Kennung (`expect`) oder Prüfregel in `archive._check` anpassen.

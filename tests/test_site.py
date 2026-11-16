@@ -62,7 +62,7 @@ def test_links_resolve_and_no_external_assets(site):
         html = page.read_text(encoding="utf-8")
         assert not re.search(r'(?:src|<link[^>]*href)="(?:https?:)?//', html), page
         for link in LINK.findall(html):
-            if link.startswith(("http://", "https://", "#", "data:")):
+            if link.startswith(("http://", "https://", "#", "data:", "mailto:")):
                 continue
             path = link.split("#")[0].split("?")[0]
             target = posixpath.normpath(posixpath.join(rel_dir, path))
@@ -114,10 +114,20 @@ def test_register_hints_list_marketed_unreported_products(site):
     conn = sqlite3.connect(DB)
     reported = {r[0] for r in conn.execute("SELECT DISTINCT atc5 FROM episodes WHERE active = 1 AND atc5 IS NOT NULL")}
     conn.close()
-    if 'id="holder-change-table"' in html:  # only with archived holder announcements (not fetched by this code)
-        changes = html.split('id="holder-change-table"')[1].split("</table>")[0]
-        assert not set(re.findall(r'ATC <span class="num">([A-Z0-9]{7})</span>', changes)) & reported
+    assert 'id="holder-changes"' not in html  # public rules: no holder-change hint (MIA) on the site
     others = html.split('id="other-holder-table"')[1].split("</table>")[0]
     listed = set(re.findall(r'ATC <span class="num">([A-Z0-9]{7})</span>', others))
     assert listed and listed <= reported
 
+
+def test_public_rules(site):
+    """Website shows only cleared sources under the display name, with the audience notice and disclaimers."""
+    for page in site.rglob("*.html"):
+        html = page.read_text(encoding="utf-8")
+        assert "Stockout Forecaster" not in html and "Fimea" not in html and "Finnland" not in html, page
+        assert 'id="audience"' in html and "kein Angebot des BASG" in html, page
+    index = (site / "index.html").read_text(encoding="utf-8")
+    assert "<title>" in index and "Lieferengpass-Radar</title>" in index
+    early = (site / "fruehwarnung" / "index.html").read_text(encoding="utf-8")
+    assert "Keine Prognose, keine Bestellempfehlung" in early and "Verlautbarungsregister" not in early
+    assert "Verlautbarungsregister" not in (site / "methodik" / "index.html").read_text(encoding="utf-8")

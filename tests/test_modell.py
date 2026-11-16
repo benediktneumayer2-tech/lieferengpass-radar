@@ -92,3 +92,48 @@ def test_scores_and_lead_time():
     r = modell.lead_and_churn(logs, {"B": [D("2027-01-06")]}, h=3, k=1)["m"]
     assert (r["meldungen"], r["auf_der_liste"], r["seit_tagen_median"], r["irgendwann_in_8_wochen"]) == (1, 1.0, 3, 1.0)  # on the list since day 3, three days before the report
     assert r["wechsel_je_tag"] == 0.25  # one change in four day pairs
+
+
+def test_backdated_report_counts_from_publication_only_with_the_switch():
+    """BASG report starting 01.03.2026, first seen 20.03.2026 (the snapshot of 19.03. was complete without it)."""
+    from stockout_at.rueckblick import AspHistory
+    s, fs, e = D("2026-03-01"), D("2026-03-20"), D("2026-04-30")
+    pub = modell.published(s, fs, D("2026-03-01"), [D("2026-02-01"), D("2026-03-19")])
+    assert pub == fs and modell.published(s, fs, D("2026-03-01"), [D("2026-02-01")]) == D("2026-03-02")  # gap: estimate
+    k = _knowledge([], [("J01CA04", s, e)])
+    k.hist, k._version, k.latest = AspHistory([(D("2026-01-01"), {"1-1": (True, "J01CA04", "SANDOZ")})]), None, D("2026-10-01")
+    at, t = {"n": 1, "holders": set()}, D("2026-03-10")
+    assert k.features("J01CA04", t, at) is None and modell.table(k, t, t) == []  # frozen: reported, no case
+    assert modell.table(k, D("2026-02-20"), D("2026-02-20"))[0]["y"] == {28: True, 56: True, 84: True}
+
+    k.pit = {"J01CA04": [(s, pub, e)]}
+    assert set(k.features("J01CA04", t, at)) == {"groesse_1", "atc_J", "quartal_1"}  # a case, not in the history
+    [row] = modell.table(k, t, t)
+    assert row["y"] == {28: True, 56: True, 84: True}  # first appears on 20.03.: a hit
+    assert k.features("J01CA04", D("2026-03-20"), at) is None  # published: reported
+    assert "engpass_365" in k.features("J01CA04", D("2026-06-01"), at)
+
+
+def test_asp_version_counts_from_its_capture_only_with_the_switch(tmp_path):
+    """ASP version dated 22.10.2026 but first fetched on 30.10.2026 (as in the archive)."""
+    import json
+    from stockout_at.archive import Archive
+    from stockout_at.rueckblick import AspHistory
+
+    def version(day, lieferbar):
+        props = [{"code": "ZulassungsNummer", "valueString": "1.2.40.0.34.4.17:13905"},
+                 {"code": "ELGA_Gültigkeit", "valueString": "true"},
+                 {"code": "ELGA_MedikationPackungsstatusLieferbar", "valueString": lieferbar},
+                 {"code": "ELGA_whoATC_01_code", "valueString": "2.16.840.1.113883.6.73:C05BB02"}]
+        return json.dumps({"resourceType": "CodeSystem", "date": day, "concept": [{"code": "1", "property": props}]}).encode()
+
+    archive = Archive(tmp_path / "a")
+    for day, fetched, lieferbar in (("2026-10-07", "2026-10-19T09:31:15Z", "true"), ("2026-10-22", "2026-10-30T17:23:39Z", "false")):
+        archive.store("asp", version(day, lieferbar), ext="json", stamp=day, meta={"origin": "live", "fetched_at": fetched})
+    hist = AspHistory.load(archive)
+    assert hist.captured == {D("2026-10-07"): D("2026-10-19"), D("2026-10-22"): D("2026-10-30")}
+    k = modell.Knowledge.__new__(modell.Knowledge)
+    k.hist, k._version = hist, None
+    assert [bool(k.marketed(D(d))) for d in ("2026-10-23", "2026-10-29", "2026-10-30")] == [False, False, False]
+    k.pit = {}  # switch on (no BASG reports needed here)
+    assert [bool(k.marketed(D(d))) for d in ("2026-10-23", "2026-10-29", "2026-10-30", "2026-10-31")] == [True, True, False, False]

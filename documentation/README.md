@@ -24,7 +24,7 @@ Lieferengpass-Radar ist ein Frühwarnwerkzeug für Arzneimittel-Lieferengpässe 
 | GitHub-Repository | `lieferengpass-radar` (<https://github.com/benediktneumayer2-tech/lieferengpass-radar>) |
 | Anzeigename | Lieferengpass-Radar |
 | User-Agent beim Abruf | `LieferengpassRadar/0.1` ([DATENQUELLEN.md](DATENQUELLEN.md#2-gemeinsame-regeln-beim-abruf)) |
-| Arbeitstitel im Code | „Stockout Forecaster AT“ (Website-Titel `site.SITE_TITLE`, systemd-Beschreibungen) |
+| Arbeitstitel im Code | „Stockout Forecaster AT“ (systemd-Beschreibungen); die Website heißt „Lieferengpass-Radar“ (`site.SITE_TITLE`) |
 | Python-Distribution | `stockout-at` 0.1.0 (`pyproject.toml`) |
 | Python-Paket | `stockout_at` (`src/stockout_at/`) |
 | Kommandozeile | `stockout` (`.venv/bin/stockout`, Einstieg `stockout_at.cli:main`) |

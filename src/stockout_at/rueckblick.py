@@ -41,7 +41,7 @@ from pathlib import Path
 from . import asp
 from .archive import Archive
 from .build import _unique_files
-from .foreign import _ascii, holder_key
+from .foreign import _ascii, file_day, holder_key
 from .substances import atc_groups
 from .vorlauf import HORIZONS, Intervals, _base_rates, _d, _signals, _wilson
 
@@ -141,11 +141,14 @@ def _csv(body: bytes, delimiter: str = ",") -> list[dict]:
 
 
 class AspHistory:
-    """Marketed ("lieferbar") products per ASP version: zulassungsnummer -> (marketed, atc5, holder)."""
+    """Marketed ("lieferbar") products per ASP version: zulassungsnummer -> (marketed, atc5, holder).
+    `captured`: version day -> day of its first capture (TermGit captured_at, live the first fetch)."""
 
-    def __init__(self, versions: list[tuple[date, dict[str, tuple[bool, str | None, str | None]]]]):
+    def __init__(self, versions: list[tuple[date, dict[str, tuple[bool, str | None, str | None]]]],
+                 captured: dict[date, date] | None = None):
         self.versions = sorted(versions, key=lambda v: v[0])
         self.days = [d for d, _ in self.versions]
+        self.captured = captured or {}
         self.atc = {}
         for _, prods in self.versions:
             for zl, (_, atc5, _) in prods.items():
@@ -154,12 +157,13 @@ class AspHistory:
 
     @classmethod
     def load(cls, archive: Archive) -> "AspHistory":
-        versions, seen = [], set()
+        versions, seen, captured = [], set(), {}
         for e in _unique_files(archive, "asp"):
             day = date.fromisoformat(Path(e["path"]).name[:10])
             if day in seen:
                 continue
             seen.add(day)
+            captured[day] = date.fromisoformat(file_day(e))
             with gzip.open(archive.root / e["path"]) as fh:
                 _, rows = asp.parse(fh)
             prods: dict[str, tuple[bool, str | None, str | None]] = {}
@@ -170,10 +174,17 @@ class AspHistory:
                 old = prods.get(zl)
                 prods[zl] = (bool(r["lieferbar"]) or bool(old and old[0]), atc_groups(r["atc"])[0], holder_key(r["inhaber"]))
             versions.append((day, prods))
-        return cls(versions)
+        return cls(versions, captured)
 
     def before(self, d: date) -> dict | None:
         i = bisect.bisect_left(self.days, d) - 1
+        return self.versions[i][1] if i >= 0 else None
+
+    def known_before(self, d: date) -> dict | None:
+        """The newest version dated before d that was captured by day d (point in time; `before` ignores capture)."""
+        i = bisect.bisect_left(self.days, d) - 1
+        while i >= 0 and self.captured.get(self.days[i], self.days[i]) > d:
+            i -= 1
         return self.versions[i][1] if i >= 0 else None
 
     def marketed_holders(self, prods: dict, atc5: str, exclude: set[str]) -> set[str]:

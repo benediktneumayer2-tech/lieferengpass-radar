@@ -23,12 +23,16 @@ from . import basg, fruehwarnung, metrics, status as archive_status
 from .archive import Archive
 from .timeline import Ep, d, de, events, mini_svg, status_class, timeline_svg
 
-SITE_TITLE = "Stockout Forecaster AT"  # working title: the only place the name is defined
+SITE_TITLE = "Lieferengpass-Radar"  # display name on the website; the code keeps its working title "Stockout Forecaster AT"
 WEB = Path(__file__).parent / "web"
 STALE_HOURS = archive_status.STALE_HOURS
 STATUS_ORDER = ("Nicht verfügbar", "eingeschränkt verfügbar", "verfügbar gemäß §4 (1)", "verfügbar")
 HIDDEN_FIELDS = {"Zulassungsinhaber_Tel"}  # never published
-HIDDEN_SOURCES = frozenset({"bfarm", "fimea"})  # not shown: BfArM only after written consent; Fimea is not fetched here
+HIDDEN_SOURCES = frozenset({"bfarm"})  # foreign sources not shown (BfArM: only after written consent)
+# Public website rules (public repo, documentation/DATENQUELLEN.md § 4), for the site only: HIDDEN_SOURCES and the register
+# hints also feed the feature and prediction log (merkmale), which stays unchanged until the Go/No-Go on 30.04.2027.
+SITE_HIDDEN_SOURCES = HIDDEN_SOURCES | {"fimea"}  # Fimea: until Fimea confirms the use
+SITE_HOLDER_CHANGES = False  # register hint from the BASG announcements (MIA, mia_verl): until the BASG permits the use
 FIELD_LABELS = {
     "PZN": "PZN",
     "Zulassungsnummer": "Zulassungsnummer",
@@ -316,8 +320,9 @@ def generate(db_path: Path, out_dir: Path, ref: date | None = None, archive: Arc
     try:
         data = Data(conn, ref)
         subs = _substances(data)
-        fw = fruehwarnung.build(conn, HIDDEN_SOURCES, _substance_paths(subs), archive,
+        fw = fruehwarnung.build(conn, SITE_HIDDEN_SOURCES, _substance_paths(subs), archive,
                                 Path(db_path).parent / "json" / "rueckblick.json", data.ref)
+        fw["register"]["holder_data"] = SITE_HOLDER_CHANGES
         links = _links(conn, set(data.by_pzn))
     finally:
         conn.close()
@@ -391,7 +396,8 @@ def generate(db_path: Path, out_dir: Path, ref: date | None = None, archive: Arc
         write("fruehwarnung", "fruehwarnung.html", "liste", fw=fw)
         write("woche", "week.html", "liste", week=week)
         write("methodik", "method.html", "text", coverage=coverage, snapshots=data.snapshots, n_complete=sum(s["complete"] for s in data.snapshots),
-              fw=fw, foreign_sources=[(c, title, fruehwarnung.source_url(key), terms) for c, title, key, terms in FOREIGN_SOURCES])
+              fw=fw, foreign_sources=[(c, title, fruehwarnung.source_url(key), terms) for c, title, key, terms in FOREIGN_SOURCES
+                                               if key not in SITE_HIDDEN_SOURCES])
         write("impressum", "impressum.html", "text")
         write("datenschutz", "datenschutz.html", "text")
         index = {

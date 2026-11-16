@@ -66,7 +66,7 @@ Gemessene Zusatzwerte einzelner Länder (Rückblick der Referenzinstanz, 19./20.
 - **Kandidaten:** Wirkstoffe (ATC 5) mit mindestens einer lieferbaren ASP-Packung und ohne aktive BASG-Meldung, zu denen laufende Auslandsmeldungen existieren (ohne die Quellen in `site.HIDDEN_SOURCES`, also ohne BfArM).
 - **Stufe** nach Zahl der Länder (A/B/C wie oben). Ein Land allein wird nicht gelistet. Derselbe Inhaber im Ausland wird angezeigt, bestimmt die Stufe aber nicht (Ergebnis von `schaerfe`, Abschnitt 6).
 - **Trefferquote je Stufe:** aus `vorlauf.measure` ohne BfArM, bei jedem Website-Aufbau neu berechnet.
-- **Registerhinweise:** (a) lieferbares Produkt nach einer Änderung beim Zulassungsinhaber in den letzten 56 Tagen (MIA-Verlautbarungen; entfällt in der öffentlichen Fassung ohne archivierte Verlautbarungen, [Unterschiede](DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz)), Wirkstoff nicht gemeldet; (b) gemeldeter Wirkstoff mit noch lieferbaren Produkten anderer Inhaber. Ihre Quoten kommen aus `rueckblick.json`.
+- **Registerhinweise:** (a) lieferbares Produkt nach einer Änderung beim Zulassungsinhaber in den letzten 56 Tagen (MIA-Verlautbarungen; entfällt in der öffentlichen Fassung ohne archivierte Verlautbarungen und ist auf der Website ausgeblendet, `site.SITE_HOLDER_CHANGES`, [Unterschiede](DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz)), Wirkstoff nicht gemeldet; (b) gemeldeter Wirkstoff mit noch lieferbaren Produkten anderer Inhaber. Ihre Quoten kommen aus `rueckblick.json`.
 
 **Beobachtet auf der am 10.11.2026 erzeugten Website der Referenzinstanz** (Rückblick 01.01.2024 bis 10.11.2026): Stufe A 96 Wirkstoffe, BASG-Meldung binnen 8 Wochen bisher 18,4 % [15,5–21,7 %]; Stufe B 181, 10,7 %; Stufe C 173, 8,1 %; Vergleich (Wirkstoffe mit früherem Engpass, ohne Auslandsblick) 6,8 %. 269 Wirkstoffe mit nur einem meldenden Land (4,1 %) sind nicht gelistet. Diese Zahlen ändern sich täglich.
 
@@ -120,6 +120,8 @@ Ohne die zusätzlichen Quellen der Referenzinstanz bleiben `inhaberwechsel_*`, `
 **Frage:** Wie wahrscheinlich bekommt ein Wirkstoff (ATC 5), der laut ASP-Liste lieferbar ist und keine aktive BASG-Meldung hat, binnen 4, 8 oder 12 Wochen eine neue BASG-Meldung?
 
 **Fall:** Wirkstoff an einem Stichtag. Zum Universum gehört ein Wirkstoff, wenn er in der ASP-Fassung *vor* dem Stichtag mindestens ein lieferbares Produkt hat und am Stichtag keine aktive Meldung (`modell.Knowledge.marketed`, `features`).
+
+**Zeitpunktgenau (Schalter seit 16.11.2026, Standard aus = wie eingefroren):** `Knowledge(..., zeitpunktgenau=True)`, `stockout modell --zeitpunktgenau` und `stockout bewertung --rueckblick --zeitpunktgenau`. Eine BASG-Meldung gilt erst ab ihrer Veröffentlichung als bekannt (`modell.published`: im täglichen Archiv die erste Sichtung, in den Lücken davor eine Schätzung). Das gilt für die Fallauswahl, die Vorgeschichte und das Ziel; das Ziel zählt wie im Prüfplan, wenn eine Meldung in (t, t+h] beginnt oder erstmals erscheint. Die ASP-Fassung zählt erst ab dem Tag ihrer ersten Erfassung (`AspHistory.known_before`; die Fassung vom 22.10.2026 kam am 30.10.2026). Der tägliche Pfad nutzt den Schalter nicht: Am Tag selbst kennt die Datenbank ohnehin nur Veröffentlichtes und schon Erfasstes. Fälle, Ziele und Vorgeschichte stimmen auf dem 14-Tage-Raster 2024–2026 mit dem Panel der Modellsuche vom November 2026 überein (nicht Teil der öffentlichen Fassung; geprüft am 16.11.2026); abweichen können nur Tage mit spät erfasster ASP-Fassung, weil das Panel sie nach Datum wählt.
 
 **Merkmale** (`modell.FEATURES`, alle binär, nur aus Daten vor dem Stichtag; Test `test_features_only_before_the_day`):
 
@@ -175,6 +177,7 @@ Vorhersagen gelten für den letzten BASG-Stand; der Dateiname ist der Kalenderta
 | `stockout bewertung` | gültige Bewertung ab Beginn des Prüfplans (01.01.2027), nur Zeilen mit dessen sha256 |
 | `stockout bewertung --von JJJJ-MM-TT` | Bewertung ab einem frei gewählten Tag, **ohne** Filter auf den Prüfplan; nur für informelle Blicke |
 | `stockout bewertung --rueckblick` | schreibt ein simuliertes Protokoll für jeden Tag 2026 mit den geprüften Parametern nach `data/derived/vorhersagen_rueckblick/` und bewertet es (Probelauf) |
+| `stockout bewertung --rueckblick --zeitpunktgenau` | derselbe Probelauf mit zeitpunktgenauen Fällen und Merkmalen (Abschnitt 9) nach `data/derived/vorhersagen_rueckblick_zeitpunktgenau/` |
 | `--json DATEI` | Ergebnis zusätzlich als JSON |
 
 Ausgegeben werden je Horizont: Zahl der Fälle, Stichtage und Meldungen; je Verfahren Brier-Score und Skill gegenüber `stufen_v0`, AUC, Average Precision, Kalibrierung (Achsenabschnitt/Steigung, Zehntel), Top 25/50/100 je Stichtag; für 8 Wochen der Hauptvergleich mit Bootstrap-Intervallen über ganze Wirkstoffe (500 Ziehungen) und die Menge der besten Verfahren; dazu Vorlauf und Listenstabilität der Top 50 (`modell.lead_and_churn`). Ohne eingefrorenen Prüfplan endet der Befehl mit Exit-Code 1.
@@ -276,6 +279,7 @@ Quelle: [Prüfbericht Z3 v0](../reports/Z3%20v0%20Pr%C3%BCfbericht.md), Stand 21
 - **BfArM bringt im Rückblick nichts dazu.**
 - **Probelauf** (`bewertung --rueckblick`, 178 neue Meldungen 2026): Am Tag vor der Meldung stand der Wirkstoff bei `z3_v0` in 25 % [20–32 %] der Fälle unter den 50 höchsten (Median seit 59 Tagen, irgendwann in den 8 Wochen davor 37 %, Wechsel der Top 50 je Tag 2,3 %); `z3_v0_ohne_ausland` 26 %; `stufen_v0` 16 %.
 - Korrektur vom 21.10.2026 laut Bericht: In der ersten Fassung flossen Stichtage aus 2026 in die Wahl der Ridge-Stärke ein; ohne sie änderte sich nur das 4-Wochen-Modell.
+- Nachtrag vom 16.11.2026 („Änderungen nach dem Einfrieren“ im Bericht): Ganz zeitpunktgenau nachgerechnet liegt die AUC bei 0,813 für `z3_v0` und 0,715 für `stufen_v0`; die Zahlen sind nicht wesentlich zu günstig. Mit dem Ziel des Prüfplans („beginnt oder erscheint erstmals“) gibt es rund 12 % mehr Treffer, der Brier liegt bei etwa 0,030 und die Top-50-Quote bei etwa 21–22 %. Prospektive Zahlen 2027 sind mit diesem Niveau zu vergleichen, nicht mit 0,02742.
 
 ## 14. Was geprüft ist und was nicht
 
@@ -291,4 +295,4 @@ Quelle: [Prüfbericht Z3 v0](../reports/Z3%20v0%20Pr%C3%BCfbericht.md), Stand 21
 - **Anzeige** einer Prognose auf der Website ist geplant, aber erst nach bestandener Prüfung und guter Kalibrierung; heute zeigt die Packungsseite „Noch keine Prognose“.
 - Der Nutzen für Fachleute ist nicht geprüft; geplant sind Gespräche mit der Zielgruppe.
 
-**Achtung bei Änderungen (Ableitung aus dem Code):** Die eingefrorenen Verfahren speichern nur Gewichte. Ihre Merkmale werden täglich aus der aktuellen Datenbank berechnet (`modell.Knowledge` nutzt alle `foreign_items` außer den in `ohne_quellen` genannten). Eine neue Auslandsquelle, ein geänderter Parser oder eine geänderte ATC-Ableitung ändert deshalb die Eingaben von `z3_v0` und `stufen_v0` während der prospektiven Prüfung. Deshalb ändert die Referenzinstanz Quellen und Parser bis zum Go/No-Go am 30.04.2027 nur, wenn eine Quelle ihr Format ändert. Die Hashes in `models/` sichern nur die Gewichte, nicht diesen Code.
+**Achtung bei Änderungen (Ableitung aus dem Code):** Die eingefrorenen Verfahren speichern nur Gewichte. Ihre Merkmale werden täglich aus der aktuellen Datenbank berechnet (`modell.Knowledge` nutzt alle `foreign_items` außer den in `ohne_quellen` genannten). Eine neue Auslandsquelle, ein geänderter Parser oder eine geänderte ATC-Ableitung ändert deshalb die Eingaben von `z3_v0` und `stufen_v0` während der prospektiven Prüfung. Deshalb ändert die Referenzinstanz Quellen und Parser bis zum Go/No-Go am 30.04.2027 nur, wenn eine Quelle ihr Format ändert. Ausnahme seit 16.11.2026: Veraltete Abrufe gehen nicht mehr in die Datenbank; das ändert die Eingaben nur an Tagen, an denen eine Quelle eine alte Fassung liefert ([BETRIEB.md](BETRIEB.md), Alarmregel). Die Hashes in `models/` sichern nur die Gewichte, nicht diesen Code.

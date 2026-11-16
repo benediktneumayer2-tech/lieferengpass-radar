@@ -80,7 +80,7 @@ Hauptvergleich laut Prüfplan: `z3_v0` gegen die Stufenregel `stufen_v0` nach 8 
 | Tagesarchiv | **läuft** in der Referenzinstanz seit 17.10.2026; BASG lückenlos (beobachtet 10.11.2026); 1.321 Dateien, 600 MB |
 | Quellen | **umgesetzt**: BASG, 12 Auslandslisten (DE nur intern, EU, IT, CZ, SK, HU, SI, BE, ES, US, FR, PL), ASP-Liste, EudraGMDP, Produktregister CZ/ES, EKO aus dem RIS, Infektionsdaten. Die Referenzinstanz archiviert einige mehr ([Unterschiede](DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz)). |
 | Datenbank, Episoden, Kennzahlen | **umgesetzt**; in der Referenzinstanz 53 BASG-Schnappschüsse seit 2021, 5.503 Episoden |
-| Website | **umgesetzt, nur lokal**; 5.558 Seiten in der Referenzinstanz; Impressum und Datenschutz mit Platzhaltern; noch mit Arbeitstitel |
+| Website | **umgesetzt, nur lokal**; 5.558 Seiten in der Referenzinstanz; Impressum und Datenschutz mit Platzhaltern |
 | Frühwarnliste | **umgesetzt** als Hinweis nach Länderzahl (A 5+, B 3–4, C 2 Länder) mit bisheriger Trefferquote |
 | Z3-Verfahren | **umgesetzt und eingefroren**; Vorhersagen nur im Protokoll, nicht auf der Website |
 | Prospektive Prüfung | **beginnt 01.01.2027**; noch keine gültige Bewertung |

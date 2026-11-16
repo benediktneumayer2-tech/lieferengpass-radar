@@ -62,7 +62,7 @@ flowchart LR
 | Modul | Aufgabe | Wichtige Symbole |
 |---|---|---|
 | `cli.py` | Kommandozeile (argparse), Ablauf der Befehle, Alarmregel beim Abruf | `main`, `cmd_fetch`, `cmd_daily`, `cmd_status`, `cmd_bewertung`, `cmd_protokoll`, `cmd_preview` |
-| `archive.py` | Quellenliste, Abruf mit Wiederholung und Formatprüfung, Archiv und Manifest | `SOURCES`, `Source`, `Archive`, `fetch_source`, `fetch_all`, `retry_due`, `last_success`, `_check`, `user_agent` |
+| `archive.py` | Quellenliste, Abruf mit Wiederholung, Formatprüfung und Regel für veraltete Abrufe, Archiv und Manifest | `SOURCES`, `Source`, `Archive`, `fetch_source`, `fetch_all`, `retry_due`, `last_success`, `_check`, `_stale`, `stale_paths`, `user_agent` |
 | `eko.py` | EKO-Änderungen aus dem RIS: Zeitfenster, Abruf, HTML-Parser | `allowed`, `sync`, `parse`, `night_end` |
 | `registers.py` | Produktregister CZ und ES (dazu ein Parser für archivierte finnische Registerdateien): füllen fehlende ATC-Codes und Inhaber der Auslandsmeldungen | `parse_sukl_dlp`, `parse_fimea_reg`, `parse_cima_reg`, `sync_cima`, `load`, `fill` |
 | `legacy.py` | Einmalige Importe der Vorgeschichte (lokal gesicherte Dateien, TermGit-ASP, Internet Archive, polnische Ausgaben seit 2015) | `import_basg_package`, `import_asp_package`, `import_wayback`, `import_pl_mz`, `DEFAULT_PACKAGE` |
@@ -81,7 +81,7 @@ flowchart LR
 | `rueckblick.py` | Rückblicktests weiterer Signale (T1, T2, T4, T6–T9) | `measure`, `AspHistory`, `mia_events`, `asp_exits`, `eko_events` |
 | `fruehwarnung.py` | Frühwarnliste und Registerhinweise für die Website | `build`, `current_items`, `substance_tier`, `register_hints` |
 | `merkmale.py` | Tägliches Merkmalsprotokoll je Produkt; ruft die Z3-Vorhersagen auf | `run`, `rows`, `write`, `COLUMNS` |
-| `modell.py` | Z3-Verfahren: Merkmale, Lernen, Prüfen, Einfrieren, Vorhersageprotokoll, Bewertung | `Knowledge`, `METHODS`, `measure`, `freeze`, `load_plan`, `predict_all`, `write_log`, `read_logs`, `bewerten`, `simulate` |
+| `modell.py` | Z3-Verfahren: Merkmale, Lernen, Prüfen, Einfrieren, Vorhersageprotokoll, Bewertung; Schalter `zeitpunktgenau` für Lernen und Rückblick | `Knowledge`, `published`, `METHODS`, `measure`, `freeze`, `load_plan`, `predict_all`, `write_log`, `read_logs`, `bewerten`, `simulate` |
 | `timeline.py` | Zeitleisten als SVG und als Text | `timeline_svg`, `mini_svg`, `events` |
 | `site.py` | Statischer Website-Generator (Jinja2) | `generate`, `Data`, `SITE_TITLE`, `HIDDEN_FIELDS`, `HIDDEN_SOURCES`, `FOREIGN_SOURCES` |
 | `web/templates/*.html`, `web/assets/` | Seitenvorlagen, Stylesheet `style.css`, Suche `search.js` | – |
@@ -160,6 +160,7 @@ data/                                  nicht in Git (.gitignore)
     stockout.sqlite                    abgeleitete Datenbank (--db, STOCKOUT_DB)
     json/                              situation, overdue, week, durations, substances, rueckblick (.json)
     vorhersagen_rueckblick/            Probelauf 2026 von "stockout bewertung --rueckblick"
+    vorhersagen_rueckblick_zeitpunktgenau/  dasselbe mit --zeitpunktgenau
 site/                                  erzeugte Website (--out, STOCKOUT_SITE), nicht in Git
 models/                                eingefrorene Verfahren und Prüfplan (in Git)
 $STOCKOUT_MIRROR                       optionale zweite Kopie von data/archive (--mirror-dir; leer = keine Kopie)
@@ -206,6 +207,7 @@ Von den 53 Schnappschüssen stammen 25 aus dem Tagesarchiv (lückenlos seit 17.1
 |---|---|
 | Netzwerk- oder HTTP-Fehler einer Quelle | bis zu drei Versuche (Pausen 15 s und 60 s, `RETRY_DELAYS`), danach Manifest-Eintrag mit `ok: false`; andere Quellen laufen weiter |
 | Antwort besteht die Formatprüfung nicht (z. B. Wartungsseite) | wird wie ein Netzfehler wiederholt; die letzte Antwort wird zur Diagnose aufbewahrt, aber mit `ok: false` vermerkt und nie in die Datenbank übernommen |
+| Antwort ist veraltet (Last-Modified älter als bei einem früheren Live-Abruf, neue Bytes) | wie eine Formatwarnung; schon archivierte veraltete Live-Dateien lässt `build._unique_files` weg (`archive.stale_paths`, seit 16.11.2026: ogyei 22.10., sukl_cz 23.10.2026) |
 | RIS-Fehler (EKO) | eigene Wiederholung nach 60 s und 300 s (±20 % Zufall), dann Eintrag mit `ok: false` |
 | BASG-XML defekt oder abgeschnitten | `basg.parse` wirft nie; vollständige `Packung`-Elemente vor dem Abbruch werden übernommen, `complete = 0`, `parse_error` gefüllt; abgeschnittene Schnappschüsse belegen nie das Fehlen einer Packung |
 | Parserfehler einer Auslands- oder Registerdatei | Datei wird beim Aufbau übersprungen, **ohne Meldung** (`foreign.load`, `registers.load`) |

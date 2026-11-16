@@ -12,7 +12,7 @@ from datetime import date
 from pathlib import Path
 
 from . import asp, basg, foreign
-from .archive import Archive
+from .archive import Archive, stale_paths
 from .episodes import Episode, SnapshotView, derive
 from .substances import atc_groups, base_substance, normalise, split_components, substance_label
 
@@ -77,10 +77,12 @@ CREATE INDEX idx_asp_equiv ON asp_packages (equiv_key);
 
 
 def _unique_files(archive: Archive, source: str) -> list[dict]:
-    """Manifest entries with a stored file, one per distinct path, in path order."""
+    """Manifest entries with a stored file, one per distinct path, in path order; stale live files left out."""
+    entries = archive.entries()
+    stale = stale_paths(entries)
     seen: dict[str, dict] = {}
-    for e in archive.entries():
-        if e.get("source") == source and e.get("ok") and e.get("path") and e["path"] not in seen:
+    for e in entries:
+        if e.get("source") == source and e.get("ok") and e.get("path") and e["path"] not in seen and e["path"] not in stale:
             seen[e["path"]] = e
     return [seen[p] for p in sorted(seen)]
 

@@ -110,6 +110,55 @@ def test_maintenance_page_is_retried_and_fetched_again_next_run(tmp_path):
     assert _fetched_recently(archive, SOURCES["ansm"]) and [e["path"] for e in _unique_files(archive, "ansm")] == [good["path"]]
 
 
+def test_stale_capture_is_left_out_and_a_new_one_fails(tmp_path):
+    """A cache served an older version (ogyei 2026-10-22): the build ignores it; a new one is a failed fetch."""
+    import sqlite3
+    from stockout_at.archive import retry_due, stale_paths
+    from stockout_at.build import _unique_files, build
+
+    def hu(*tks):
+        return ("Termék neve;TK szám;A hiány kezdete;ATC kód 1/ATC kód 2\n"
+                + "".join(f"Produkt {tk};{tk};01.06.2026;N02BE01\n" for tk in tks)).encode("iso-8859-2")
+
+    archive = Archive(tmp_path / "a")
+
+    def put(source, body, fetched, lm, ext="csv"):
+        return archive.store(source, body, ext=ext, stamp=fetched.replace(":", ""),
+                             meta={"origin": "live", "fetched_at": fetched, "last_modified": lm, "warnings": []})
+
+    good = put("ogyei", hu(1, 2), "2026-10-22T05:00:00Z", "Thu, 22 Oct 2026 00:30:45 GMT")
+    old = put("ogyei", hu(1, 2, 9), "2026-10-22T16:24:53Z", "Thu, 11 Jun 2026 12:43:44 GMT")  # archived before the rule
+    later = put("ogyei", hu(1), "2026-10-23T05:00:00Z", "Fri, 23 Oct 2026 00:30:40 GMT")
+    put("basg", BASG, "2026-10-17T02:00:08Z", None, "xml")  # BASG sends no Last-Modified: never stale
+    put("basg", BASG.replace(b"2026-10-17", b"2026-10-16"), "2026-10-18T02:00:08Z", None, "xml")
+    assert stale_paths(archive.entries()) == {old["path"]}
+    assert [e["path"] for e in _unique_files(archive, "ogyei")] == [good["path"], later["path"]]
+    assert len(_unique_files(archive, "basg")) == 2
+    build(archive, tmp_path / "db.sqlite")
+    conn = sqlite3.connect(tmp_path / "db.sqlite")
+    hu_items = dict(conn.execute("SELECT product, last_seen FROM foreign_items WHERE source = 'ogyei'"))
+    assert hu_items == {"Produkt 1": "2026-10-23", "Produkt 2": "2026-10-22"}  # Produkt 9 only in the stale file
+    conn.close()
+
+    def opener(answers):
+        def open_(req, timeout):
+            body, lm = answers.pop(0)
+            r = Resp(body)
+            r.headers["Last-Modified"] = lm
+            return r
+        return open_
+
+    june = (hu(1, 2, 7), "Wed, 10 Jun 2026 08:00:00 GMT")
+    [bad] = fetch_all(archive, ["ogyei"], opener=opener([june] * 3), sleep=lambda s: None)
+    assert not bad["ok"] and bad["attempts"] == 3 and "veraltete Fassung" in bad["error"]
+    assert archive.read(bad["path"]) == hu(1, 2, 7) and "ogyei" in retry_due(archive)  # kept; catch-up run retries
+    [again] = fetch_all(archive, ["ogyei"], opener=opener([june] * 3), sleep=lambda s: None)
+    assert not again["ok"] and again["duplicate"]  # the same old bytes once more: still a failure
+    [same] = fetch_all(archive, ["ogyei"], opener=opener([(hu(1), "Thu, 22 Oct 2026 00:00:00 GMT")]), sleep=lambda s: None)
+    assert same["ok"] and same["duplicate"] and same["path"] == later["path"]  # known good bytes are harmless
+    assert [e["path"] for e in _unique_files(archive, "ogyei")] == [good["path"], later["path"]]
+
+
 def test_eudragmdp_search_runs_in_session_and_export_is_stored(tmp_path):
     u = urls()
     xls = b"\xd0\xcf\x11\xe0fake-xls LOC-100096104"

@@ -4,6 +4,10 @@ Raw files are the source of truth. Each response is gzip-compressed (lossless)
 and recorded in an append-only JSONL manifest together with the SHA-256 of the
 original bytes. A version whose hash is already archived is only noted in the
 manifest. Failed requests are recorded too, so gaps stay visible.
+
+A live file whose Last-Modified is older than that of an earlier live fetch of the same source is stale (a cache
+served an old version, e.g. ogyei 2026-10-22, sukl_cz 2026-10-23): the build leaves it out (`stale_paths`), and a
+new one counts as a failed fetch like an answer that fails the format check.
 """
 from __future__ import annotations
 
@@ -19,6 +23,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Callable
 
@@ -222,6 +227,48 @@ def user_agent() -> str:
     return f"LieferengpassRadar/0.1 (+{PROJECT_URL}; Kontakt: {contact})" if contact else USER_AGENT
 
 
+def _last_modified(value: str | None) -> datetime | None:
+    try:
+        lm = parsedate_to_datetime(value)
+    except (TypeError, ValueError):
+        return None
+    return lm if lm.tzinfo else lm.replace(tzinfo=timezone.utc)
+
+
+def _dated_live(entries: list[dict]) -> list[tuple[dict, datetime]]:
+    """Stored live files with a Last-Modified, in fetch order (repeats of known bytes are left out)."""
+    out = [(e, _last_modified(e.get("last_modified"))) for e in entries if e.get("origin") == "live" and e.get("ok")
+           and e.get("path") and not e.get("duplicate") and e.get("last_modified")]
+    return sorted(((e, lm) for e, lm in out if lm), key=lambda x: x[0].get("fetched_at") or "")
+
+
+def stale_paths(entries: list[dict]) -> set[str]:
+    """Live files whose Last-Modified is older than that of an earlier live fetch of the same source (the rule of
+    the model search, November 2026). Left out of the database; the archive keeps them."""
+    out, newest = set(), {}
+    for e, lm in _dated_live(entries):
+        if e["source"] in newest and lm < newest[e["source"]]:
+            out.add(e["path"])
+        newest[e["source"]] = max(lm, newest.get(e["source"], lm))
+    return out
+
+
+def _stale(archive: Archive, source: str, body: bytes, last_modified: str | None) -> list[str]:
+    """Warning for a new answer older than an earlier live fetch; bytes of a file the build uses are harmless."""
+    lm = _last_modified(last_modified)
+    if lm is None:
+        return []
+    entries = archive.entries()
+    newest = max((x for e, x in _dated_live(entries) if e["source"] == source), default=None)
+    if newest is None or lm >= newest:
+        return []
+    sha, stale = hashlib.sha256(body).hexdigest(), stale_paths(entries)
+    if any(e.get("sha256") == sha and e["path"] not in stale for e in entries if e.get("source") == source
+           and e.get("ok") and e.get("path") and not e.get("duplicate")):
+        return []
+    return [f"veraltete Fassung: Last-Modified {last_modified} älter als zuvor {iso(newest)}"]
+
+
 def _get(url: str, opener: Opener, timeout: float):
     req = urllib.request.Request(url, headers={"User-Agent": user_agent()})
     with opener(req, timeout) as resp:
@@ -314,8 +361,9 @@ def fetch_source(
 ) -> dict:
     """Fetch one source with retries and record the outcome in the manifest.
 
-    An answer that fails the format check (e.g. a maintenance page) is retried like a network error; if all
-    attempts fail that way, the last answer is kept for diagnosis but recorded as a failed fetch (ok=False).
+    An answer that fails the format check (e.g. a maintenance page) or is stale (an older Last-Modified than an earlier
+    live fetch) is retried like a network error; if all attempts fail that way, the last answer is kept for diagnosis
+    but recorded as a failed fetch (ok=False).
     """
     errors: list[str] = []
     rejected = None
@@ -347,7 +395,7 @@ def fetch_source(
             "last_modified": headers.get("Last-Modified"),
             "etag": headers.get("ETag"),
             "produced_on": produced_on,
-            "warnings": _check(source, body, produced_on),
+            "warnings": _check(source, body, produced_on) or _stale(archive, source.name, body, headers.get("Last-Modified")),
             "attempts": attempt + 1,
         }
         if headers.get("X-Act"):

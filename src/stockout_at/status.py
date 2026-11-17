@@ -42,26 +42,27 @@ def missing_basg_days(entries: list[dict], now: datetime) -> tuple[date | None, 
 
 def collect(archive: Archive, mirror_root: Path | None, now: datetime) -> dict:
     entries = archive.entries()
-    sources = {}
+    sources, watched = {}, {}  # watched sources in their own block: the website lists only `sources`
     warnings = []
     week_ago = now - timedelta(days=7)
-    for name in SOURCES:
+    for name, source in SOURCES.items():
         own = [e for e in entries if e.get("source") == name and e.get("origin") == "live"]
         ok = [e for e in own if e.get("ok")]
         new = [e for e in ok if not e.get("duplicate")]
         failures = [e for e in own if not e.get("ok") and _parse(e["recorded_at"]) >= week_ago]
         last_ok = max((e["recorded_at"] for e in ok), default=None)
-        sources[name] = {
+        (watched if source.watch else sources)[name] = {
             "last_ok": last_ok,
             "last_new_version": max((e.get("produced_on") or e.get("fetched_at") for e in new), default=None),
             "versions": len(new),
             "failures_7d": len(failures),
             "last_error": failures[-1]["error"] if failures else None,
         }
+        limit = STALE_HOURS + source.min_hours if source.watch else STALE_HOURS
         if last_ok is None:
             warnings.append(f"{name}: noch kein erfolgreicher Abruf")
-        elif now - _parse(last_ok) > timedelta(hours=STALE_HOURS):
-            warnings.append(f"{name}: letzter erfolgreicher Abruf älter als {STALE_HOURS} h")
+        elif now - _parse(last_ok) > timedelta(hours=limit):
+            warnings.append(f"{name}: letzter erfolgreicher Abruf älter als {limit:g} h")
         recent_warn = [w for e in new[-3:] for w in e.get("warnings") or []]
         if recent_warn:
             warnings.append(f"{name}: Inhaltswarnungen {sorted(set(recent_warn))}")
@@ -93,6 +94,7 @@ def collect(archive: Archive, mirror_root: Path | None, now: datetime) -> dict:
         "files": len(files),
         "megabytes": round(sum(p.stat().st_size for p in files) / 1e6, 1),
         "sources": sources,
+        "watched": watched,
         "basg_first_live_day": first.isoformat() if first else None,
         "basg_missing_days": [d.isoformat() for d in gaps],
         "history_imports": legacy,
@@ -103,11 +105,14 @@ def collect(archive: Archive, mirror_root: Path | None, now: datetime) -> dict:
 
 def render(report: dict) -> str:
     lines = [f"Archiv: {report['archive']} ({report['files']} Dateien, {report['megabytes']} MB)"]
-    for name, s in report["sources"].items():
-        lines.append(
-            f"  {name:<8} letzter Erfolg: {s['last_ok'] or '–'} | neueste Fassung: {s['last_new_version'] or '–'}"
-            f" | Fassungen: {s['versions']} | Fehlversuche 7 Tage: {s['failures_7d']}"
-        )
+    for block in ("sources", "watched"):
+        if block == "watched" and report.get(block):
+            lines.append("Beobachtete Quellen (nur roh archiviert, Ausfall nur Warnung):")
+        for name, s in (report.get(block) or {}).items():
+            lines.append(
+                f"  {name:<8} letzter Erfolg: {s['last_ok'] or '–'} | neueste Fassung: {s['last_new_version'] or '–'}"
+                f" | Fassungen: {s['versions']} | Fehlversuche 7 Tage: {s['failures_7d']}"
+            )
     gaps = report["basg_missing_days"]
     lines.append(
         f"BASG-Tage seit Archivbeginn ({report['basg_first_live_day'] or '–'}): "

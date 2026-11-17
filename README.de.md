@@ -160,7 +160,7 @@ Das sind Entscheidungen im Aufbau, keine Validierung: Das Radar ist kein validie
 
 ## Unterschiede zur Referenzinstanz
 
-Die Referenzinstanz hat die eingefrorenen Modelle, das Vorhersageprotokoll und die Bildschirmfotos erzeugt; die prospektive Prüfung wertet ihr Protokoll aus. Sie archiviert einige Quellen mehr, deren Nutzung mit den Betreibern noch geklärt wird; der öffentliche Code lässt sie deshalb weg. Modelle und Prüfplan sind byte-gleich (`models/SHA256SUMS`), Länderzahlen und Frühwarnstufen weichen aber ab, und ein Registerhinweis fehlt. Einzelheiten: [Unterschiede zur Referenzinstanz](documentation/DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz).
+Die Referenzinstanz hat die eingefrorenen Modelle, das Vorhersageprotokoll und die Bildschirmfotos erzeugt; die prospektive Prüfung wertet ihr Protokoll aus. Sie archiviert einige Quellen mehr, deren Nutzung mit den Betreibern noch geklärt wird; der öffentliche Code lässt sie deshalb weg. Seit 16.11.2026 archiviert sie zusätzlich weitere Register und Seiten ohne klare Nutzungsbedingungen roh (beobachtete Quellen, ohne Parser); der öffentliche Code holt nur die beobachteten Quellen mit klaren Bedingungen: drei EMA-Tabellen und das Wiener Abwassermonitoring. Modelle und Prüfplan sind byte-gleich (`models/SHA256SUMS`), Länderzahlen und Frühwarnstufen weichen aber ab, und ein Registerhinweis fehlt. Einzelheiten: [Unterschiede zur Referenzinstanz](documentation/DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz).
 
 ## Datenschutz und Sicherheit
 

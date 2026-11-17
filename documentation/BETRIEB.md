@@ -1,6 +1,6 @@
 # Betrieb
 
-**Stand:** 11.11.2026 · öffentliche Fassung 0.1 · Projektordner in den Beispielen: `~/lieferengpass-radar` (`<projektordner>`)
+**Stand:** 11.11.2026, beobachtete Quellen 16.11.2026 · öffentliche Fassung 0.1 · Projektordner in den Beispielen: `~/lieferengpass-radar` (`<projektordner>`)
 
 Dieses Dokument beschreibt Installation, Konfiguration, alle Befehle, die Zeitsteuerung, Alarme, die zweite Kopie, das Nachholen und das Vorgehen, wenn eine Quelle sich ändert. Wie die Teile zusammenhängen, steht in [ARCHITEKTUR.md](ARCHITEKTUR.md).
 
@@ -87,8 +87,8 @@ Ein unbehandelter Fehler (z. B. fehlende Datenbank) endet mit Python-Traceback u
 stockout fetch [--source QUELLE ...] [--nachholen] [--eko]
 ```
 
-- **ohne Option** (planmäßiger Lauf): EKO aus dem RIS, wenn das Zeitfenster es erlaubt (sonst Meldung „außerhalb der RIS-Abfragezeiten … übersprungen“); dann alle 19 Quellen, Tagesquellen nur, wenn ihr letzter Erfolg mindestens 20 h zurückliegt; dann CIMA-Register; dann Kopie, falls eingestellt.
-- `--source QUELLE` (mehrfach möglich; Auswahl aus den 19 Namen in `SOURCES`): nur diese Quellen, **ohne** 20-h-Sperre, ohne EKO; CIMA-Register nur, wenn `cima` dabei ist.
+- **ohne Option** (planmäßiger Lauf): EKO aus dem RIS, wenn das Zeitfenster es erlaubt (sonst Meldung „außerhalb der RIS-Abfragezeiten … übersprungen“); dann alle 19 ausgewerteten Quellen, Tagesquellen nur, wenn ihr letzter Erfolg mindestens 20 h zurückliegt; dann CIMA-Register; dann Kopie, falls eingestellt. Die 4 beobachteten Quellen holt erst `daily` nach dem Protokoll.
+- `--source QUELLE` (mehrfach möglich; Auswahl aus den 23 Namen in `SOURCES`): nur diese Quellen, **ohne** 20-h-Sperre, ohne EKO; CIMA-Register nur, wenn `cima` dabei ist. So holt man auch eine beobachtete Quelle von Hand.
 - `--nachholen`: nur Quellen ohne Tagesrhythmus, deren **letzter** Live-Versuch scheiterte (`archive.retry_due`); ohne EKO. Ist nichts offen, endet der Befehl sofort („Nachholen: nichts offen“) ohne Kopie.
 - `--eko`: nur EKO (für den Abendlauf an Werktagen), danach Kopie, falls eingestellt.
 
@@ -108,7 +108,7 @@ Kopiert alle Dateien, die in der Kopie fehlen, eine andere Größe haben oder ä
 stockout status [--json] [--verify]
 ```
 
-Zeigt je Quelle aus `SOURCES` den letzten Erfolg, die neueste Fassung, die Zahl der Fassungen und die Fehlversuche der letzten 7 Tage; dazu fehlende BASG-Tage seit dem 17.10.2026, die importierte Vorgeschichte und den Zustand der Kopie. `--json` gibt dasselbe als JSON aus. `--verify` vergleicht zusätzlich die SHA-256 aller Dateien mit der Kopie (liest beide Archive vollständig). Der Befehl liest nur. EKO und `cima_reg` erscheinen nicht.
+Zeigt je Quelle aus `SOURCES` den letzten Erfolg, die neueste Fassung, die Zahl der Fassungen und die Fehlversuche der letzten 7 Tage, die beobachteten Quellen in einem eigenen Block (in `--json` unter `watched`, nicht unter `sources`; die Methodikseite der Website liest nur `sources`); dazu fehlende BASG-Tage seit dem 17.10.2026, die importierte Vorgeschichte und den Zustand der Kopie. `--json` gibt dasselbe als JSON aus. `--verify` vergleicht zusätzlich die SHA-256 aller Dateien mit der Kopie (liest beide Archive vollständig). Der Befehl liest nur. EKO und `cima_reg` erscheinen nicht.
 
 ### `import-legacy`
 
@@ -145,7 +145,7 @@ Erzeugt die Website (siehe [WEBSITE.md](WEBSITE.md)); liest zusätzlich das Arch
 stockout daily [--source QUELLE ...] [--db DB] [--out OUT] [--export-json DIR]
 ```
 
-Abruf (wie `fetch`), Datenbank mit JSON-Export (Standard `<db-Ordner>/json`), Rückblick (`rueckblick.json`), Website, Protokolle. Ablauf und Fehlerverhalten: [ARCHITEKTUR.md](ARCHITEKTUR.md#4-kontrollfluss-des-tageslaufs-stockout-daily). Beobachtete Dauer am 10.11.2026: 06:18:39 bis 06:31:07 Uhr (gut 12 Minuten).
+Abruf (wie `fetch`), Datenbank mit JSON-Export (Standard `<db-Ordner>/json`), Rückblick (`rueckblick.json`), Website, Protokolle, als letzter Schritt die fälligen beobachteten Quellen (`Schritt Beobachtet`, ohne Quellen mit eigenem Timer). Dieser Schritt lässt den Lauf nie scheitern, auch nicht bei einem Programmfehler (dann `WARNUNG Beobachtet: …`), und kopiert nicht selbst; die neuen Dateien kopiert der nächste Lauf. Ablauf und Fehlerverhalten: [ARCHITEKTUR.md](ARCHITEKTUR.md#4-kontrollfluss-des-tageslaufs-stockout-daily). Beobachtete Dauer am 10.11.2026: 06:18:39 bis 06:31:07 Uhr (gut 12 Minuten).
 
 ### `vorlauf`, `rueckblick`, `schaerfe`, `modell`
 
@@ -201,7 +201,10 @@ Beobachtet in der Referenzinstanz am 10.11.2026 (`systemctl --user list-timers '
 **Alarmregel beim Abruf** (`cli.cmd_fetch`): Ein gescheiterter Abruf ist
 
 - **FEHLER**, wenn die Quelle `basg` ist, wenn sie noch nie erfolgreich war oder wenn ihr letzter Erfolg mehr als 36 Stunden zurückliegt (`status.STALE_HOURS`);
-- sonst **WARNUNG** mit dem Alter des letzten Erfolgs, z. B. `WARNUNG ogyei: … (letzter Erfolg vor 12 h, FEHLER erst nach 36 h)`.
+- sonst **WARNUNG** mit dem Alter des letzten Erfolgs, z. B. `WARNUNG ogyei: … (letzter Erfolg vor 12 h, FEHLER erst nach 36 h)`;
+- bei einer **beobachteten** Quelle immer nur **WARNUNG**, auch ohne früheren Erfolg, z. B. `WARNUNG ema_union: … (beobachtete Quelle, noch kein Erfolg; nur Warnung)`.
+
+**Reihenfolge im Tageslauf:** Die beobachteten Quellen kommen erst nach dem Protokoll, mit einem Versuch je Lauf und ohne `RETRY_DELAYS`; die EMA-Tabellen warten vor ihrer Anfrage 60 s. Ein hängender Server verzögert so weder Datenbank noch Protokoll. Der Nachholabruf lässt sie aus (sie haben `min_hours`).
 
 Als Erfolg zählt ein Live-Abruf, der die Formatprüfung bestanden hat. Seit 16.11.2026 scheitert auch eine veraltete Antwort: neue Bytes mit einem Last-Modified, das älter ist als das eines früheren Live-Abrufs derselben Quelle (`archive._stale`, Meldung `Formatprüfung: veraltete Fassung: …`). Sie wird wiederholt und dann als Fehlabruf mit aufbewahrter Antwort vermerkt; Nachholabruf und Alarmregel greifen wie bei einer Wartungsseite. Eine Quelle, die dauerhaft eine ältere Fassung liefert, wird so nach 36 h zum FEHLER. Quellen ohne Last-Modified (BASG) und Antworten mit schon genutzten Bytes sind nicht betroffen. FEHLER entsteht außerdem bei einem gescheiterten EKO-Dokument, einem Fehler im CIMA-Register und einer gescheiterten Kopie. Jeder FEHLER führt zu Exit-Code 1, und die systemd-Unit gilt dann als `failed`. Eine WARNUNG allein lässt den Lauf erfolgreich enden.
 
@@ -212,7 +215,7 @@ Als Erfolg zählt ein Live-Abruf, der die Formatprüfung bestanden hat. Seit 16.
 - `stockout status` (Exit-Code 2 bei Warnungen),
 - den Hinweis „Daten möglicherweise veraltet“ auf der Website, wenn der letzte erfolgreiche BASG-Abruf älter als 36 Stunden ist.
 
-**Warnungen von `stockout status`:** Quelle noch nie erfolgreich; letzter Erfolg älter als 36 h; Inhaltswarnungen in den letzten drei neuen Fassungen; fehlende BASG-Tage; bei eingestellter Kopie: Kopie nicht erreichbar oder Dateien fehlen in der Kopie, mit `--verify` abweichende Prüfsummen.
+**Warnungen von `stockout status`:** Quelle noch nie erfolgreich; letzter Erfolg älter als 36 h (beobachtete Quellen: älter als `min_hours` + 36 h, also 56 h bzw. 196 h); Inhaltswarnungen in den letzten drei neuen Fassungen; fehlende BASG-Tage; bei eingestellter Kopie: Kopie nicht erreichbar oder Dateien fehlen in der Kopie, mit `--verify` abweichende Prüfsummen.
 
 **Beobachtet in der Referenzinstanz am 10.11.2026** (`stockout --no-mirror status`, Exit-Code 0): Archiv 1.321 Dateien, 600,1 MB; alle Quellen mit Erfolg innerhalb von 36 Stunden; BASG-Tage seit 17.10.2026 lückenlos; „Warnungen: keine“.
 
@@ -226,6 +229,7 @@ Die Kopie ist optional und standardmäßig aus. Ist `STOCKOUT_MIRROR` bzw. `--mi
 |---|---|
 | Rechner war beim Tageslauf aus | `stockout-archive.timer` hat `Persistent=true` und läuft nach dem Hochfahren nach. Nachhol- und EKO-Timer holen nichts nach. |
 | Quelle mit Rhythmus „jeder Lauf“ scheiterte | Nachholabruf um 12:15 Uhr; sonst der nächste Tageslauf. |
+| beobachtete Quelle scheiterte | Der nächste Tageslauf versucht sie wieder, solange kein Erfolg innerhalb `min_hours` vorliegt; von Hand `stockout fetch --source <quelle>`. |
 | BASG-Tag fehlt | Das BASG zeigt nur den heutigen Stand; ein verpasster Tag ist dort verloren. Einzige Möglichkeit: eine Aufnahme im Internet Archive (`stockout import-legacy --wayback-only basg`, Netz). `stockout status` listet fehlende Tage. |
 | EKO-Abendläufe verpasst | Der nächste Lauf nimmt alle Dokumente der letzten 90 Tage, die noch fehlen. |
 | polnische Ausgabe verpasst | Der Tagesabruf holt nur die neueste Ausgabe; ältere über `stockout import-legacy --backfill pl_mz`. |
@@ -239,7 +243,7 @@ Die Kopie ist optional und standardmäßig aus. Ist `STOCKOUT_MIRROR` bzw. `--mi
 
 1. **Erkennen:** Im Journal erscheinen `WARNUNG` bzw. nach 36 h `FEHLER <quelle>` mit `HTTP …`, `URLError …` oder `Formatprüfung: …` (auch `veraltete Fassung`) und dem Pfad der aufbewahrten Antwort („Antwort aufbewahrt: …“). `stockout status` zeigt Fehlversuche und nach 36 h eine Warnung. Ein Parser, der an einer *bestandenen* Datei scheitert, meldet sich nicht; Anzeichen sind ausbleibende neue Meldungen der Quelle (`foreign_items.last_seen`, `still_listed`).
 2. **Ansehen:** aufbewahrte Antwort lesen, z. B. `zcat data/archive/<pfad>.gz | head`; Manifest-Einträge der Quelle in `data/archive/manifest.jsonl` prüfen.
-3. **Adresse geändert:** URL in `archive.SOURCES` anpassen; bei Quellen mit eigener Abruffunktion auch dort (`_get_sukl_dlp`, `_get_pl_mz`, `_get_eudragmdp`). Beispiel: der SÚKL-Domainwechsel im Oktober 2026 ([DATENQUELLEN.md](DATENQUELLEN.md#tschechien-súkl)).
+3. **Adresse geändert:** URL in `archive.SOURCES` anpassen; bei Quellen mit eigener Abruffunktion auch dort (`_get_sukl_dlp`, `_get_pl_mz`, `_get_eudragmdp`); bei der Link-Suche das Muster `Source.link`. Beispiel: der SÚKL-Domainwechsel im Oktober 2026 ([DATENQUELLEN.md](DATENQUELLEN.md#tschechien-súkl)).
 4. **Format geändert:** Parser anpassen (`foreign.parse_<quelle>`, `registers.parse_*`, `gmp.parse_*`, `eko.parse`, `asp.parse`, `basg.parse`). Alte Dateien bleiben im Archiv; der Parser muss deshalb **beide** Formate lesen, weil `build` alles neu einliest. Bei Bedarf Kennung (`expect`) oder Prüfregel in `archive._check` anpassen.
 5. **Test** mit kleinem Beispiel in `tests/` ergänzen, dann `.venv/bin/python -m pytest -q`.
 6. **Prüfen:** `stockout fetch --source <quelle>` (Netz), dann `stockout build` und Zeilenzahlen vergleichen.

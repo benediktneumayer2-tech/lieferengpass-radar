@@ -46,6 +46,27 @@ def _hours_since_success(archive: Archive, name: str) -> float | None:
     return None if last is None else (utcnow() - last).total_seconds() / 3600
 
 
+def _result(archive: Archive, e: dict) -> bool:
+    """Print one fetch result; True for an error (BASG, or no success for STALE_HOURS; never a watched source)."""
+    if e["ok"]:
+        what = "unverändert" if e["duplicate"] else "neu"
+        warn = f" WARNUNG: {'; '.join(e['warnings'])}" if e.get("warnings") else ""
+        print(f"OK {e['source']}: {what}, {e['bytes']} Bytes, {e['path']}{warn}")
+        return False
+    kept = f" (Antwort aufbewahrt: {e['path']})" if e.get("path") else ""
+    hours = _hours_since_success(archive, e["source"])
+    if SOURCES[e["source"]].watch:
+        since = "noch kein Erfolg" if hours is None else f"letzter Erfolg vor {hours:.0f} h"
+        print(f"WARNUNG {e['source']}: {e['error']}{kept} (beobachtete Quelle, {since}; nur Warnung)")
+        return False
+    if e["source"] == "basg" or hours is None or hours > STALE_HOURS:
+        print(f"FEHLER {e['source']}: {e['error']}{kept}")
+        return True
+    print(f"WARNUNG {e['source']}: {e['error']}{kept} "
+          f"(letzter Erfolg vor {hours:.0f} h, FEHLER erst nach {STALE_HOURS} h)")
+    return False
+
+
 def cmd_fetch(args) -> int:
     """Fetch and archive; a failed source is an error only for BASG or after STALE_HOURS without success."""
     archive, mirror_root, mount = _paths(args)
@@ -65,19 +86,7 @@ def cmd_fetch(args) -> int:
             print(f"FEHLER eko: {type(exc).__name__}: {exc}")
             failed = True
     for e in ([] if eko_only else fetch_all(archive, names)):
-        if not e["ok"]:
-            kept = f" (Antwort aufbewahrt: {e['path']})" if e.get("path") else ""
-            hours = _hours_since_success(archive, e["source"])
-            if e["source"] == "basg" or hours is None or hours > STALE_HOURS:
-                failed = True
-                print(f"FEHLER {e['source']}: {e['error']}{kept}")
-            else:
-                print(f"WARNUNG {e['source']}: {e['error']}{kept} "
-                      f"(letzter Erfolg vor {hours:.0f} h, FEHLER erst nach {STALE_HOURS} h)")
-        else:
-            what = "unverändert" if e["duplicate"] else "neu"
-            warn = f" WARNUNG: {'; '.join(e['warnings'])}" if e.get("warnings") else ""
-            print(f"OK {e['source']}: {what}, {e['bytes']} Bytes, {e['path']}{warn}")
+        failed |= _result(archive, e)
     if not eko_only and (scheduled or "cima" in names):
         from . import registers
         from .build import _unique_files
@@ -195,8 +204,21 @@ def _rueckblick_json(args) -> int:
     return 0
 
 
+def _watched(args) -> None:
+    """Due watched sources, last step of the daily run; never fails the run. No copy: the next run copies the files."""
+    try:
+        archive = Archive(Path(args.archive))
+        for e in fetch_all(archive, watch=True):
+            _result(archive, e)
+        print("Schritt Beobachtet: OK")
+    except Exception as exc:  # noqa: BLE001 - watched sources must never fail the daily run
+        print(f"WARNUNG Beobachtet: {type(exc).__name__}: {exc}")
+        print("Schritt Beobachtet: WARNUNG")
+
+
 def cmd_daily(args) -> int:
-    """fetch (+Kopie) -> build (+JSON) -> Rückblick -> site -> Merkmalsprotokoll (+Kopie); every step is attempted while BASG data exist."""
+    """fetch (+Kopie) -> build (+JSON) -> Rückblick -> site -> Merkmalsprotokoll (+Kopie) -> beobachtete Quellen;
+    every step is attempted while BASG data exist; the watched sources never fail the run."""
     archive = Archive(Path(args.archive))
     failed = []
 
@@ -219,6 +241,7 @@ def cmd_daily(args) -> int:
     step("Rückblick", lambda: _rueckblick_json(args))
     step("Website", lambda: cmd_site(args))
     step("Protokoll", lambda: cmd_protokoll(args))
+    _watched(args)
     print("Tageslauf: " + (f"FEHLER in {', '.join(failed)}" if failed else "alles OK"))
     return 1 if failed else 0
 

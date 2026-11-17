@@ -160,7 +160,7 @@ These are design choices, not a validation: the radar is not a validated compute
 
 ## Differences from the reference instance
 
-The reference instance produced the frozen models, the prediction log and the screenshots; the prospective test scores its log. It archives a few additional sources whose use is still being clarified with their operators, so the public code leaves them out. Models and test plan are byte-identical (`models/SHA256SUMS`), but country counts and early-warning tiers differ, and one register hint is missing. Details: [Unterschiede zur Referenzinstanz](documentation/DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz).
+The reference instance produced the frozen models, the prediction log and the screenshots; the prospective test scores its log. It archives a few additional sources whose use is still being clarified with their operators, so the public code leaves them out. Since 16 Nov 2026 it also keeps raw copies of further registers and pages without clear terms of use (watched sources, no parser); the public code fetches only the watched sources with clear terms: three EMA tables and Vienna's wastewater monitoring. Models and test plan are byte-identical (`models/SHA256SUMS`), but country counts and early-warning tiers differ, and one register hint is missing. Details: [Unterschiede zur Referenzinstanz](documentation/DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz).
 
 ## Privacy and security
 

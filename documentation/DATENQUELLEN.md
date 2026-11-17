@@ -1,6 +1,6 @@
 # Datenquellen
 
-**Stand:** 11.11.2026 · öffentliche Fassung 0.1 · Definition der Quellen: `src/stockout_at/archive.py` `SOURCES`, dazu `eko.py` und `registers.py`
+**Stand:** 11.11.2026, beobachtete Quellen 16.11.2026 · öffentliche Fassung 0.1 · Definition der Quellen: `src/stockout_at/archive.py` `SOURCES`, dazu `eko.py` und `registers.py`
 
 Das Projekt nutzt ausschließlich öffentlich abrufbare Daten. Es verarbeitet keine Apotheken-, Großhandels- oder Patientendaten. Dieses Dokument beschreibt jede Quelle, die die öffentliche Fassung abruft: was abgerufen wird, wie oft, in welchem Format, welches Modul sie liest und welche Nutzungshinweise im Code stehen. Was die Referenzinstanz zusätzlich nutzt, steht in [Abschnitt 4](#4-unterschiede-zur-referenzinstanz). Wie die Meldungen danach verknüpft und ausgewertet werden, steht in [MODELL_UND_BEWERTUNG.md](MODELL_UND_BEWERTUNG.md); die Zeitsteuerung in [BETRIEB.md](BETRIEB.md#zeitsteuerung-systemd).
 
@@ -8,11 +8,12 @@ Das Projekt nutzt ausschließlich öffentlich abrufbare Daten. Es verarbeitet ke
 
 ## 1. Überblick
 
-`archive.SOURCES` enthält **19 Quellen**. Dazu kommen zwei Quellen mit eigenem Abrufweg: **`eko`** (RIS, Modul `eko`) und **`cima_reg`** (Einzelabfragen bei CIMA, `registers.sync_cima`). Alle 21 Namen erscheinen als Ordner im Archiv; `stockout status` zeigt nur die 19 aus `SOURCES`.
+`archive.SOURCES` enthält **23 Quellen**: 19 ausgewertete und 4 beobachtete, die nur roh archiviert werden ([Beobachtete Quellen](#beobachtete-quellen-nur-roh-archiviert)). Dazu kommen zwei Quellen mit eigenem Abrufweg: **`eko`** (RIS, Modul `eko`) und **`cima_reg`** (Einzelabfragen bei CIMA, `registers.sync_cima`). Jeder Name erscheint nach dem ersten Abruf als Ordner im Archiv; `stockout status` zeigt die 23 aus `SOURCES`, die beobachteten in einem eigenen Block.
 
 **Rhythmus** (Details in Abschnitt 3):
 - **jeder Lauf**: Quellen ohne `min_hours`, also bei jedem planmäßigen Lauf um 06:15 und 18:15 Uhr und im Nachholabruf um 12:15 Uhr, wenn ihr letzter Versuch scheiterte;
 - **1×/Tag**: Quellen mit `min_hours = 20`; ein planmäßiger Lauf überspringt sie, solange ihr letzter Erfolg jünger als 20 Stunden ist.
+- **beobachtet, 1×/Tag oder 1×/Woche**: `min_hours = 20` bzw. `160`; der Tageslauf holt die fälligen als letzten Schritt, nach dem Protokoll.
 
 ### Engpassregister
 
@@ -45,6 +46,17 @@ Das Projekt nutzt ausschließlich öffentlich abrufbare Daten. Es verarbeitet ke
 | `sari_region` | Österreichische Sozialversicherung (Open Data) | SARI-Spitalsaufnahmen nach Virus und Region, wöchentlich ab Woche 19/2023 | CSV | 1×/Tag | 19.10.2026 | `rueckblick.sari_series` | Test T4 | keine Angabe im Code |
 | `sari_patient` | wie `sari_region` | SARI nach Wohnregion und Altersgruppe | CSV | 1×/Tag | 19.10.2026 | – | **nur archiviert** | keine Angabe im Code |
 
+### Beobachtete Quellen (nur roh archiviert)
+
+Seit 16.11.2026. Ohne eigenes Archiv ginge ihr Verlauf verloren: Die Datei wird an Ort und Stelle überschrieben oder neu gefasst. Es gibt keinen Parser, keine Datenbanktabelle, kein Merkmal und keinen Eintrag auf der Website; `build` übergeht sie, weil es Quellen nur über ihren Namen liest. Je Lauf gibt es einen Versuch; ein Ausfall ist nur eine WARNUNG (Kennzeichen `watch`, [BETRIEB.md](BETRIEB.md#meldungen-alarme-und-status)). Die Referenzinstanz beobachtet weitere Quellen ([Abschnitt 4](#4-unterschiede-zur-referenzinstanz)).
+
+| Quelle | Herausgeber, Land | Inhalt | Format, Abruf | Rhythmus | robots.txt (16.11.2026) | Nutzungshinweis | beobachtet in der Referenzinstanz (16.11.2026) |
+|---|---|---|---|---|---|---|---|
+| `ema_medicines` | EMA, EU | Arzneimitteltabelle (Medicines output) | XLSX, 60 s Pause vor der Anfrage | täglich | erlaubt | Weiterverwendung mit Quellenangabe EMA | 906.752 Bytes (im zweiten Anlauf, siehe Abschnitt 3) |
+| `ema_dhpc` | EMA, EU | DHPC-Tabelle | XLSX, 60 s Pause | täglich | erlaubt | wie `ema_medicines` | 96.626 Bytes |
+| `ema_union` | EMA, EU | Unionsliste kritischer Arzneimittel | XLSX, 60 s Pause | wöchentlich; Neufassung November/Dezember 2026 | erlaubt | wie `ema_medicines` | 219.112 Bytes (im zweiten Anlauf) |
+| `abwasser_wien` | Stadt Wien (MA 15), AT | Abwassermonitoring (Virusfracht je Woche) | CSV, Kennung `Datum;Target` | wöchentlich; die Reihe endet vermutlich 2025-10 | `/downloads/` nicht gesperrt | CC BY 4.0, Stadt Wien | 18.774 Bytes |
+
 Die Spalte „seit“ gibt den ersten Live-Abruf der Referenzinstanz laut Manifest an. Die Nutzungshinweise der Engpassregister stehen wortgleich in `site.FOREIGN_SOURCES` und erscheinen auf der Methodikseite der Website.
 
 ### Umfang am 10.11.2026 (beobachtet in der Referenzinstanz)
@@ -69,7 +81,7 @@ Weitere Dateien im Archiv: `basg` 53 (davon 25 live), `asp` 84, `eko` 270, `eudr
 ## 2. Gemeinsame Regeln beim Abruf
 
 - **User-Agent** (`archive.user_agent()`): `LieferengpassRadar/0.1 (+https://github.com/benediktneumayer2-tech/lieferengpass-radar)`. Ist die Umgebungsvariable `STOCKOUT_CONTACT` gesetzt, etwa auf eine E-Mail-Adresse, steht zusätzlich `; Kontakt: <Wert>` vor der schließenden Klammer. Wer das Radar regelmäßig betreibt, sollte sie setzen, damit sich die Betreiber der Quellen melden können. Alle Abrufwege (`archive`, `eko`, `registers`, `legacy`) verwenden denselben User-Agent.
-- **Wiederholung:** bis zu drei Versuche je Quelle, Pausen 15 s und 60 s (`archive.RETRY_DELAYS`), Zeitlimit 90 s je Anfrage.
+- **Wiederholung:** bis zu drei Versuche je Quelle, Pausen 15 s und 60 s (`archive.RETRY_DELAYS`), Zeitlimit 90 s je Anfrage. Beobachtete Quellen haben einen Versuch je Lauf. Eine Quelle kann eine Pause vor jeder Anfrage verlangen (`Source.pause`, EMA-Tabellen 60 s).
 - **Formatprüfung** (`archive._check`), bevor eine Antwort als Erfolg zählt:
 
 | Fall | Prüfung |
@@ -81,10 +93,10 @@ Weitere Dateien im Archiv: `basg` 53 (davon 25 live), `asp` 84, `eko` 270, `eudr
 | JSONL (`cima`) | beginnt mit `{` |
 | PDF (`pl_mz`) | beginnt mit `%PDF` |
 | XLS (`ansm`, `eudragmdp`) | OLE-Signatur |
-| Quellen mit Kennung (`expect`) | `countryname` (ERVISS), `JAHR;KW` (SARI) in den ersten 3.000 Bytes |
+| Quellen mit Kennung (`expect`) | `countryname` (ERVISS), `JAHR;KW` (SARI), `Datum;Target` (`abwasser_wien`) in den ersten 3.000 Bytes; bei HTML-Seiten (`ext = "html"`) irgendwo im Text |
 | übrige CSV | Semikolon in den ersten 2.000 Bytes |
 
-  Eine Antwort, die die Prüfung nicht besteht, wird wie ein Netzfehler wiederholt. Bleibt sie falsch, wird sie zur Diagnose archiviert, aber mit `ok: false` vermerkt und nie ausgewertet.
+  Eine Antwort, die die Prüfung nicht besteht, wird wie ein Netzfehler wiederholt (bei beobachteten Quellen erst im nächsten Lauf). Bleibt sie falsch, wird sie zur Diagnose archiviert, aber mit `ok: false` vermerkt und nie ausgewertet.
 - **Kontaktdaten:** Die Parser lesen keine Kontaktspalten (Telefon, E-Mail) in Auslandsmeldungen ein (`foreign`-Docstring; Test `test_bfarm_items_group_pzns_and_drop_contacts`). Die BASG-Spalte `Zulassungsinhaber_Tel` steht wörtlich in Archiv und Datenbank, wird aber nie auf der Website gezeigt.
 
 ## 3. Besonderheiten je Quelle
@@ -130,6 +142,11 @@ Wird zweimal täglich archiviert und in `foreign_items` übernommen. Auf der Web
 
 Seit 19.10.2026 kommt die Liste täglich vom FHIR-Terminologieserver der ELGA; eine neue Fassung erscheint etwa monatlich, der Dateiname trägt ihr Datum. Die Historie bis Juni 2026 wurde aus TermGit importiert (`legacy.import_asp_package`, `origin: termgit_history`). Beide Formate tragen dieselben Eigenschaften und ergeben dieselben Zeilen (`asp.concept_row`, Test `test_asp_fhir_codesystem_gives_the_same_rows_as_svs`). Der Aufbau verwendet die neueste Fassung (am 10.11.2026: Version `2.54.0+20261022`); die Rückblicktests und die Modelle nutzen alle Fassungen.
 
+### Beobachtete Quellen (EMA)
+
+- **EMA** (`ema_medicines`, `ema_dhpc`, `ema_union`): Schnelle Folgeabrufe lösen eine Sperre aus (HTTP 429), die auch die ausgewertete Quelle `ema` träfe. Deshalb kommen die neuen EMA-Abrufe erst nach dem Protokoll, mit 60 s Pause vor jeder Anfrage und einem Versuch. **Beobachtet in der Referenzinstanz:** `ema` scheitert seit 09.11.2026 in den meisten Läufen mit HTTP 429. Beim Probeabruf am 16.11.2026 kam `ema_dhpc` durch; `ema_medicines` und `ema_union` bekamen trotz 60 s Abstand 429 und kamen 20 Minuten später im zweiten Anlauf durch. Bleibt die Sperre, werden die neuen EMA-Abrufe auf wöchentlich gestellt.
+- **Hilfen für weitere beobachtete Quellen** (im Code, von der öffentlichen Fassung derzeit nicht genutzt): Link-Suche nach der neuesten verlinkten Datei (`Source.link`, `archive._get_linked`, Adresse im Manifest unter `file_url`), Seitenabruf bis zur ersten Seite ohne Ergebnis-Kennung (`Source.page_rows`), Kennung irgendwo im Text bei HTML-Seiten und Abruf nur über einen eigenen Timer statt in den Tagesläufen (`Source.timer`).
+
 ### Internet Archive (Vorgeschichte)
 
 `stockout import-legacy --wayback-only <quelle>` holt alle verschiedenen Aufnahmen einer Export-URL, die noch nicht im Archiv sind (Vergleich über die CDX-Prüfsumme), mit 3 s Pause. Bei anderen Quellen als BASG muss der Parser mindestens eine Meldung lesen, sonst wird die Aufnahme als Fehler vermerkt. Die Referenzinstanz hat Internet-Archive-Historie unter anderem für `aifa`, `basg`, `bfarm`, `ema`, `fda`, `ogyei` und `sukl_sk`.
@@ -147,6 +164,7 @@ Zusätzlich zu den Quellen oben archiviert die Referenzinstanz:
 - die finnische Engpassliste und das finnische Basisregister der Fimea (`fimea`, `fimea_reg`);
 - die CEP-Datei der EDQM (`edqm`, Eignungszertifikate der Wirkstoffhersteller);
 - vier Exporte aus „Medikamente Info Austria“ des BASG (`mia_asp`, `mia_abst`, `mia_verl`, `mia_ve`).
+- seit 16.11.2026 als beobachtete Quellen, nur roh und ohne Parser: die kroatische Engpasstabelle der HALMED (`halmed`), die BASG-Seiten zu Vertriebseinschränkungen (MSC) und Sicherheitsinformationen (DHPC) (`basg_msc`, `basg_dhpc`), die norwegische Übersicht der DMP (`dmp_no`), den Erstattungskodex als PDF (`eko_pdf`), die portugiesische Liste der Exportverbote (`infarmed`), die rumänischen Marktaustrittsmeldungen der ANMDMR (`anm_ro`) und die lettische Verfügbarkeitsliste der ZVA (`zva_lv`); vorgesehen ist außerdem der Datenwürfel des Schweizer BWL (`bwl_ch`).
 
 Die öffentliche Fassung lässt sie weg, bis die Nutzung mit den Betreibern geklärt ist. Ihre Parser bleiben im Code, damit bereits archivierte Dateien lesbar bleiben; finnische Meldungen blendet die Website aber aus (`site.SITE_HIDDEN_SOURCES`).
 
@@ -158,9 +176,10 @@ Die öffentliche Fassung lässt sie weg, bis die Nutzung mit den Betreibern gekl
 | `mia_verl` | Merkmal `inhaberwechsel_56` (Änderung beim Zulassungsinhaber in den letzten 56 Tagen) und der Registerhinweis „Änderung beim Zulassungsinhaber“ auf der Website | Merkmal immer 0; den Hinweis zeigt die Website nicht (`site.SITE_HOLDER_CHANGES`, auch in der Referenzinstanz ausgeblendet, bis das BASG die Nutzung erlaubt) |
 | `mia_asp`, `edqm` | nur Schattenspalten im Merkmalsprotokoll (§ 21 AMG, CEP) | keine Wirkung auf Modelle, Vorhersagen oder Website |
 | `mia_abst`, `mia_ve` | nur archiviert | keine |
+| beobachtete Quellen der Referenzinstanz | nur roh archiviert | keine |
 
-**Modelle und Prüfplan sind byte-gleich** mit der Referenzinstanz (`models/SHA256SUMS`, siehe [Vorab-Registrierung](MODELL_UND_BEWERTUNG.md#12-vorab-registrierung)). Die eingefrorenen Modelle speichern aber nur Gewichte; ihre Merkmale entstehen täglich aus den Daten. Die öffentliche Fassung liefert denselben Modellen deshalb andere Eingaben und erhält andere Vorhersagen. Für die prospektive Prüfung zählt das Vorhersageprotokoll der Referenzinstanz. Bis zum Go/No-Go am 30.04.2027 bleibt deren Code unverändert; danach werden beide Fassungen angeglichen.
+**Modelle und Prüfplan sind byte-gleich** mit der Referenzinstanz (`models/SHA256SUMS`, siehe [Vorab-Registrierung](MODELL_UND_BEWERTUNG.md#12-vorab-registrierung)). Die eingefrorenen Modelle speichern aber nur Gewichte; ihre Merkmale entstehen täglich aus den Daten. Die öffentliche Fassung liefert denselben Modellen deshalb andere Eingaben und erhält andere Vorhersagen. Für die prospektive Prüfung zählt das Vorhersageprotokoll der Referenzinstanz. Bis zum Go/No-Go am 30.04.2027 ändert sich deren Code nur in den Punkten, die der Prüfbericht unter „Änderungen nach dem Einfrieren“ nennt; danach werden beide Fassungen angeglichen.
 
 ## 5. Nicht umgesetzte Quellen
 
-Ausgeschlossen oder zurückgestellt: drugshortage.ch (wird nicht gescrapt), Schweden (robots.txt sperrt die Export-Schnittstelle), Norwegen (nur HTML), Portugal und Kroatien (wechselnde URL bzw. PDF), Produktregister für SK und SI (kein offener Export gefunden).
+Ausgeschlossen oder zurückgestellt: drugshortage.ch (wird nicht gescrapt), Schweden und Zypern (robots.txt sperrt den Abruf), Litauen (Cloudflare), Produktregister für SK und SI (kein offener Export gefunden). Norwegen, Portugal und Kroatien archiviert die Referenzinstanz seit 16.11.2026 roh ([Abschnitt 4](#4-unterschiede-zur-referenzinstanz)).

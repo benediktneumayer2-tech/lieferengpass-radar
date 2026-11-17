@@ -8,11 +8,15 @@ manifest. Failed requests are recorded too, so gaps stay visible.
 A live file whose Last-Modified is older than that of an earlier live fetch of the same source is stale (a cache
 served an old version, e.g. ogyei 2026-10-22, sukl_cz 2026-10-23): the build leaves it out (`stale_paths`), and a
 new one counts as a failed fetch like an answer that fails the format check.
+
+Watched sources (`watch`) are archived raw only, without parser, table or feature: the daily run fetches
+them last, after the daily log, with one attempt and no retries; a failure is only a warning.
 """
 from __future__ import annotations
 
 import gzip
 import hashlib
+import html
 import io
 import json
 import os
@@ -22,7 +26,7 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Callable
@@ -43,7 +47,12 @@ class Source:
     ext: str
     paged: bool = False  # url contains {page}; pages 1..n until an empty result, stored as JSONL (one raw page per line)
     min_hours: float = 0  # scheduled runs skip the source while its last successful fetch is younger
-    expect: bytes = b""  # marker that must appear near the start of a valid file (format check)
+    expect: bytes = b""  # marker that must appear near the start of a valid file (format check; HTML: anywhere)
+    watch: bool = False  # watched: raw only; fetched after the daily log, one attempt, a failure is only a warning
+    pause: float = 0  # seconds to wait before each request (EMA: distance to the previous EMA request; paged: per page)
+    link: str = ""  # regex on link address and text of the page at url; the newest linked file (by its date) is fetched
+    page_rows: bytes = b""  # paged: marker of a page with results (default: a non-empty "resultados" list as at CIMA)
+    timer: bool = False  # fetched only by its own systemd timer (stockout fetch --source), never in the regular runs
 
 
 SOURCES = {
@@ -91,6 +100,17 @@ SOURCES = {
                           "csv", min_hours=20, expect=b"JAHR;KW"),
     "sari_patient": Source("sari_patient", "https://opendata-files.sozialversicherung.at/sari/SARI_Wohnregion_Patient_v202602.csv",
                            "csv", min_hours=20, expect=b"JAHR;KW"),
+    # Watched sources (documentation/DATENQUELLEN.md): history only through this archive. Daily:
+    # EMA blocks quick repeated requests (it would hit the source `ema` too): 60 s before each request, one attempt.
+    "ema_medicines": Source("ema_medicines", "https://www.ema.europa.eu/en/documents/report/medicines-output-medicines-report_en.xlsx",
+                            "xlsx", min_hours=20, watch=True, pause=60),
+    "ema_dhpc": Source("ema_dhpc", "https://www.ema.europa.eu/en/documents/report/medicines-output-dhpc-report_en.xlsx", "xlsx",
+                       min_hours=20, watch=True, pause=60),
+    # Weekly checks; a new issue is stored when it appears, an unchanged file costs one manifest line.
+    "ema_union": Source("ema_union", "https://www.ema.europa.eu/en/documents/other/union-list-critical-medicines-en.xlsx", "xlsx",
+                        min_hours=160, watch=True, pause=60),
+    "abwasser_wien": Source("abwasser_wien", "https://www.wien.gv.at/downloads/ma15/ogd/abwassermonitoring.csv", "csv",
+                            min_hours=160, watch=True, expect=b"Datum;Target"),
 }
 EUDRAGMDP_FROM = "2000-01-01"
 PL_JOURNAL = "https://dziennikmz.mz.gov.pl/"
@@ -214,7 +234,7 @@ def _check(source: Source, body: bytes, produced_on: str | None) -> list[str]:
     elif source.ext == "xls" and not body.startswith(b"\xd0\xcf\x11\xe0"):
         warnings.append("keine xls-Datei")
     elif source.expect:
-        if source.expect not in body[:3000]:
+        if source.expect not in (body if source.ext == "html" else body[:3000]):
             warnings.append(f"Kennung {source.expect.decode()} fehlt")
     elif source.ext == "csv" and b";" not in body[:2000]:
         warnings.append("keine CSV mit Semikolon")
@@ -333,13 +353,55 @@ def _get_sukl_dlp(source: Source, opener: Opener, timeout: float):
     return _get(max(urls, key=lambda u: u[-12:-4]).decode(), opener, timeout)
 
 
-def _get_pages(source: Source, opener: Opener, timeout: float):
+PT_MONTHS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro",
+             "novembro", "dezembro"]
+
+
+def _link_day(text: str) -> date | None:
+    """First date in a link: 13.11.2026, 1.1.2026, 13 novembro 2026 or 13 de novembro de 2026."""
+    m = re.search(r"\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b", text)
+    if m:
+        day, month, year = int(m[1]), int(m[2]), int(m[3])
+    else:
+        m = re.search(r"\b(\d{1,2}) (?:de )?([a-zç]+) (?:de )?(\d{4})\b", text.lower())
+        if not m or m[2] not in PT_MONTHS:
+            return None
+        day, month, year = int(m[1]), PT_MONTHS.index(m[2]) + 1, int(m[3])
+    try:
+        return date(year, month, day)
+    except ValueError:
+        return None
+
+
+def _get_linked(source: Source, opener: Opener, timeout: float, sleep: Callable[[float], None]):
+    """Newest file linked from the page at url: links whose address and text match `link`, newest by their date."""
+    page, _, _ = _get(source.url, opener, timeout)
+    found = []
+    for href, text in re.findall(r'<a\s[^>]*?href="([^"]+)"[^>]*>(.*?)</a>', page.decode("utf-8", "replace"), re.S | re.I):
+        href = html.unescape(href)
+        label = " ".join((urllib.parse.unquote_plus(href) + " " + html.unescape(re.sub(r"<[^>]+>", " ", text))).split())
+        day = _link_day(label)
+        if day and re.search(source.link, label):
+            found.append((day, href))
+    if not found:
+        raise OSError("keine Datei verlinkt")
+    url = urllib.parse.quote(urllib.parse.urljoin(source.url, max(found)[1]), safe=":/?&=%+#~")
+    if source.pause:
+        sleep(source.pause)
+    body, headers, status = _get(url, opener, timeout)
+    return body, {"Content-Type": headers.get("Content-Type"), "Last-Modified": headers.get("Last-Modified"),
+                  "ETag": headers.get("ETag"), "X-File": url}, status
+
+
+def _get_pages(source: Source, opener: Opener, timeout: float, sleep: Callable[[float], None] = time.sleep):
     """All pages of a paged JSON API, joined as JSONL; stops at the first page without results."""
     pages, headers = [], None
     for page in range(1, MAX_PAGES + 1):
+        if source.pause:
+            sleep(source.pause)
         body, h, _ = _get(source.url.format(page=page), opener, timeout)
         headers = headers or h
-        if not json.loads(body).get("resultados"):
+        if not (source.page_rows in body if source.page_rows else json.loads(body).get("resultados")):
             break
         if b"\n" in body:
             raise OSError(f"Seite {page} enthält Zeilenumbrüche")
@@ -359,7 +421,7 @@ def fetch_source(
     sleep: Callable[[float], None] = time.sleep,
     timeout: float = 90,
 ) -> dict:
-    """Fetch one source with retries and record the outcome in the manifest.
+    """Fetch one source with retries (a watched source: one attempt) and record the outcome in the manifest.
 
     An answer that fails the format check (e.g. a maintenance page) or is stale (an older Last-Modified than an earlier
     live fetch) is retried like a network error; if all attempts fail that way, the last answer is kept for diagnosis
@@ -367,19 +429,23 @@ def fetch_source(
     """
     errors: list[str] = []
     rejected = None
-    for attempt in range(len(RETRY_DELAYS) + 1):
+    for attempt in range(1 if source.watch else len(RETRY_DELAYS) + 1):
         if attempt:
             sleep(RETRY_DELAYS[attempt - 1])
+        if source.pause and not source.paged:
+            sleep(source.pause)
         fetched = utcnow()
         try:
             if source.paged:
-                body, headers, status = _get_pages(source, opener, timeout)
+                body, headers, status = _get_pages(source, opener, timeout, sleep)
             elif source.name == "eudragmdp":
                 body, headers, status = _get_eudragmdp(source, opener, timeout)
             elif source.name == "pl_mz":
                 body, headers, status = _get_pl_mz(source, opener, timeout)
             elif source.name == "sukl_dlp":
                 body, headers, status = _get_sukl_dlp(source, opener, timeout)
+            elif source.link:
+                body, headers, status = _get_linked(source, opener, timeout, sleep)
             else:
                 body, headers, status = _get(source.url, opener, timeout)
         except Exception as exc:  # network errors, HTTP errors, timeouts
@@ -400,6 +466,8 @@ def fetch_source(
         }
         if headers.get("X-Act"):
             meta.update(act=headers["X-Act"], published=headers.get("X-Published"))
+        if headers.get("X-File"):
+            meta["file_url"] = headers["X-File"]
         if meta["warnings"]:
             errors.append("Formatprüfung: " + "; ".join(meta["warnings"]))
             rejected = (body, _stamp(produced_on, fetched), meta)
@@ -451,13 +519,15 @@ def retry_due(archive: Archive) -> list[str]:
             if not s.min_hours and s.name in latest and not _succeeded(latest[s.name])]
 
 
-def fetch_all(archive: Archive, names: list[str] | None = None, **kwargs) -> list[dict]:
+def fetch_all(archive: Archive, names: list[str] | None = None, *, watch: bool = False, **kwargs) -> list[dict]:
     """Fetch the selected sources independently; one failure never blocks the others.
 
-    Without explicit names (scheduled run), sources with `min_hours` are skipped while recently fetched.
+    Without explicit names (scheduled run), sources with `min_hours` are skipped while recently fetched, and only the
+    watched sources (`watch=True`, last step of the daily run) or only the others are fetched; never those with a timer.
     """
     if names:
         selected = [SOURCES[n] for n in names]
     else:
-        selected = [s for s in SOURCES.values() if not (s.min_hours and _fetched_recently(archive, s))]
+        selected = [s for s in SOURCES.values() if s.watch == watch and not s.timer
+                    and not (s.min_hours and _fetched_recently(archive, s))]
     return [fetch_source(archive, s, **kwargs) for s in selected]

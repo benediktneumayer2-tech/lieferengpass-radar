@@ -299,7 +299,8 @@ def test_failed_source_is_an_error_only_for_basg_or_after_36_hours(tmp_path, mon
 
 def test_public_code_fetches_none_of_the_withheld_sources():
     from stockout_at import archive as arch
-    withheld = {"edqm", "fimea", "fimea_reg", "mia_asp", "mia_abst", "mia_verl", "mia_ve"}
+    withheld = {"edqm", "fimea", "fimea_reg", "mia_asp", "mia_abst", "mia_verl", "mia_ve",
+                "halmed", "basg_msc", "basg_dhpc", "dmp_no", "eko_pdf", "infarmed", "anm_ro", "zva_lv", "bwl_ch"}
     assert not withheld & set(arch.SOURCES)
 
 
@@ -352,3 +353,116 @@ def test_import_legacy_without_package_fails_with_clear_message(tmp_path, monkey
     err = capsys.readouterr().err
     assert "Kein Datenpaket für die Vorgeschichte angegeben" in err and "STOCKOUT_LEGACY_PACKAGE" in err
     assert not (tmp_path / "a" / "manifest.jsonl").exists()
+
+
+def test_watched_source_fails_with_one_attempt_and_only_a_warning(tmp_path, monkeypatch, capsys):
+    from stockout_at import cli
+    u = urls()
+    archive = Archive(tmp_path / "a")
+    asked, waits = [], []
+
+    def opener(req, timeout):
+        asked.append(req.full_url)
+        raise OSError("gesperrt")
+
+    [e] = fetch_all(archive, ["ema_medicines"], opener=opener, sleep=waits.append)
+    assert not e["ok"] and e["attempts"] == 1 and asked == [u["ema_medicines"]] and waits == [60]  # EMA pause, no retries
+    monkeypatch.setattr(cli, "fetch_all", lambda a, names: [e])
+    assert cli.cmd_fetch(_fetch_args(archive, source=["ema_medicines"])) == 0  # even without any earlier success
+    out = capsys.readouterr().out
+    assert "WARNUNG ema_medicines: OSError: gesperrt" in out and "noch kein Erfolg" in out and "FEHLER" not in out
+
+
+def test_daily_run_fetches_watched_sources_last_and_never_fails_on_them(tmp_path, monkeypatch, capsys):
+    import argparse
+
+    from stockout_at import archive as arch, cli
+    archive = Archive(tmp_path / "a")
+    archive.append({"source": "basg", "origin": "live", "ok": True, "path": "basg/2026/x.xml.gz"})
+    calls = []
+    for step in ("cmd_fetch", "cmd_build", "_rueckblick_json", "cmd_site", "cmd_protokoll"):
+        monkeypatch.setattr(cli, step, lambda args, step=step: calls.append(step) or 0)
+
+    def watched(a, names=None, watch=False):
+        calls.append(f"fetch_all(watch={watch})")
+        return [{"source": "ema_medicines", "ok": False, "error": "gesperrt"}]
+
+    monkeypatch.setattr(cli, "fetch_all", watched)
+    args = argparse.Namespace(archive=str(archive.root), db=str(tmp_path / "d" / "stockout.sqlite"), export_json=None)
+    assert cli.cmd_daily(args) == 0
+    assert calls == ["cmd_fetch", "cmd_build", "_rueckblick_json", "cmd_site", "cmd_protokoll", "fetch_all(watch=True)"]
+    out = capsys.readouterr().out
+    assert out.index("Schritt Protokoll: OK") < out.index("WARNUNG ema_medicines") and "Tageslauf: alles OK" in out
+
+    monkeypatch.setattr(cli, "fetch_all", lambda a, names=None, watch=False: 1 / 0)  # a programming error
+    assert cli.cmd_daily(args) == 0 and "WARNUNG Beobachtet: ZeroDivisionError" in capsys.readouterr().out
+
+    # the regular fetch step never takes a watched source, the last step only the due watched ones (no own timer)
+    def offline(req, timeout):
+        raise OSError("aus")
+
+    regular = {e["source"] for e in arch.fetch_all(Archive(tmp_path / "b"), opener=offline, sleep=lambda s: None)}
+    last = {e["source"] for e in arch.fetch_all(Archive(tmp_path / "c"), watch=True, opener=offline, sleep=lambda s: None)}
+    assert regular == {n for n, s in arch.SOURCES.items() if not s.watch}
+    assert last == {n for n, s in arch.SOURCES.items() if s.watch and not s.timer} and "ema_union" in last
+
+
+def test_status_lists_watched_sources_apart_and_warns_after_min_hours_plus_36(tmp_path):
+    from stockout_at.archive import iso
+    from stockout_at.status import render
+    archive = Archive(tmp_path / "a")
+    now = datetime(2026, 11, 20, 10, 0, tzinfo=timezone.utc)
+    t = iso(now - timedelta(days=3))
+    archive.append({"source": "abwasser_wien", "origin": "live", "ok": True, "duplicate": False, "warnings": [],
+                    "path": "abwasser_wien/2026/x.csv.gz", "recorded_at": t, "fetched_at": t})
+    report = collect(archive, None, now)
+    assert "abwasser_wien" in report["watched"] and "abwasser_wien" not in report["sources"] and "basg" in report["sources"]
+    assert not any(w.startswith("abwasser_wien") for w in report["warnings"])  # weekly source, 3 days ago
+    assert "ema_union: noch kein erfolgreicher Abruf" in report["warnings"]
+    assert "Beobachtete Quellen" in render(report)
+    later = collect(archive, None, now + timedelta(days=6))  # 9 days without success
+    assert "abwasser_wien: letzter erfolgreicher Abruf älter als 196 h" in later["warnings"]
+
+
+def test_link_search_paging_and_html_marker(tmp_path):
+    from stockout_at.archive import Source, fetch_source
+    archive = Archive(tmp_path / "a")
+
+    # link search: the newest file by the date in its link (Portuguese month names, numeric dates, spaces in the path)
+    page = ('<a href="/documents/9/Lista+de+proibi%C3%A7%C3%B5es+-+2+outubro+2026/b">Lista de proibições 2 outubro 2026</a>'
+            '<a class="x" href="/documents/9/a">Lista de proibi&ccedil;&otilde;es a partir de <b>13&nbsp;de novembro</b>\n'
+            ' de 2026</a><a href="/andere-1.12.2026.xlsx">Andere Liste</a>').encode()
+    pt = Source("t_pt", "https://pt.test/web/seite", "xlsx", watch=True, link=r"Lista de proibições")
+    newest = "https://pt.test/documents/9/a"
+    e = fetch_source(archive, pt, opener=opener_for({pt.url: page, newest: EMA}), sleep=lambda s: None)
+    assert e["ok"] and e["file_url"] == newest and archive.read(e["path"]) == EMA
+    ro = Source("t_ro", "https://ro.test/liste/", "pdf", watch=True, link=r"Notificari Sunset.*\.pdf")
+    page = b'<a href="/_/D M/31.07.2026 Notificari Sunset.pdf">alt</a> <a href="/_/D M/13.11.2026 Notificari Sunset.pdf">neu</a>'
+    newest = "https://ro.test/_/D%20M/13.11.2026%20Notificari%20Sunset.pdf"
+    e = fetch_source(archive, ro, opener=opener_for({ro.url: page, newest: b"%PDF-1.7"}), sleep=lambda s: None)
+    assert e["ok"] and e["file_url"] == newest
+    bad = fetch_source(archive, ro, opener=opener_for({ro.url: b"<p>keine Liste</p>"}), sleep=lambda s: None)
+    assert not bad["ok"] and "keine Datei verlinkt" in bad["error"]
+
+    # paged JSON with an HTML table (ZVA): pages until the first one without a result table, a pause before each page
+    zva = Source("t_lv", "https://lv.test/api/?p={page}", "jsonl", paged=True, watch=True, pause=3, page_rows=b"<thead")
+    full = b'{"data":"<table><thead><tr><th>Name<\\/th><\\/tr><\\/thead><tr><td>A<\\/td><\\/tr><\\/table>","success":true}'
+    empty = b'{"data":"<table class=\\"pages\\"><tr><td>1 2<\\/td><\\/tr><\\/table>","success":true}'
+    asked, waits = [], []
+
+    def opener(req, timeout):
+        asked.append(req.full_url)
+        return Resp(full if len(asked) < 3 else empty)
+
+    e = fetch_source(archive, zva, opener=opener, sleep=waits.append)
+    assert e["ok"] and asked == [zva.url.format(page=p) for p in (1, 2, 3)] and waits == [3, 3, 3]
+    assert archive.read(e["path"]) == full + b"\n" + full
+
+    # an HTML page counts only with its marker, which may stand far behind the first 3,000 bytes
+    no = Source("t_no", "https://no.test/oversikt", "html", watch=True, expect=b'id="excelData"')
+    good = b"<html>" + b"x" * 5000 + b'<input id="excelData" value="{}"></html>'
+    assert fetch_source(archive, no, opener=opener_for({no.url: good}), sleep=lambda s: None)["ok"]
+    bad = fetch_source(archive, no, opener=opener_for({no.url: b"<html>Wartung</html>"}), sleep=lambda s: None)
+    assert not bad["ok"] and bad["attempts"] == 1 and "Kennung" in bad["error"]
+    assert archive.read(bad["path"]) == b"<html>Wartung</html>"  # kept for diagnosis
+

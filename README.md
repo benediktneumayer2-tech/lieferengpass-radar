@@ -18,7 +18,7 @@ The website is meant for pharmacies, hospital pharmacies, physicians and public-
 
 The project uses public data only — no data from pharmacies, wholesalers or patients.
 
-[Quick start](#quick-start) · [How it works](#how-it-works) · [Does the forecast work?](#does-the-forecast-work) · [Pre-registration](#pre-registration) · [Documentation (German)](documentation/README.md) · [Deutsch](README.de.md)
+[Quick start](#quick-start) · [How it works](#how-it-works) · [Does the forecast work?](#does-the-forecast-work) · [Pre-registration](#pre-registration) · [What's new](#whats-new-since-v01-prereg) · [Documentation (German)](documentation/README.md) · [Deutsch](README.de.md)
 
 ```bash
 # Linux, Python ≥ 3.12, inside the cloned repository. A fresh clone holds no data;
@@ -146,13 +146,23 @@ The archive is designed along the ALCOA+ data-integrity principles used in GxP q
 
 These are design choices, not a validation: the radar is not a validated computerised system in the GxP sense.
 
+## What's new since v0.1-prereg
+
+The frozen models and the test plan are unchanged (same hashes). The changes concern how data are archived and read, plus one added check.
+
+- **17 Nov 2026 – additional pre-registered check.** Do Z3 warnings come true more often when a second, independent model at the level of the marketing authorisation holder agrees? Rule, dates and hashes: [analysis/paketsuche/zusatzpruefung](analysis/paketsuche/zusatzpruefung/README.md).
+- **16 Nov 2026 – more raw archiving.** The daily run also keeps raw copies of further public sources, without a parser and not yet used for forecasts. The public code fetches three EMA tables and Vienna's wastewater monitoring.
+- **16 Nov 2026 – stale downloads discarded.** A download older than an earlier one of the same source counts as failed and is retried. The new switch `--zeitpunktgenau` counts BASG reports only from their publication date; it is off by default, so the frozen test is unaffected. The Z3 test report has a dated note on this.
+- **16 Nov 2026 – website.** Display name Lieferengpass-Radar and a notice for health professionals.
+- **12 Nov 2026 – citation.** `CITATION.cff` and a Zenodo DOI for v0.1-prereg.
+
 ## Status and limits
 
-| Part | Status on 10 Nov 2026 |
+| Part | Status on 17 Nov 2026 |
 |---|---|
-| Daily archive | running on the reference instance since 17 Oct 2026; no BASG day missing |
+| Daily archive | running on the reference instance since 17 Oct 2026; no BASG day missing; raw copies of further sources since 16 Nov 2026 |
 | Episodes | history back to 10 Apr 2021 from 28 snapshots, 10 of them truncated |
-| Z3 forecast | frozen, logged daily; prospectively untested |
+| Z3 forecast | frozen, logged daily; prospective test from 1 Jan 2027, with one additional pre-registered check |
 | Website | built locally, not yet public |
 | Planned | forecasts of whether a delivery date holds and when a shortage ends; open data exports; public website |
 

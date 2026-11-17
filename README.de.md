@@ -18,7 +18,7 @@ Die Website ist für Apotheken, Spitalapotheken, Ärzt:innen und das öffentlich
 
 Das Projekt verwendet ausschließlich öffentliche Daten, keine Daten von Apotheken, Großhändlern oder Patient:innen.
 
-[Schnellstart](#schnellstart) · [So funktioniert es](#so-funktioniert-es) · [Trägt die Schätzung?](#trägt-die-schätzung) · [Vorab-Registrierung](#vorab-registrierung) · [Dokumentation](documentation/README.md) · [English](README.md)
+[Schnellstart](#schnellstart) · [So funktioniert es](#so-funktioniert-es) · [Trägt die Schätzung?](#trägt-die-schätzung) · [Vorab-Registrierung](#vorab-registrierung) · [Neu](#neu-seit-v01-prereg) · [Dokumentation](documentation/README.md) · [English](README.md)
 
 ```bash
 # Linux, Python ≥ 3.12, im geklonten Repository. Ein frischer Klon enthält keine Daten;
@@ -146,13 +146,23 @@ Das Archiv folgt im Aufbau den ALCOA+-Grundsätzen der Datenintegrität aus dem 
 
 Das sind Entscheidungen im Aufbau, keine Validierung: Das Radar ist kein validiertes computergestütztes System im GxP-Sinn.
 
+## Neu seit v0.1-prereg
+
+Die eingefrorenen Modelle und der Prüfplan sind unverändert (gleiche Hashes). Geändert hat sich, wie Daten archiviert und gelesen werden; dazu kommt eine Zusatzprüfung.
+
+- **17.11.2026 – zusätzliche Vorab-Prüfung.** Treffen Z3-Warnungen öfter ein, wenn ein zweites, unabhängiges Modell auf Ebene der Zulassungsinhaber zustimmt? Regel, Termine und Hashes: [analysis/paketsuche/zusatzpruefung](analysis/paketsuche/zusatzpruefung/ZUSATZPRUEFPLAN.md).
+- **16.11.2026 – mehr Rohquellen.** Der Tageslauf archiviert weitere öffentliche Quellen nur roh, ohne Parser und noch ohne Einfluss auf die Schätzung. Der öffentliche Code lädt drei EMA-Tabellen und das Wiener Abwassermonitoring.
+- **16.11.2026 – veraltete Abrufe verworfen.** Ein Abruf, der älter ist als ein früherer derselben Quelle, gilt als gescheitert und wird nachgeholt. Der neue Schalter `--zeitpunktgenau` zählt BASG-Meldungen erst ab ihrer Veröffentlichung; er ist standardmäßig aus, die eingefrorene Prüfung bleibt unberührt. Der Z3-Prüfbericht hat dazu einen datierten Nachtrag.
+- **16.11.2026 – Website.** Anzeigename Lieferengpass-Radar und ein Hinweis für Fachkreise.
+- **12.11.2026 – Zitierbarkeit.** `CITATION.cff` und eine Zenodo-DOI für v0.1-prereg.
+
 ## Stand und Grenzen
 
-| Teil | Stand am 10.11.2026 |
+| Teil | Stand am 17.11.2026 |
 |---|---|
-| Tagesarchiv | läuft in der Referenzinstanz seit 17.10.2026; seither kein BASG-Tag fehlend |
+| Tagesarchiv | läuft in der Referenzinstanz seit 17.10.2026; seither kein BASG-Tag fehlend; seit 16.11.2026 auch Rohkopien weiterer Quellen |
 | Episoden | Vorgeschichte ab 10.04.2021 aus 28 Einzelaufnahmen, davon 10 abgeschnitten |
-| Z3-Schätzung | eingefroren, schreibt täglich ins Protokoll; prospektiv ungeprüft |
+| Z3-Schätzung | eingefroren, schreibt täglich ins Protokoll; prospektive Prüfung ab 01.01.2027, dazu eine vorab festgelegte Zusatzprüfung |
 | Website | lokal gebaut, noch nicht öffentlich |
 | Geplant | Prognosen, ob ein Termin hält und wann eine Meldung endet; offene Datenexporte; öffentliche Website |
 

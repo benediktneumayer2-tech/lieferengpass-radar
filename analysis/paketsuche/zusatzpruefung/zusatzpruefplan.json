@@ -1,0 +1,105 @@
+{
+ "name": "Zusatzprüfung: Zustimmung des Inhabermodells (s28)",
+ "festgelegt_am": "2026-11-16",
+ "owner_entscheidung": "2026-11-16",
+ "regeltext": "analysis/paketsuche/zusatzpruefung/ZUSATZPRUEFPLAN.md",
+ "auswerteskript": "analysis/paketsuche/psuche/zustimmung_voraus.py",
+ "regel": {
+  "hauptmodell": {
+   "verfahren": "z3_v0",
+   "spalte": "z3_v0_p8",
+   "quelle": "data/archive/protokoll/vorhersagen/JJJJ/JJJJ-MM-TT.csv.gz",
+   "pruefplan": "35a230a0a9bd"
+  },
+  "stichtage": {
+   "wochentag": "Montag",
+   "ab": "2027-01-04",
+   "nur_mit_protokoll": true
+  },
+  "liste": {
+   "k": 50,
+   "gleichstand": "atc5 aufsteigend"
+  },
+  "zustimmung": {
+   "modell": "T04_I_lin_klein",
+   "objekt": "analysis/paketsuche/work/zusammenspiel/zusammenspiel_fest_2026-11-16.pkl",
+   "daten": "je Stichtag aus dem Archiv, nur Daten vor dem Stichtag (Rechenweg s27); einmal gerechnet, nie neu",
+   "zusammenfassung": "q = 1 - prod(1 - p) über die Inhaber-Fälle des Wirkstoffs, roh",
+   "bestaetigt": "Wirkstoff steht am selben Stichtag auch unter den k höchsten q",
+   "k": 50,
+   "rang_unter": "Wirkstoffe des Protokolls",
+   "gleichstand": "atc5 aufsteigend",
+   "ohne_q": "nicht bestätigt"
+  },
+  "ziel": {
+   "regel": "wie stockout bewertung: eine BASG-Meldung zum Wirkstoff beginnt oder erscheint erstmals in (d, d + h]",
+   "horizont": 56,
+   "zaehlt_ab": "d + h <= BASG-Stand"
+  },
+  "hauptendpunkt": {
+   "groesse": "Trefferquote bestätigt minus nicht bestätigt innerhalb der Top k, gepoolt über die Stichtage",
+   "bootstrap": {
+    "einheit": "ganze Wirkstoffe (ATC5)",
+    "B": 2000,
+    "seed": 20261116,
+    "niveau": 0.95,
+    "bereich": "Perzentil"
+   },
+   "erfuellt": "95-%-Bereich liegt über 0 (untere Grenze > 0)"
+  },
+  "auswertung": {
+   "entscheidend": {
+    "montage_von": "2027-01-04",
+    "montage_bis": "2027-06-28",
+    "endgueltig_ab_basg_stand": "2027-08-23"
+   },
+   "zwischenauswertung": {
+    "am": "2027-04-30",
+    "art": "nur beschreibend (Go/No-Go)"
+   }
+  },
+  "nebenpunkte": {
+   "verhaeltnis": "je Gruppe eingetroffen zu angesagt (Summe y / Summe der Werte des Hauptmodells)",
+   "horizonte": [
+    28,
+    84
+   ],
+   "horizonte_lesart": "Liste und Zustimmung mit den Werten des Horizonts (z3_v0_p4 bzw. z3_v0_p12, q für 28 bzw. 84 Tage); daneben die 8-Wochen-Liste mit Ziel 28/84 Tage",
+   "E_S3z_C": "dieselbe Teilung mit E_S3z_C (56 Tage) als Hauptmodell; Werte aus msuche.spaetpruefung (work/spaet/vorhersagen.parquet), sonst aus derselben Nachrechnung",
+   "art": "beschreibend"
+  }
+ },
+ "unberuehrt": [
+  "Hauptprüfung nach models/pruefplan.json (35a230a0a9bd)",
+  "models/",
+  "src/",
+  "deploy/",
+  "data/",
+  "Anzeige auf der Website (frühestens nach dem Go/No-Go und nur nach Owner-Entscheidung)"
+ ],
+ "dateien": {
+  "models/pruefplan.json": {
+   "rolle": "Prüfplan der Hauptprüfung",
+   "sha256": "6539b06cb88d60461d39563e2332d59043534ac839e79a8a24020913774ca0a3",
+   "pruefplan_sha256": "35a230a0a9bd8da4810849d5599442d33bb44769431bfc29be093b8fd6974479"
+  },
+  "models/z3_v0.json": {
+   "rolle": "Hauptmodell z3_v0",
+   "sha256": "0c23d9029e35a743def38a27db81a774303e5c0c860e89400ea7712c0d6d2b44",
+   "sha256_im_pruefplan": "4041b80cd0b532356d66db7e838b9ab7d10bc2a423912a849338eef46a5f666a"
+  },
+  "analysis/paketsuche/work/zusammenspiel/zusammenspiel_fest_2026-11-16.pkl": {
+   "rolle": "eingefrorenes Inhabermodell T04_I_lin_klein",
+   "sha256": "6a501562002d09226ed673adfe13536cdd259cb0ec02d40c0361bfc3899410db"
+  },
+  "analysis/modellsuche/work/spaet/modell_E_S3z_C_2026-10-20.pkl": {
+   "rolle": "eingefrorenes E_S3z_C (s23)",
+   "sha256": "3e791fb03cbef748a701c6b1259920137e42a67ff7d0a831725c1fd53a96e69b"
+  },
+  "analysis/paketsuche/psuche/zustimmung_voraus.py": {
+   "rolle": "Auswerteskript",
+   "sha256": "1705b86cf33424f8965f27e4deaa76aec24c442b4d95f44f80df32559e67b81a"
+  }
+ },
+ "geschrieben": "2026-11-16T23:28:04+01:00"
+}

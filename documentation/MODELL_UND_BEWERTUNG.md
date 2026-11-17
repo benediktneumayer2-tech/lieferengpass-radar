@@ -194,6 +194,8 @@ Die fünf Verfahren und der Prüfplan wurden am **21.10.2026** eingefroren, vor 
 | `pruefplan.json` | Beginn, Stichtage, Ergebnis, Hauptvergleich mit Bestehensregel, Nebenkennzahlen und Regeln; legt jedes Verfahren über seine sha256 fest |
 | `SHA256SUMS` | Ausgabe von `sha256sum` über `models/*.json`, beim Export der öffentlichen Fassung erzeugt |
 
+**Zusatzprüfung Zustimmung (festgelegt 16.11.2026).** Ein zusätzlicher, vorab festgelegter Punkt der Prüfung fragt, ob Top-50-Warnungen von z3_v0 öfter eintreffen, wenn ein eingefrorenes Modell auf Ebene der Zulassungsinhaber zustimmt. Regel, Termine und sha256: `analysis/paketsuche/zusatzpruefung/` ([Regeltext](../analysis/paketsuche/zusatzpruefung/ZUSATZPRUEFPLAN.md)). Die Hauptprüfung nach `pruefplan.json` bleibt unberührt.
+
 **Der Prüfplan-Hash.** Die sha256 von `pruefplan.json` beginnt mit **`35a230a0a9bd`**. Jede Zeile des Vorhersageprotokolls trägt diese 12 Zeichen in der Spalte `pruefplan` ([Abschnitt 10](#10-vorhersageprotokoll-täglich)), und `stockout bewertung` wertet nur solche Zeilen aus.
 
 **Nachrechnen**, im Repository-Ordner:

@@ -131,6 +131,8 @@ flowchart LR
 
 Ab dem 01.01.2027 zählt nur, was an den Stichtagen im täglichen Protokoll stand; ein verpasster Tag lässt sich nicht nachholen. Das Go/No-Go am 30.04.2027 ist der erste Bericht nach dem Prüfplan. **Die Ergebnisse werden in jedem Fall veröffentlicht, auch bei No-Go.** Der eingefrorene Stand ist auf Zenodo als Release `v0.1-prereg` archiviert: [doi:10.5281/zenodo.24168687](https://doi.org/10.5281/zenodo.24168687). Wie sich die Hashes nachrechnen lassen, samt einer Eigenheit in drei Modelldateien: [Vorab-Registrierung](documentation/MODELL_UND_BEWERTUNG.md#12-vorab-registrierung).
 
+**Zusätzlich vorab festgelegt (16.11.2026).** Treffen Z3-Warnungen öfter ein, wenn ein zweites, unabhängiges Modell auf Ebene der Zulassungsinhaber zustimmt? Regel, Termine und Hashes: [analysis/paketsuche/zusatzpruefung](analysis/paketsuche/zusatzpruefung/ZUSATZPRUEFPLAN.md). Die Hauptprüfung bleibt unverändert.
+
 ## Datenintegrität
 
 Das Archiv folgt im Aufbau den ALCOA+-Grundsätzen der Datenintegrität aus dem GxP-Umfeld:

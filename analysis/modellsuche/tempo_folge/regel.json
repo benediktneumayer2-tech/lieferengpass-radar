@@ -1,0 +1,49 @@
+{
+ "name": "Folgeprüfung Signaltempo neue Länder (s29)",
+ "festgelegt": "2026-11-17, vor jeder äußeren Zahl mit Tempomerkmalen",
+ "zweck": "Prüfen, ob das Auslandstempo G1 über alle Länder, also mit BE, ES, FR, FI und den EMA-Tageslisten, die erst seit Oktober 2026 eine saubere tägliche Geschichte im Archiv haben, die Prognose des eingefrorenen E_S3z_C ergänzt.",
+ "auswertung_fruehestens": "2027-09-01 (letzter Stichtag 28.06.2027 + 56 Tage + Meldeverzug)",
+ "stichtage": "alle Montage vom 02.11.2026 bis 28.06.2027 (35 Stichtage, im Zeitraum 01.11.2026–30.06.2027)",
+ "faelle": "wie s23/s29 (Protokoll mp1): Wirkstoffe, die in der zuletzt erfassten ASP-Fassung vor t lieferbar sind und am Tag t keine veröffentlichte aktive BASG-Meldung haben (fall)",
+ "ziel": "y56: eine BASG-Meldung beginnt oder erscheint erstmals in (t, t + 56]; nur Stichtage mit t + 56 ≤ BASG-Stand der Auswertung",
+ "ausgangsmodell": {
+  "name": "E_S3z_C eingefroren",
+  "datei": "analysis/modellsuche/work/spaet/modell_E_S3z_C_2026-10-20.pkl",
+  "sha256": "3e791fb03cbef748a701c6b1259920137e42a67ff7d0a831725c1fd53a96e69b",
+  "lernende": "2026-10-20",
+  "vorhersage": "p_E je (Wirkstoff, Stichtag) mit den zeitpunktgenauen Merkmalen wie msuche.spaetpruefung.merkmale_tage, ohne Neulernen"
+ },
+ "quellen": {
+  "mit": ["aifa (IT)", "pl_mz (PL)", "ogyei (HU)", "ema (EU, auch Tageslisten)", "fda (US)", "famhp (BE)", "cima (ES)", "ansm (FR)", "fimea (FI)", "sukl_cz (CZ)", "sukl_sk (SK)", "jazmp (SI)"],
+  "ohne": ["bfarm (DE, nur Diagnose)", "Register (sukl_dlp, cima_reg, fimea_reg) nur für die Zuordnung wie im Betrieb", "stockout_at.foreign.link / foreign_links"],
+  "zeitregel": "Eine Meldung zählt ab der ersten täglichen Archivdatei ihrer Quelle, in der sie steht (Ereignistag = max(Signaldatum, erste Sichtung)); aktiv ist, was in der letzten Archivdatei vor t steht und nicht vor t endet. Einträge der ersten Archivdatei einer Quelle (Altbestand) behalten ihr Signaldatum als Ereignistag; für Tage vor der ersten Archivdatei einer Quelle gilt deren erste Datei, beschränkt auf Einträge mit Signaldatum vor dem Tag."
+ },
+ "merkmal": {
+  "gruppe": "G1 Auslandstempo, Form dif (fest, keine innere Wahl)",
+  "komponenten": {
+   "dl28": "sign·log1p(|L(t) − L(t−28)|), L(d) = Zahl der Länder mit aktiver Meldung am Tag d",
+   "dl56": "sign·log1p(|L(t) − L(t−56)|)",
+   "nc": "sign·log1p(|NC(t) − NC(t−28)|), NC(d) = Länder mit bekannter neuer Meldung, Ereignistag in [d−28, d)",
+   "gap": "exp(−Tage/91) vom ersten zum zweiten aktiven Land (frühester Ereignistag je Land unter den aktiven), 0 bei weniger als zwei Ländern",
+   "ew": "ln2·(EW28 − EW91·28/91), EW_h = Σ 2^(−Alter/h) über bekannte Meldungen mit Alter ≤ 365 Tage"
+  },
+  "index": "tpi_G1 = Σ x_k / sd_k; sd_k = Streuung der Komponente auf den Fällen der Folgestichtage (nur Merkmalswerte)",
+  "code": "msuche.tempo._tempo mit allen Quellen oben und der Zeitregel der sauberen Variante (Umsetzung im späteren Schritt; die Formeln hier gelten)"
+ },
+ "e1": {
+  "modell": "logistische Regression y56 ~ logit(p_E) + z(tpi_G1), ungestraft; Odds Ratio je Standardabweichung",
+  "zeilen": {"alle": "alle Fälle der Folgestichtage", "signal": "mindestens eine aktive Auslandsmeldung einer Quelle oben oder eine aktive oder neue (56 T.) BASG-Meldung eines Inhabers bei einem anderen Wirkstoff"},
+  "bereich": "Block-Bootstrap über Stichtage (kreisförmige Blöcke von 8 Stichtagen, B = 2000, Startwert 20261117), Holm über die zwei Zeilenmengen",
+  "beschreibend": "dasselbe nur mit den neuen Quellen (famhp, cima, ansm, fimea, EMA-Tageslisten) und nur mit den alten Quellen der sauberen Variante"
+ },
+ "schwellen": {"or_je_sd": 1.10},
+ "entscheidung": {
+  "gefunden": "Holm-Untergrenze des OR auf allen Zeilen über 1: Tempo der neuen Länder ergänzt E_S3z_C; Folge: eigener Prüfplan für ein Modell mit diesen Quellen (E2), kein direkter Einbau",
+  "ausgeschlossen": "Holm-Obergrenze des OR unter 1,10 auf allen Zeilen und auf den Signalzeilen",
+  "unklar": "alles andere"
+ },
+ "hinweise": [
+  "Die Stichtage November/Dezember 2026 sehen bei den Rückblicken von 28/56 Tagen für BE, ES, FR teils nur den Altbestand der ersten Archivdatei; beendete Meldungen vor dem Archivbeginn fehlen dort.",
+  "Die Rechnung ist ein späterer, eigener Schritt; diese Datei legt Regel und Formeln fest."
+ ]
+}

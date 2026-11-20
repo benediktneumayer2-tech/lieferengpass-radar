@@ -129,9 +129,11 @@ flowchart LR
     C --> G["Go/no-go<br/>30 Apr 2027"]
 ```
 
-From 1 Jan 2027 only what the daily log recorded on the reference dates counts; a missed day cannot be made up. The go/no-go on 30 Apr 2027 is the first report under the plan. **The results will be published either way, including a no-go.** The frozen state is archived on Zenodo as release `v0.1-prereg`: [doi:10.5281/zenodo.24168687](https://doi.org/10.5281/zenodo.24168687). How to recompute the hashes, including a quirk in three model files: [Vorab-Registrierung](documentation/MODELL_UND_BEWERTUNG.md#12-vorab-registrierung).
+From 1 Jan 2027 only what the daily log recorded on the reference dates counts; a missed day cannot be made up. The go/no-go on 30 Apr 2027 is the first report under the plan. **The results will be published either way, including a no-go.** The frozen state is archived on Zenodo as release `v0.1-prereg`: [doi:10.5281/zenodo.24168687](https://doi.org/10.5281/zenodo.24168687). Release `v0.1.1-prereg` (20 Nov 2026) adds the two pre-registered additions below with the same models; all versions: [doi:10.5281/zenodo.24168686](https://doi.org/10.5281/zenodo.24168686). How to recompute the hashes, including a quirk in three model files: [Vorab-Registrierung](documentation/MODELL_UND_BEWERTUNG.md#12-vorab-registrierung).
 
 **Additional pre-registered check (fixed 16 Nov 2026).** Do Z3 warnings come true more often when a second, independent model at the level of the marketing authorisation holder agrees? Rule, dates and hashes: [analysis/paketsuche/zusatzpruefung](analysis/paketsuche/zusatzpruefung/README.md). The main test stays unchanged.
+
+**Pre-registered follow-up analysis (fixed 17 Nov 2026).** Does the speed at which shortage reports spread across countries add to the forecast once Belgium, Spain, France, Finland and the EMA daily lists have a daily history? Evaluated from September 2027 against the frozen challenger model; a positive result would lead to a separate test plan, not to a change of Z3. Rule, dates and hashes: [analysis/modellsuche/tempo_folge](analysis/modellsuche/tempo_folge/README.md).
 
 ## Data integrity
 
@@ -148,8 +150,10 @@ These are design choices, not a validation: the radar is not a validated compute
 
 ## What's new since v0.1-prereg
 
-The frozen models and the test plan are unchanged (same hashes). The changes concern how data are archived and read, plus one added check.
+The frozen models and the test plan are unchanged (same hashes). The changes concern how data are archived and read, plus one added check and one pre-registered follow-up analysis.
 
+- **20 Nov 2026 – signal speed: no measurable gain, follow-up fixed.** A retrospective search tested whether the speed at which shortage reports spread across countries improves the forecast. Verdict "unclear": no gain shown, a large one unlikely; nothing went into a model. Countries archived daily only since October 2026 are tested forward under a rule fixed on 17 Nov 2026: [analysis/modellsuche/tempo_folge](analysis/modellsuche/tempo_folge/README.md).
+- **20 Nov 2026 – citation.** Zenodo release `v0.1.1-prereg` archives the two pre-registered additions; models and test plan unchanged.
 - **17 Nov 2026 – additional pre-registered check.** Do Z3 warnings come true more often when a second, independent model at the level of the marketing authorisation holder agrees? Rule, dates and hashes: [analysis/paketsuche/zusatzpruefung](analysis/paketsuche/zusatzpruefung/README.md).
 - **16 Nov 2026 – more raw archiving.** The daily run also keeps raw copies of further public sources, without a parser and not yet used for forecasts. The public code fetches three EMA tables and Vienna's wastewater monitoring.
 - **16 Nov 2026 – stale downloads discarded.** A download older than an earlier one of the same source counts as failed and is retried. The new switch `--zeitpunktgenau` counts BASG reports only from their publication date; it is off by default, so the frozen test is unaffected. The Z3 test report has a dated note on this.
@@ -158,11 +162,12 @@ The frozen models and the test plan are unchanged (same hashes). The changes con
 
 ## Status and limits
 
-| Part | Status on 17 Nov 2026 |
+| Part | Status on 20 Nov 2026 |
 |---|---|
 | Daily archive | running on the reference instance since 17 Oct 2026; no BASG day missing; raw copies of further sources since 16 Nov 2026 |
 | Episodes | history back to 10 Apr 2021 from 28 snapshots, 10 of them truncated |
 | Z3 forecast | frozen, logged daily; prospective test from 1 Jan 2027, with one additional pre-registered check |
+| Follow-up analysis | signal speed of the newly archived countries, pre-registered; evaluation from Sep 2027 |
 | Website | built locally, not yet public |
 | Planned | forecasts of whether a delivery date holds and when a shortage ends; open data exports; public website |
 

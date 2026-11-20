@@ -129,9 +129,11 @@ flowchart LR
     C --> G["Go/No-Go<br/>30.04.2027"]
 ```
 
-Ab dem 01.01.2027 zählt nur, was an den Stichtagen im täglichen Protokoll stand; ein verpasster Tag lässt sich nicht nachholen. Das Go/No-Go am 30.04.2027 ist der erste Bericht nach dem Prüfplan. **Die Ergebnisse werden in jedem Fall veröffentlicht, auch bei No-Go.** Der eingefrorene Stand ist auf Zenodo als Release `v0.1-prereg` archiviert: [doi:10.5281/zenodo.24168687](https://doi.org/10.5281/zenodo.24168687). Wie sich die Hashes nachrechnen lassen, samt einer Eigenheit in drei Modelldateien: [Vorab-Registrierung](documentation/MODELL_UND_BEWERTUNG.md#12-vorab-registrierung).
+Ab dem 01.01.2027 zählt nur, was an den Stichtagen im täglichen Protokoll stand; ein verpasster Tag lässt sich nicht nachholen. Das Go/No-Go am 30.04.2027 ist der erste Bericht nach dem Prüfplan. **Die Ergebnisse werden in jedem Fall veröffentlicht, auch bei No-Go.** Der eingefrorene Stand ist auf Zenodo als Release `v0.1-prereg` archiviert: [doi:10.5281/zenodo.24168687](https://doi.org/10.5281/zenodo.24168687). Das Release `v0.1.1-prereg` (20.11.2026) ergänzt die beiden Vorab-Festlegungen unten bei gleichen Modellen; alle Fassungen: [doi:10.5281/zenodo.24168686](https://doi.org/10.5281/zenodo.24168686). Wie sich die Hashes nachrechnen lassen, samt einer Eigenheit in drei Modelldateien: [Vorab-Registrierung](documentation/MODELL_UND_BEWERTUNG.md#12-vorab-registrierung).
 
 **Zusätzlich vorab festgelegt (16.11.2026).** Treffen Z3-Warnungen öfter ein, wenn ein zweites, unabhängiges Modell auf Ebene der Zulassungsinhaber zustimmt? Regel, Termine und Hashes: [analysis/paketsuche/zusatzpruefung](analysis/paketsuche/zusatzpruefung/ZUSATZPRUEFPLAN.md). Die Hauptprüfung bleibt unverändert.
+
+**Vorab festgelegte Folgeauswertung (17.11.2026).** Ergänzt das Tempo, mit dem sich Engpassmeldungen über Länder ausbreiten, die Prognose, sobald Belgien, Spanien, Frankreich, Finnland und die EMA-Tageslisten eine tägliche Geschichte haben? Ausgewertet ab September 2027 gegen das eingefrorene Vergleichsmodell; ein positives Ergebnis führt zu einem eigenen Prüfplan, nicht zu einer Änderung von Z3. Regel, Termine und Hashes: [analysis/modellsuche/tempo_folge](analysis/modellsuche/tempo_folge/FOLGEPRUEFUNG.md).
 
 ## Datenintegrität
 
@@ -148,8 +150,10 @@ Das sind Entscheidungen im Aufbau, keine Validierung: Das Radar ist kein validie
 
 ## Neu seit v0.1-prereg
 
-Die eingefrorenen Modelle und der Prüfplan sind unverändert (gleiche Hashes). Geändert hat sich, wie Daten archiviert und gelesen werden; dazu kommt eine Zusatzprüfung.
+Die eingefrorenen Modelle und der Prüfplan sind unverändert (gleiche Hashes). Geändert hat sich, wie Daten archiviert und gelesen werden; dazu kommen eine Zusatzprüfung und eine vorab festgelegte Folgeauswertung.
 
+- **20.11.2026 – Signaltempo: kein messbarer Gewinn, Folgeprüfung festgelegt.** Eine Rückschau prüfte, ob das Tempo, mit dem sich Engpassmeldungen über Länder ausbreiten, die Prognose verbessert. Urteil „unklar“: kein Gewinn nachgewiesen, ein großer unwahrscheinlich; nichts davon ging in ein Modell. Länder, die erst seit Oktober 2026 täglich archiviert werden, werden nach einer am 17.11.2026 festgelegten Regel vorwärts geprüft: [analysis/modellsuche/tempo_folge](analysis/modellsuche/tempo_folge/FOLGEPRUEFUNG.md).
+- **20.11.2026 – Zitierbarkeit.** Das Zenodo-Release `v0.1.1-prereg` archiviert die beiden Vorab-Festlegungen; Modelle und Prüfplan unverändert.
 - **17.11.2026 – zusätzliche Vorab-Prüfung.** Treffen Z3-Warnungen öfter ein, wenn ein zweites, unabhängiges Modell auf Ebene der Zulassungsinhaber zustimmt? Regel, Termine und Hashes: [analysis/paketsuche/zusatzpruefung](analysis/paketsuche/zusatzpruefung/ZUSATZPRUEFPLAN.md).
 - **16.11.2026 – mehr Rohquellen.** Der Tageslauf archiviert weitere öffentliche Quellen nur roh, ohne Parser und noch ohne Einfluss auf die Schätzung. Der öffentliche Code lädt drei EMA-Tabellen und das Wiener Abwassermonitoring.
 - **16.11.2026 – veraltete Abrufe verworfen.** Ein Abruf, der älter ist als ein früherer derselben Quelle, gilt als gescheitert und wird nachgeholt. Der neue Schalter `--zeitpunktgenau` zählt BASG-Meldungen erst ab ihrer Veröffentlichung; er ist standardmäßig aus, die eingefrorene Prüfung bleibt unberührt. Der Z3-Prüfbericht hat dazu einen datierten Nachtrag.
@@ -158,11 +162,12 @@ Die eingefrorenen Modelle und der Prüfplan sind unverändert (gleiche Hashes). 
 
 ## Stand und Grenzen
 
-| Teil | Stand am 17.11.2026 |
+| Teil | Stand am 20.11.2026 |
 |---|---|
 | Tagesarchiv | läuft in der Referenzinstanz seit 17.10.2026; seither kein BASG-Tag fehlend; seit 16.11.2026 auch Rohkopien weiterer Quellen |
 | Episoden | Vorgeschichte ab 10.04.2021 aus 28 Einzelaufnahmen, davon 10 abgeschnitten |
 | Z3-Schätzung | eingefroren, schreibt täglich ins Protokoll; prospektive Prüfung ab 01.01.2027, dazu eine vorab festgelegte Zusatzprüfung |
+| Folgeauswertung | Signaltempo der neu archivierten Länder, vorab festgelegt; Auswertung ab September 2027 |
 | Website | lokal gebaut, noch nicht öffentlich |
 | Geplant | Prognosen, ob ein Termin hält und wann eine Meldung endet; offene Datenexporte; öffentliche Website |
 

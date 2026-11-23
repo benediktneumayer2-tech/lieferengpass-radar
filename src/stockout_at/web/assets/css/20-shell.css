@@ -1,0 +1,75 @@
+/* Shell: top bar with freshness readout, rail with two printed groups, <details> menu below 1000 px, footer. */
+.skip { position: absolute; left: 8px; top: -48px; z-index: 40; padding: 8px 12px; background: var(--surface-2); border: 1px solid var(--rule-strong); border-radius: 6px; }
+.skip:focus { top: 8px; }
+
+/* top bar */
+.topbar { position: relative; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; min-height: 52px; padding: 8px 16px; background: var(--bg-header); border-bottom: 1px solid var(--border); box-shadow: 0 1px 0 var(--hilite); }
+.brand { display: inline-flex; align-items: center; min-height: 44px; margin-right: auto; font-size: 1.125rem; font-weight: 600; color: var(--text-1); text-decoration: none; }
+.brand:hover { color: var(--accent); }
+
+/* freshness readout: a small screen with a mono line, an LED and a word */
+.fresh { order: 3; display: flex; align-items: center; gap: 8px; flex-basis: 100%; min-height: 28px; margin: 0; padding: 3px 10px; background: var(--screen-bg); border: 1px solid var(--screen-rim); border-radius: 6px; box-shadow: 0 1px 0 var(--hilite); font: 400 .8125rem/1.3 var(--font-mono); color: var(--screen-muted); }
+.fresh-w { font-weight: 500; color: var(--screen-text); }
+.fresh .f-off { display: none; }
+.fresh .led { --c: var(--led-finished); }
+.fresh.is-stale .led, body:has(#stale-client:not([hidden])) .fresh .led { --c: var(--led-blocked); }
+.fresh.is-stale .f-on, body:has(#stale-client:not([hidden])) .fresh .f-on { display: none; }
+.fresh.is-stale .f-off, body:has(#stale-client:not([hidden])) .fresh .f-off { display: inline; }
+@media (max-width: 359px) { .fresh-l { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } }
+@media (min-width: 600px) { .fresh { order: 0; flex-basis: auto; } }
+
+/* LED: always next to a word */
+.led { --c: var(--led-off); display: inline-block; flex: none; width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 34% 30%, color-mix(in srgb, #fff 45%, var(--c)) 0, color-mix(in srgb, #fff 12%, var(--c)) 55%); box-shadow: 0 0 0 1px var(--rule-strong), 0 0 6px color-mix(in srgb, var(--c) 55%, transparent); }
+.led-off { box-shadow: 0 0 0 1px var(--rule-strong); }
+.led-ok { --c: var(--led-finished); }
+.led-working { --c: var(--led-working); animation: led-breathe 2.2s ease-in-out infinite; }
+@keyframes led-breathe { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .led-working { animation: none; } }
+
+/* menu below 1000 px */
+.menu > summary { list-style: none; cursor: pointer; }
+.menu > summary::-webkit-details-marker { display: none; }
+.menu > nav { position: absolute; left: 0; right: 0; top: 100%; display: grid; gap: 8px; padding: 12px 16px 16px; background: var(--surface-1); border-bottom: 1px solid var(--rule-strong); box-shadow: 0 6px 12px var(--key-shadow); }
+.menu ul { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 4px; padding: 0; list-style: none; }
+.menu li a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; background: linear-gradient(180deg, var(--hilite) 0 1px, var(--surface-2) 1px); border: 1px solid var(--rule-strong); border-radius: 6px; box-shadow: 0 1.5px 0 var(--key-skirt); color: var(--text-1); text-decoration: none; }
+.menu li a.cur { background: var(--selected); box-shadow: 0 1px 0 var(--hilite); font-weight: 600; }
+
+/* layout */
+.rail { display: none; }
+.col { min-width: 0; padding: 0 12px; }
+.col > * { max-width: 1180px; margin-left: auto; margin-right: auto; }
+.notices { padding-top: 12px; }
+.notices .notice { margin: 0; }
+.notices .banner { margin: 8px 0 0; }
+main.page { display: block; padding: 20px 0 8px; }
+@media (min-width: 600px) { .col { padding: 0 16px; } }
+@media (min-width: 1000px) {
+  .menu { display: none; }
+  .shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); align-items: start; }
+  .col { padding: 0 24px; }
+  /* the bar stays on top so that the rail, and "Projekt" at its foot, always fits the window */
+  :root { --topbar-h: 61px; scroll-padding-top: calc(var(--topbar-h) + 8px); }
+  .topbar { position: sticky; top: 0; height: var(--topbar-h); }
+  .rail { position: sticky; top: var(--topbar-h); display: flex; flex-direction: column; height: calc(100vh - var(--topbar-h)); padding: 12px 8px 0; overflow-y: auto; background: var(--bg); border-right: 1px solid var(--border); box-shadow: 1px 0 0 var(--hilite); }
+  .rail .lg { padding: 12px 12px 4px; }
+  .rail .lg.on { color: var(--text-1); }
+  .rail ul { margin: 0; padding: 0; list-style: none; }
+  .rail li a { position: relative; display: flex; align-items: center; min-height: 40px; padding: 0 12px; border: 1px solid transparent; border-radius: 6px; color: var(--text-1); font-size: .9375rem; text-decoration: none; }
+  .rail li a:hover { background: color-mix(in srgb, var(--text-1) 6%, transparent); }
+  .rail li a.cur { background: var(--selected); border-color: var(--border); box-shadow: 0 1px 0 var(--hilite); font-weight: 600; }
+  .rail li a.cur::before { content: ""; position: absolute; left: -1px; top: 8px; bottom: 8px; width: 2px; border-radius: 0 2px 2px 0; background: var(--signal); box-shadow: 0 0 4px color-mix(in srgb, var(--signal) 50%, transparent); }
+  .rail > nav { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; }
+  /* speaker grille between the app and the project entry at the foot of the rail */
+  .grille { flex: 1 1 auto; min-height: 48px; margin: 24px 12px 16px; opacity: .55; background-image: radial-gradient(circle, var(--grille) 1.7px, transparent 1.9px); background-size: 10px 10px; }
+  .rail .nav-end { padding: 8px 0 12px; border-top: 1px solid var(--border); box-shadow: inset 0 1px 0 var(--hilite); }
+}
+
+/* tabs of the project section; they wrap instead of scrolling the page */
+.subnav { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 12px; padding-bottom: 4px; border-bottom: 1px solid var(--border); box-shadow: 0 1px 0 var(--hilite); }
+.subnav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 6px 6px 0 0; color: var(--text-2); font-size: .9375rem; text-decoration: none; }
+.subnav a:hover { background: color-mix(in srgb, var(--text-1) 6%, transparent); color: var(--text-1); }
+.subnav a.cur { box-shadow: inset 0 -2px 0 var(--signal); color: var(--text-1); font-weight: 600; }
+
+/* footer, with an engraved rule above */
+.site-footer { margin-top: 32px; padding: 16px 0 24px; border-top: 1px solid var(--border); box-shadow: inset 0 1px 0 var(--hilite); font-size: .875rem; color: var(--text-2); }
+.site-footer p { margin: 6px 0; max-width: 62rem; }

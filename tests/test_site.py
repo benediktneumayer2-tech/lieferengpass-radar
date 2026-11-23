@@ -3,6 +3,8 @@ import json
 import posixpath
 import re
 import sqlite3
+import subprocess
+import sys
 from datetime import date
 from pathlib import Path
 
@@ -23,6 +25,11 @@ CONTRACT = {
     "methodik/": ["header", "method-text", "archive-coverage", "sources"],
     "impressum/": ["header", "legal-text"],
     "datenschutz/": ["header", "legal-text"],
+    "projekt/": ["header", "archivieren", "verknuepfen", "pruefen", "footer-sources"],
+    "projekt/idee/": ["header", "fig-f16", "fig-f29", "fig-f21", "fig-f04", "data-integrity", "footer-sources"],
+    "projekt/modell/": ["header", "frage", "vergleich", "kalibrierung", "reihung", "schwaeche", "gewichte", "grenzen", "vorab"],
+    "projekt/befunde/": ["header", "ledger", "ereignisse", "stufen", "tempo", "modellsuche", "folgen"],
+    "projekt/ueber/": ["header", "about-h", "footer-sources"],
 }
 LINK = re.compile(r'(?:href|src)="([^"]*)"')
 
@@ -53,6 +60,20 @@ def test_contract_routes_and_regions(site):
         assert '<html lang="de">' in html
         for region in regions:
             assert f'id="{region}"' in html, (route, region)
+
+
+def test_project_pages_only_in_tabs(site):
+    rail = re.search(r'<aside class="rail">.*?</aside>', (site / "index.html").read_text(encoding="utf-8"), re.S).group(0)
+    assert re.findall(r">([^<]+)</a>", rail) == ["Übersicht", "Frühwarnung", "Überfällig", "Woche", "Wirkstoffe A–Z", "Projekt"]
+    for route in ("projekt/", "projekt/idee/", "projekt/modell/", "projekt/befunde/", "methodik/", "projekt/ueber/"):
+        tabs = re.search(r'<nav class="subnav".*?</nav>', (site / route / "index.html").read_text(encoding="utf-8"), re.S).group(0)
+        assert tabs.count("<a ") == 6 and tabs.count('aria-current="page"') == 1, route
+
+
+def test_site_import_loads_no_display_code():
+    code = ("import sys; from stockout_at.site import HIDDEN_SOURCES as h; assert h == frozenset({'bfarm'}); "
+            "assert not [m for m in sys.modules if m.startswith(('stockout_at.charts', 'stockout_at.seiten', 'stockout_at.live'))]")
+    subprocess.run([sys.executable, "-c", code], check=True)
 
 
 def test_links_resolve_and_no_external_assets(site):
@@ -130,4 +151,8 @@ def test_public_rules(site):
     assert "<title>" in index and "Lieferengpass-Radar</title>" in index
     early = (site / "fruehwarnung" / "index.html").read_text(encoding="utf-8")
     assert "Keine Prognose, keine Bestellempfehlung" in early and "Verlautbarungsregister" not in early
-    assert "Verlautbarungsregister" not in (site / "methodik" / "index.html").read_text(encoding="utf-8")
+    method = (site / "methodik" / "index.html").read_text(encoding="utf-8")
+    assert "Verlautbarungsregister" not in method
+    listed = set(re.findall(r'<th scope="row">([^<]+)</th><td class="num">', method))
+    assert "BASG" in listed and not listed & {"BfArM (nur privat archiviert)", "bfarm", "fimea", "fimea_reg", "edqm",
+                                              "mia_asp", "mia_abst", "mia_verl", "mia_ve"}

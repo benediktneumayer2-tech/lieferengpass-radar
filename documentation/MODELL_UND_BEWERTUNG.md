@@ -4,7 +4,7 @@
 
 Dieses Dokument beschreibt, was aus den Rohdaten abgeleitet wird (Episoden, Verknüpfung, Stufen), welche Messungen es gibt, wie die Z3-Verfahren gebaut und eingefroren sind, wie das Vorhersageprotokoll aussieht und wie es bewertet wird. Am Ende steht, was geprüft ist und was nicht.
 
-> **Wichtig:** Alle Zahlen zur Güte in diesem Dokument sind **Rückblicke** (zeitlich getrennt gelernt und geprüft, aber auf Vergangenheitsdaten) und stammen aus der Referenzinstanz ([Unterschiede zur öffentlichen Fassung](DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz)). Die **prospektive Prüfung beginnt erst am 01.01.2027**. Keine Vorhersage wird auf der Website gezeigt.
+> **Wichtig:** Alle Zahlen zur Güte in diesem Dokument sind **Rückblicke** (zeitlich getrennt gelernt und geprüft, aber auf Vergangenheitsdaten) und stammen aus der Referenzinstanz ([Unterschiede zur öffentlichen Fassung](DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz)). Die **prospektive Prüfung beginnt erst am 01.01.2027**. Keine Vorhersage für einzelne Wirkstoffe wird auf der Website gezeigt. *Geändert am 23.11.2026: Bis dahin stand hier „Keine Vorhersage wird auf der Website gezeigt“. Die Startseite zeigt seither eine Auswertung in sechs Wahrscheinlichkeitsklassen, ohne Namen, Codes oder Einzelwerte ([WEBSITE.md](WEBSITE.md#festgeschriebene-darstellung-der-startgrafik)).*
 
 ## 1. Begriffe
 
@@ -88,7 +88,7 @@ Gemessene Zusatzwerte einzelner Länder (Rückblick der Referenzinstanz, 19./20.
 | T1 | Zulassung auf Antrag aufgehoben; Standort gestrichen | 1,41× [1,00–1,94], bei vermarkteten Produkten 1 von 40, also kein Frühsignal; Standort 0,99× | – |
 | T2 | Preisband-Runden 2017–2025 | keine Häufung | – |
 | T4 | Infektionswelle (ERVISS-ILI, SARI) | hohe ILI-Wochen 7,5× für Mehrbedarf-Meldungen (4 Wochen), aber nur durch die Saison 2022/23; SARI ab 2023 ohne Effekt | – |
-| T6 | Engpass bei einem ATC-4-Nachbarn | in AT 1,08× [1,03–1,12], im Ausland 0,67× | – |
+| T6 | Engpass bei einem ATC-4-Nachbarn | in AT 1,08× [1,03–1,12], im Ausland 0,67× (Stand Oktober 2026). Der tägliche Neulauf ergibt am 23.11.2026 für AT 1,03× [0,99–1,08]; der Bereich schließt 1 nun ein | – |
 | T6b | anderer Inhaber desselben Wirkstoffs gemeldet | 1,69× [1,62–1,75] | Registerhinweis auf der Website |
 | T7 | GMP: EDQM-Aussetzung bzw. EudraGMDP-Bericht | 22 bzw. 58 Fälle; nach 12 Wochen 2,1× [0,7–5,0] bzw. 1,8× [0,95–3,2]; nicht belastbar | nur Merkmalsprotokoll |
 | T8 | Marktaustritt eines anderen Produkts (ASP-Historie) | 1,18× [0,82–1,66] | Merkmal in Z3, Merkmalsprotokoll |

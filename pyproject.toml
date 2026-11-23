@@ -27,4 +27,4 @@ where = ["src"]
 testpaths = ["tests"]
 
 [tool.setuptools.package-data]
-stockout_at = ["web/templates/*.html", "web/assets/*"]
+stockout_at = ["web/templates/*.html", "web/assets/*", "web/assets/css/*", "web/assets/fonts/*", "web/data/*"]

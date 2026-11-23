@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Über das Projekt{% endblock %}
+{% block main %}
+<h1 class="page-title">Über das Projekt</h1>
+{% if name %}
+<section class="module about" aria-labelledby="about-h">
+ <p class="lg">Ein Projekt von</p>
+ <h2 id="about-h" class="about-name">{{ name }}</h2>
+ <p class="about-ort">{{ ort }}</p>
+ {% if persoenlich %}
+ <div class="about-text prose">{% for absatz in persoenlich %}<p>{{ absatz }}</p>{% endfor %}</div>
+ {% endif %}
+ <p class="about-repo"><span class="lg">Repository</span> <a href="{{ repository }}">{{ repository_label }}</a></p>
+</section>
+{% else %}
+<section class="module prose" aria-label="Hinweis zu dieser Seite">
+ <p>Die Grundlagen stehen in <a href="{{ root }}methodik/">Methodik und Quellen</a>.</p>
+</section>
+{% endif %}
+{% endblock %}

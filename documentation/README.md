@@ -2,7 +2,7 @@
 
 **Stand:** 11.11.2026 · öffentliche Fassung 0.1 · Einstieg auf Englisch: [README.md](../README.md), auf Deutsch: [README.de.md](../README.de.md)
 
-Lieferengpass-Radar ist ein Frühwarnwerkzeug für Arzneimittel-Lieferengpässe in Österreich, gebaut nur aus öffentlichen Daten. Es archiviert täglich das amtliche Register der Vertriebseinschränkungen des BASG und die Engpasslisten weiterer Länder, baut daraus eine Datenbank mit Engpass-Episoden, schätzt für Wirkstoffe die Wahrscheinlichkeit einer baldigen BASG-Meldung, schreibt diese Schätzungen in ein tägliches Protokoll und erzeugt eine statische Website. Die Website wird lokal gebaut und ist noch nicht öffentlich bereitgestellt.
+Lieferengpass-Radar ist ein Frühwarnwerkzeug für Arzneimittel-Lieferengpässe in Österreich, gebaut nur aus öffentlichen Daten. Es archiviert täglich das amtliche Register der Vertriebseinschränkungen des BASG und die Engpasslisten weiterer Länder, baut daraus eine Datenbank mit Engpass-Episoden, schätzt für Wirkstoffe die Wahrscheinlichkeit einer baldigen BASG-Meldung, schreibt diese Schätzungen in ein tägliches Protokoll und erzeugt eine statische Website. Die Website läuft unter https://lieferengpass-radar.at und lässt sich auch lokal bauen.
 
 ## Wo was steht
 

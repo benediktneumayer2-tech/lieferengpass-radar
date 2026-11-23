@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Modell und Prüfung{% endblock %}
+{% block description %}Wie das Modell neue BASG-Meldungen reiht, was es im Rückblick leistet, wo es versagt und wie es vorab festgelegt geprüft wird.{% endblock %}
+{% block main %}
+<div class="hero">
+ <p class="lg">Modell und Prüfung</p>
+ <h1 class="hero-title">Ein Modell reiht Wirkstoffe nach dem Risiko einer neuen BASG-Meldung. Ob das trägt, entscheidet eine vorab festgelegte Prüfung.</h1>
+ <p class="lead">Diese Seite zeigt, was das Modell im Rückblick leistet, wo es versagt und wie es geprüft wird. Die Schwächen stehen gleichberechtigt neben den Stärken.</p>
+</div>
+
+{% if fakten %}
+<section class="module md-notice" aria-label="Einordnung der Zahlen">
+ <p class="bench-phase"><span class="led led-{{ fakten.bench.led }}" aria-hidden="true"></span><span>{{ fakten.bench.text }}</span></p>
+ <p>Keine Zahl auf dieser Seite ist eine Validierung. Rückblicke sind als solche gekennzeichnet, Zahlen aus dem laufenden Protokoll sind Zwischenstände ohne Urteil. Der Bericht vom {{ fakten.bench.go }} wird in jedem Fall veröffentlicht. Den aktuellen Stand zeigt der <a href="{{ root }}projekt/">Prüfstand auf der Projektseite</a>.</p>
+</section>
+
+<section id="frage" class="md-sec" aria-labelledby="frage-h">
+ <h2 id="frage-h" class="sec-title">Was vorhergesagt wird</h2>
+ <div class="md-text">
+  <p>Ein Fall ist <strong>ein Wirkstoff an einem Stichtag</strong>. Das Modell Z3 v0, eine regularisierte logistische Regression, schätzt für ihn die Wahrscheinlichkeit, dass binnen 4, 8 oder 12 Wochen eine neue BASG-Meldung beginnt oder erstmals erscheint. Der Hauptvergleich läuft über 8 Wochen gegen die einfache Stufenregel der Frühwarnliste.</p>
+  <p>Eine neue Meldung heißt nicht, dass ein Arzneimittel fehlt. Vorhersagen für einzelne Wirkstoffe erscheinen auf dieser Website nicht.</p>
+ </div>
+ <dl class="tiles md-tiles">
+  {{ m.readout("Gelernt", fakten.bedingungen.lernen[0][:4] ~ "–" ~ fakten.bedingungen.lernen[1][:4], small=true) }}
+  {{ m.readout("Rückblick", fakten.bedingungen.pruefen[0][:4], small=true) }}
+  {{ m.readout("Fälle", fakten.faelle, small=true) }}
+  {{ m.readout("Neue Meldungen", fakten.meldungen, small=true) }}
+ </dl>
+</section>
+{% endif %}
+
+<section id="vergleich" class="md-sec" aria-labelledby="vergleich-h">
+ <h2 id="vergleich-h" class="sec-title">Reiht es besser als die einfache Regel?</h2>
+ <p class="md-text">Im Rückblick auf 2026 ja. Der Abstand ist in allen drei Maßen größer als null, das Intervall für die Trefferquote der 50 höchsten Wirkstoffe ist aber breit. Eine prospektive Prüfung ersetzt das nicht.</p>
+ {% if f08 %}{{ m.figure(**f08) }}{% endif %}
+ {% if f09 %}{{ m.figure(**f09) }}{% endif %}
+</section>
+
+<section id="kalibrierung" class="md-sec" aria-labelledby="kalibrierung-h">
+ <h2 id="kalibrierung-h" class="sec-title">Bedeuten 10 % auch ungefähr 10 %?</h2>
+ <p class="md-text">Eine Wahrscheinlichkeit taugt nur, wenn sie zur beobachteten Häufigkeit passt. Dieselbe Darstellung wie auf der Startseite, hier für alle drei Horizonte. Die Punkte aus dem echten Tagesprotokoll füllen sich erst, wenn ein Horizont abgelaufen ist.</p>
+ {% if f10 %}{{ m.figure(**f10) }}{% endif %}
+ {% if fakten %}
+ <div class="table-wrap md-table" tabindex="0"><table class="compact">
+  <caption>AUC im Rückblick 2026 je Horizont {{ m.tag("Rückblick · nicht validiert", "warn") }}</caption>
+  <thead><tr><th scope="col">Horizont</th><th scope="col" class="r">Z3 v0</th><th scope="col" class="r">Stufenregel</th></tr></thead>
+  <tbody>{% for a in fakten.auc %}<tr><th scope="row">{{ a.wochen }} Wochen</th><td class="r num">{{ a.z3 }}</td><td class="r num">{{ a.stufen }}</td></tr>{% endfor %}</tbody>
+ </table></div>
+ {% endif %}
+</section>
+
+<section id="reihung" class="md-sec" aria-labelledby="reihung-h">
+ <h2 id="reihung-h" class="sec-title">Stehen die Richtigen oben auf der Liste?</h2>
+ <p class="md-text">Für den praktischen Nutzen zählt die Reihung: Wer nur die obersten Plätze ansieht, sollte dort möglichst viele der später gemeldeten Wirkstoffe finden, und die Liste sollte nicht täglich springen.</p>
+ {% if f25 %}{{ m.figure(**f25) }}{% endif %}
+ {% if fakten %}
+ <div class="md-readouts">
+  <p class="lg">Probelauf 2026 {{ m.tag("Rückblick · nicht validiert", "warn") }}</p>
+  <dl class="tiles">
+   {{ m.readout("Am Vortag unter den 50 höchsten", fakten.vorlauf.anteil) }}
+   {{ m.readout("95-%-Intervall", fakten.vorlauf.ki) }}
+   {{ m.readout("Median seit Tagen auf der Liste", fakten.vorlauf.tage) }}
+  </dl>
+  <p class="md-small-text">Veröffentlichte Zahlen des Prüfberichts zu {{ fakten.vorlauf.meldungen }} neuen Meldungen: Stand der Wirkstoff am Tag vor der Meldung auf der Liste, war er dort im Median seit {{ fakten.vorlauf.tage }} Tagen ununterbrochen. {{ REFERENZ_SATZ }}</p>
+ </div>
+ {% endif %}
+ {% if f36 %}{{ m.figure(**f36) }}{% endif %}
+</section>
+
+<section id="schwaeche" class="md-sec" aria-labelledby="schwaeche-h">
+ <h2 id="schwaeche-h" class="sec-title">Was das Modell nicht kann</h2>
+ {% if f27_fakten %}
+ <div class="module md-weak">
+  <p class="md-weak-head"><strong>Das Modell reiht Wirkstoffe. Die Gesamtzahl neuer Meldungen sagt es nicht voraus.</strong></p>
+  <p>Erwartet waren je Stichtag {{ f27_fakten.erwartet }} neue Meldungen, eingetroffen sind {{ f27_fakten.eingetroffen }}. Am {{ f27_fakten.erster.tag }} kamen {{ f27_fakten.erster.kam }} statt {{ f27_fakten.erster.erwartet }}, am {{ f27_fakten.tief.tag }} nur {{ f27_fakten.tief.kam }} statt {{ f27_fakten.tief.erwartet }}. Der Zusammenhang über {{ f27_fakten.stichtage }} Stichtage liegt bei {{ f27_fakten.korrelation }}: Stichtage mit höherer Erwartung brachten nicht mehr Meldungen. An {{ f27_fakten.ausserhalb }} von {{ f27_fakten.stichtage }} Stichtagen lag die Zahl außerhalb des 95-%-Zufallsbands; bei reinem Zufall wäre es etwa einer.</p>
+  <p>Für die Prüfung heißt das: Kommen in einer Zeit insgesamt mehr Meldungen, liegen die Punkte der Kalibrierung über der Diagonale, auch wenn die Reihung stimmt. Die Schwäche ist hier vor Beginn der Prüfung benannt. Das eingefrorene Modell wird deswegen nicht geändert.</p>
+ </div>
+ {% endif %}
+ {% if f27 %}{{ m.figure(**f27) }}{% endif %}
+ <p class="md-text">Auch innerhalb der Reihung gibt es einen blinden Fleck: Das Modell sieht Herstellungs- und Lieferprobleme eher kommen als plötzlichen Mehrbedarf.</p>
+ {% if f26 %}{{ m.figure(**f26) }}{% endif %}
+</section>
+
+<section id="gewichte" class="md-sec" aria-labelledby="gewichte-h">
+ <h2 id="gewichte-h" class="sec-title">Worauf das Modell schaut</h2>
+ <p class="md-text">Das Modell ist bewusst einfach, jedes Gewicht lässt sich lesen. Am stärksten zählt, ob ein Wirkstoff schon einmal knapp war und wie viele Produkte es gibt.</p>
+ {% if f11 %}{{ m.figure(**f11) }}{% endif %}
+</section>
+
+{% if fakten %}
+<section id="grenzen" class="md-sec" aria-labelledby="grenzen-h">
+ <h2 id="grenzen-h" class="sec-title">Grenzen des Rückblicks</h2>
+ <div class="module prose">
+  <ul>{% for g in fakten.grenzen %}<li>{{ g }}</li>{% endfor %}</ul>
+  <p><strong>Nachtrag vom 16.11.2026.</strong> {{ fakten.nachtrag }}</p>
+ </div>
+</section>
+
+<section id="vorab" class="md-sec" aria-labelledby="vorab-h">
+ <h2 id="vorab-h" class="sec-title">Vorab festgelegt</h2>
+ <p class="md-text">Verfahren und Prüfplan sind eingefroren, ihre Prüfsummen öffentlich. Die Regel steht fest, bevor die ersten Prüfungsdaten entstehen.</p>
+ {% if f15 %}{{ m.figure(**f15) }}{% endif %}
+ <div class="two-col">
+  <div class="module prose">
+   <h3 class="lg">Regel des Hauptvergleichs</h3>
+   <p>{{ fakten.regel }}</p>
+   <p>{{ fakten.pruefsummen_hinweis }}</p>
+   <p class="keys">{{ m.key("Code und Prüfplan", fakten.repository, ic="code") }}{{ m.key("Zenodo", "https://doi.org/" ~ fakten.doi, ic="external-link") }}{{ m.key("Prüfstand", root ~ "projekt/", ic="arrow-right") }}</p>
+  </div>
+  <div class="table-wrap md-table" tabindex="0"><table class="compact">
+   <caption>Eingefrorene Verfahren, Prüfplan {{ fakten.plan_hash }}</caption>
+   <thead><tr><th scope="col">Verfahren</th><th scope="col">Rolle</th><th scope="col" class="r">Prüfsumme</th></tr></thead>
+   <tbody>{% for v in fakten.methods %}<tr><th scope="row">{{ v.id }}</th><td>{{ v.rolle }}</td><td class="r num">{{ v.sha }}</td></tr>{% endfor %}</tbody>
+  </table><p class="md-small-text">{{ fakten.verfahren_hinweis }}</p></div>
+ </div>
+</section>
+{% endif %}
+{% endblock %}

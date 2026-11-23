@@ -33,6 +33,8 @@ HIDDEN_SOURCES = frozenset({"bfarm"})  # foreign sources not shown (BfArM: only 
 # hints also feed the feature and prediction log (merkmale), which stays unchanged until the Go/No-Go on 30.04.2027.
 SITE_HIDDEN_SOURCES = HIDDEN_SOURCES | {"fimea"}  # Fimea: until Fimea confirms the use
 SITE_HOLDER_CHANGES = False  # register hint from the BASG announcements (MIA, mia_verl): until the BASG permits the use
+# Sources the public version leaves out (DATENQUELLEN.md § 4) stay off the fetch table on the method page as well.
+SITE_UNLISTED_SOURCES = SITE_HIDDEN_SOURCES | {"fimea_reg", "edqm", "mia_asp", "mia_abst", "mia_verl", "mia_ve"}
 FIELD_LABELS = {
     "PZN": "PZN",
     "Zulassungsnummer": "Zulassungsnummer",
@@ -93,6 +95,15 @@ FOREIGN_SOURCES = [
      "amtliches Dokument, nach Art. 4 des polnischen Urheberrechtsgesetzes nicht geschützt"),
 ]
 START_SHORT = {"beginn": "Beginn laut BASG", "meldung": "Meldedatum laut BASG", "first_seen": "erstmals gesehen"}
+# Navigation, the same on every page: (group, ((label, path), ...)); the empty path is the start page.
+NAV = (
+    ("Radar", (("Übersicht", ""), ("Frühwarnung", "fruehwarnung/"), ("Überfällig", "ueberfaellig/"), ("Woche", "woche/"),
+               ("Wirkstoffe A–Z", "wirkstoffe/"))),
+    ("", (("Projekt", "projekt/"),)),
+)
+# Sub-pages of "Projekt": reachable from the tabs on those pages, not from the rail. Methodik keeps its public URL.
+PROJECT_PAGES = (("Überblick", "projekt/"), ("Idee und Aufbau", "projekt/idee/"), ("Modell und Prüfung", "projekt/modell/"),
+                 ("Befunde", "projekt/befunde/"), ("Methodik", "methodik/"), ("Über", "projekt/ueber/"))
 
 
 def package_slug(key: str) -> str:
@@ -313,8 +324,30 @@ def _links(conn: sqlite3.Connection, pzns: set[str]) -> dict[str, dict[str, dict
     return out
 
 
+def _nav_state(rel: str) -> dict:
+    """Rail state of a page: its group, the entry to mark, and whether the page is that entry itself."""
+    if rel.startswith("packung/"):
+        return {"nav_group": "Radar", "nav_current": None, "nav_exact": False}
+    if rel.startswith("wirkstoff/"):
+        return {"nav_group": "Radar", "nav_current": "wirkstoffe/", "nav_exact": False}
+    path = f"{rel}/" if rel else ""
+    if any(p == path for _, p in PROJECT_PAGES):
+        return {"nav_group": "", "nav_current": "projekt/", "nav_exact": path == "projekt/", "project_tab": path}
+    group = next((g for g, items in NAV if any(p == path for _, p in items)), None)
+    return {"nav_group": group, "nav_current": path if group else None, "nav_exact": bool(group)}
+
+
+def _write_stylesheet(assets: Path) -> str:
+    """Concatenate `web/assets/css/*.css` in name order into `assets/style.css`; return the cache-busting version."""
+    css = "\n".join(f.read_text(encoding="utf-8") for f in sorted((WEB / "assets" / "css").glob("*.css")))
+    (assets / "style.css").write_text(css, encoding="utf-8")
+    return hashlib.sha256(css.encode("utf-8")).hexdigest()[:8]
+
+
 def generate(db_path: Path, out_dir: Path, ref: date | None = None, archive: Archive | None = None, now: datetime | None = None) -> dict:
     """Generate the complete site into `out_dir` (atomic swap). Return page counts."""
+    from . import live, seiten, showcase  # imported here on purpose: chart code must never be able to break `from .site import HIDDEN_SOURCES`
+
     now = now or datetime.now(timezone.utc)
     conn = metrics.connect(Path(db_path))
     try:
@@ -324,6 +357,13 @@ def generate(db_path: Path, out_dir: Path, ref: date | None = None, archive: Arc
                                 Path(db_path).parent / "json" / "rueckblick.json", data.ref)
         fw["register"]["holder_data"] = SITE_HOLDER_CHANGES
         links = _links(conn, set(data.by_pzn))
+        results = showcase.load_results()
+        try:  # display only: if this figure fails, the page shows a neutral note and the site still builds
+            f22 = showcase.f22_context(live.build(conn, archive.root if archive is not None else None, results), results)
+        except Exception as exc:
+            f22 = None
+            print(f"WARNUNG Startgrafik F22: {type(exc).__name__}: {exc}")
+        pages = seiten.build(seiten.Quellen(conn, archive.root if archive is not None else None, results, data, fw, data.ref))
     finally:
         conn.close()
     for s in subs.values():
@@ -356,7 +396,10 @@ def generate(db_path: Path, out_dir: Path, ref: date | None = None, archive: Arc
         TIERS=fruehwarnung.TIERS,
         COUNTRY_NAMES=fruehwarnung.COUNTRY_NAMES,
         fw_counts=fw["counts"],
+        NAV=NAV,
+        PROJECT_PAGES=PROJECT_PAGES,
     )
+    env.globals["REFERENZ_SATZ"] = results["referenzinstanz_satz"]
 
     out_dir = Path(out_dir).resolve()
     out_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -367,11 +410,12 @@ def generate(db_path: Path, out_dir: Path, ref: date | None = None, archive: Arc
         depth = rel.count("/") + 1 if rel else 0
         target = tmp / rel / "index.html" if rel else tmp / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(env.get_template(template).render(root="../" * depth, **ctx), encoding="utf-8")
+        target.write_text(env.get_template(template).render(root="../" * depth, **_nav_state(rel), **ctx), encoding="utf-8")
         counts[kind] += 1
 
     try:
-        shutil.copytree(WEB / "assets", tmp / "assets")
+        shutil.copytree(WEB / "assets", tmp / "assets", ignore=shutil.ignore_patterns("css"))
+        env.globals["style_version"] = _write_stylesheet(tmp / "assets")
         sit = data.m["situation"]
         status_rows = sorted(sit["by_status"].items(), key=lambda kv: _status_rank(kv[0]))
         atc_rows = sorted(((k, ATC1.get(k, k), v) for k, v in sit["active_by_atc1"].items()), key=lambda r: (-r[2], r[0]))
@@ -383,7 +427,8 @@ def generate(db_path: Path, out_dir: Path, ref: date | None = None, archive: Arc
         }
         overdue = [{**o, "p": data.packages[o["package_key"]]} for o in data.m["overdue"]]
 
-        write("", "index.html", "start", sit=sit, status_rows=status_rows, atc_rows=atc_rows, week=week, n_overdue=len(overdue))
+        write("", "index.html", "start", sit=sit, status_rows=status_rows, atc_rows=atc_rows, week=week, n_overdue=len(overdue), f22=f22, **pages["start"])
+        write("projekt", "projekt.html", "text", **showcase.start_context(results, now.astimezone(archive_status.VIENNA).date()), **pages["projekt"])
         for key in data.packages:
             write(data.packages[key]["path"].rstrip("/"), "package.html", "packung", **_package_context(data, key, fw, links))
         for s in subs.values():
@@ -392,14 +437,17 @@ def generate(db_path: Path, out_dir: Path, ref: date | None = None, archive: Arc
         for label in sorted(subs, key=substance_slug):
             letters[_letter(label)].append(subs[label])
         write("wirkstoffe", "substances.html", "liste", letters=sorted(letters.items()))
-        write("ueberfaellig", "overdue.html", "liste", overdue=overdue)
-        write("fruehwarnung", "fruehwarnung.html", "liste", fw=fw)
+        write("ueberfaellig", "overdue.html", "liste", overdue=overdue, **pages["radar"])
+        write("fruehwarnung", "fruehwarnung.html", "liste", fw=fw, **pages["fruehwarnung"])
         write("woche", "week.html", "liste", week=week)
-        write("methodik", "method.html", "text", coverage=coverage, snapshots=data.snapshots, n_complete=sum(s["complete"] for s in data.snapshots),
+        listed_sources = {k: v for k, v in coverage["sources"].items() if k not in SITE_UNLISTED_SOURCES} if coverage else {}
+        write("methodik", "method.html", "text", coverage=coverage, listed_sources=listed_sources, snapshots=data.snapshots, n_complete=sum(s["complete"] for s in data.snapshots),
               fw=fw, foreign_sources=[(c, title, fruehwarnung.source_url(key), terms) for c, title, key, terms in FOREIGN_SOURCES
-                                               if key not in SITE_HIDDEN_SOURCES])
+                                               if key not in SITE_HIDDEN_SOURCES], **pages["methodik"])
         write("impressum", "impressum.html", "text")
         write("datenschutz", "datenschutz.html", "text")
+        for name in ("idee", "modell", "befunde", "ueber"):
+            write(f"projekt/{name}", f"{name}.html", "text", **pages[name])
         index = {
             "p": [[p["pzn"] or "", p["label"], p["substance"] or "", p["path"], p["current_status"] or ""] for p in data.packages.values()],
             "s": [[s["label"], s["path"], len(s["packages"])] for s in subs.values()],

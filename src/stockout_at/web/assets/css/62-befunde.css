@@ -1,0 +1,41 @@
+/* Page "Befunde": ledger of tested ideas, verdict panels, the threshold line of F19. */
+.bf-notice { margin: 0 0 24px; max-width: 50rem; }
+.bf-sec { margin: 0 0 32px; min-width: 0; }
+.bf-intro { max-width: 46rem; margin: 0 0 12px; }
+.bf-sec .fig { max-width: 50rem; }
+.bf-foot { max-width: 50rem; margin: 8px 0 0; color: var(--ink-2); font-size: .9375rem; line-height: 1.45; }
+.bf-tiles { grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); max-width: 50rem; }
+.bf-tiles .tile dd { font-size: 1.25rem; font-variant-numeric: normal; }
+
+.bf-ledger-screen { padding: 8px 16px 12px; }
+.bf-ledger { min-width: 0; }
+.bf-ledger caption { padding-top: 6px; }
+.bf-ledger tbody th[scope="row"] { width: 34%; padding-right: 16px; overflow-wrap: anywhere; }
+.bf-ledger td { padding-right: 16px; }
+.bf-ledger td:last-child { padding-right: 0; }
+.bf-ledger .small { display: inline; color: var(--ink-2); }
+.bf-num { font-family: var(--font-mono); font-size: .875rem; white-space: nowrap; }
+.bf-group th { padding: 14px 0 6px; border-bottom-color: var(--line-strong); color: var(--ink-2); font: 600 1.0625rem/1.2 var(--font-legend); font-variant-caps: all-small-caps; letter-spacing: 1.2px; }
+.bf-group a { margin-left: 8px; font: 400 .875rem/1.2 var(--font); font-variant-caps: normal; letter-spacing: 0; white-space: nowrap; }
+.bf-ledger tbody:first-of-type .bf-group th { padding-top: 6px; }
+
+.bf-verdict { max-width: 50rem; margin: 0 0 16px; }
+.bf-verdict p { margin: 0 0 8px; }
+.bf-verdict p:last-child { margin-bottom: 0; }
+.bf-verdict-head { display: flex; align-items: center; gap: 8px; }
+.bf-end { max-width: 50rem; }
+.bf-end .keys { max-width: none; }
+
+.bf-thr { stroke: var(--ch-comp); stroke-width: 1.25; stroke-dasharray: 5 3; }
+
+@media (max-width: 600px) {
+  .bf-ledger-screen { padding: 8px 12px 10px; }
+  .bf-ledger tbody th[scope="row"] { width: auto; padding-right: 0; font-weight: 600; }
+  .bf-ledger td { padding-right: 0; }
+  .bf-group th { padding-top: 12px; }
+  .bf-num { white-space: normal; }
+}
+
+@media (forced-colors: active) {
+  .bf-thr { stroke: CanvasText; }
+}

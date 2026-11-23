@@ -1,0 +1,79 @@
+/* Situation figure F01, early-warning figures F05, F06, F35, story panels of the project page, About page. */
+
+/* figures that sit inside a screen or block use that surface: cards do not nest */
+#situation-summary .fig-screen, #warning-summary .fig-screen, #country-overview .fig-screen { padding: 4px 0 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+#situation-summary .fig { margin: 0 0 4px; }
+#warning-summary .fig, #country-overview .fig { margin: 0 0 20px; }
+#country-overview .fig:last-child { margin-bottom: 0; }
+#fig-f06 td.r.num:last-child, #fig-f04k td.r.num { font-family: var(--font); font-size: inherit; text-align: left; }
+#situation-summary .fig-w svg, #warning-summary .fig-w svg, #country-overview .fig-w svg { margin: 0; }
+/* small phones: the drawing keeps its 11 px minimum for axis text */
+@media (max-width: 420px) {
+  #situation-summary > .screen, #warning-summary, #country-overview { padding-left: 8px; padding-right: 8px; }
+}
+#fig-f05 .fig-head .lg { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+/* wide windows: the caption stands beside the drawing instead of leaving the right third empty */
+@media (min-width: 1360px) {
+  #situation-summary .fig, #warning-summary .fig, #country-overview .fig { display: grid; grid-template-columns: minmax(0, 760px) minmax(0, 1fr); column-gap: 28px; align-items: start; }
+  #situation-summary .fig-head, #warning-summary .fig-head, #country-overview .fig-head, #warning-summary .fig-table, #country-overview .fig-table { grid-column: 1 / -1; }
+  #situation-summary figcaption, #warning-summary figcaption, #country-overview figcaption { grid-column: 2; margin-top: 4px; }
+}
+
+/* F01 */
+.ch-f01 .f01-k { font: 400 13px var(--font); fill: var(--screen-muted); }
+.ch-f01 .f01-act { font-weight: 600; fill: var(--screen-text); }
+.ch-f01 .f01-g { font: 400 13px var(--font); }
+.ch-f01 .f01-c { font: 500 12.5px var(--font-mono); fill: var(--screen-muted); }
+.f01-seg { stroke: var(--nv); stroke-width: .75; }
+.f01-seg.s-nv { fill: var(--nv); }
+.f01-seg.s-ev { fill: url(#stripes); }
+.f01-seg.s-s4 { fill: url(#dots); }
+.f01-seg.s-ok { fill: var(--screen-raised); stroke: var(--screen-line-strong); }
+.f01-seg.s-other { fill: var(--other); }
+.f01-brace { fill: none; stroke: var(--screen-line-strong); stroke-width: 1; }
+.f01-bar { fill: var(--ch-main); }
+.f01-rest { fill: var(--ch-base); }
+
+/* F05 */
+.ch-f05 .f05-rl { font: 400 12.5px var(--font-mono); fill: var(--screen-muted); paint-order: stroke; stroke: var(--screen-bg); stroke-width: 3px; }
+.f05-ref { stroke-dasharray: 4 3; }
+
+/* F06 */
+.ch-f06 .f06-l { font: 400 12.5px var(--font); }
+.ch-f06 .f06-c { font: 600 14px var(--font-legend); letter-spacing: .4px; fill: var(--screen-muted); }
+.ch-f06 .f06-n { font: 600 14px var(--font-legend); font-variant-numeric: tabular-nums; }
+.ch-f06 .f01-k { font: 400 13px var(--font); fill: var(--screen-muted); }
+
+/* F35 */
+.f35-tile { fill: var(--screen-sunk); stroke: var(--screen-line); stroke-width: 1; }
+.ch-f35 .f35-n { font: 600 14px var(--font); }
+.ch-f35 .f35-v { font: 500 21px var(--font-mono); font-variant-numeric: tabular-nums; }
+.ch-f35 .f35-s { font: 400 12.5px var(--font); fill: var(--screen-muted); }
+.f35-track { fill: var(--screen-line); }
+.f35-bar { fill: var(--ch-main); }
+
+@media (forced-colors: active) {
+  .f01-seg, .f01-brace, .f35-tile { stroke: CanvasText; }
+  .f01-bar, .f35-bar { fill: CanvasText; }
+  .f01-rest, .f35-track { fill: Canvas; stroke: CanvasText; }
+}
+
+/* project page: three story panels */
+.story-col { display: grid; gap: 28px; min-width: 0; }
+.story-col .story { min-width: 0; }
+.story-col .fig { margin-bottom: 4px; }
+.story-col .story > .keys { margin-top: 8px; }
+.story-col .sec-title { display: flex; align-items: baseline; gap: 10px; }
+.step-n { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 1.625rem; height: 1.625rem; background: var(--surface-3); border: 1px solid var(--rule-strong); border-radius: 6px; box-shadow: 0 1px 0 var(--hilite); color: var(--text-1); font: 500 .875rem/1 var(--font-mono); }
+.story-steps { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; padding: 0; list-style: none; }
+.story-steps a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px 0 8px; color: var(--text-1); font-weight: 600; text-decoration: none; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); }
+.story-steps a:hover { background: var(--surface-2); color: var(--text-1); }
+@media (max-width: 480px) { .story-steps { display: none; } }
+
+/* about page */
+.about { max-width: 40rem; }
+.about-name { margin: 2px 0 0; font-size: 1.5rem; line-height: 1.2; }
+.about-ort { margin: 2px 0 14px; color: var(--ink-2); }
+.about-text { margin: 0 0 14px; }
+.about-repo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 0; overflow-wrap: anywhere; }
+.about-repo a { font-family: var(--font-mono); font-size: .9375rem; }

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Idee und Aufbau{% endblock %}
+{% block description %}Wie der Lieferengpass-Radar aufgebaut ist: tägliches Archiv der BASG-Liste, Engpass-Episoden je Packung, Datenintegrität und Grenzen.{% endblock %}
+{% block main %}
+<div class="hero">
+ <p class="lg">Idee und Aufbau</p>
+ <h1 class="hero-title">Aus einer Liste, die nur heute kennt, wird ein Verlauf.</h1>
+ <p class="lead">Das Register des BASG sagt, was heute gemeldet ist. Es sagt nicht, was gestern dort stand. Dieses Projekt sichert jede Fassung, baut daraus je Packung eine Geschichte und legt offen, wo diese Geschichte lückenhaft ist.</p>
+</div>
+
+<section class="idee-sec idee-problem" aria-labelledby="problem-h">
+ <div class="idee-note">
+  <p class="lg">Ausgangspunkt</p>
+  <h2 id="problem-h" class="sec-title">Drei Dinge, die das Register nicht zeigt</h2>
+ </div>
+ <ol class="idee-points">
+  <li><strong>Beendete Meldungen verschwinden.</strong> Ob und wie lange eine Packung schon einmal knapp war, steht im Register nicht mehr.</li>
+  <li><strong>Verschobene Termine hinterlassen keine Spur.</strong> Sichtbar ist nur der zuletzt angekündigte Liefertermin, nicht wie oft er schon geändert wurde.</li>
+  <li><strong>Das Ausland bleibt verstreut.</strong> Ob derselbe Wirkstoff anderswo knapp ist, erfährt nur, wer ein Dutzend Behördenlisten in mehreren Sprachen liest.</li>
+ </ol>
+</section>
+
+{% if f16 %}
+<section class="idee-sec" aria-labelledby="aufbau-h">
+ <div class="idee-note">
+  <p class="lg">Aufbau</p>
+  <h2 id="aufbau-h" class="sec-title">Sichern, verknüpfen, schätzen, zeigen</h2>
+  <p>Die vier Teile laufen nacheinander und sind streng getrennt. Das Archiv ist die einzige Quelle der Wahrheit: Alles danach lässt sich jederzeit neu daraus bauen, auch nach einer Korrektur im Code.</p>
+ </div>
+ <div class="idee-fig">{{ m.figure(**f16) }}</div>
+</section>
+{% endif %}
+
+{% if f29 %}
+<section class="idee-sec" aria-labelledby="archiv-h">
+ <div class="idee-note">
+  <p class="lg">Archiv</p>
+  <h2 id="archiv-h" class="sec-title">Warum täglich?</h2>
+  <p>Eine kurze Meldung, die zwischen zwei Aufnahmen beginnt und endet, hat es für jede spätere Auswertung nie gegeben. Der Abstand der Aufnahmen entscheidet also darüber, was überhaupt gezählt werden kann.</p>
+  {% if archiv %}
+  <dl class="tiles idee-tiles">
+   {{ m.readout("Stände im Archiv", archiv.staende) }}
+   {% if archiv.start %}{{ m.readout("Täglich seit " ~ archiv.start, archiv.taeglich) }}{% endif %}
+   {% if archiv.abstand %}{{ m.readout("Abstand davor, Median", archiv.abstand ~ " Tage") }}{% endif %}
+  </dl>
+  {% endif %}
+ </div>
+ <div class="idee-fig">{{ m.figure(**f29) }}</div>
+</section>
+{% endif %}
+
+{% if f21 %}
+<section class="idee-sec" aria-labelledby="quellen-h">
+ <div class="idee-note">
+  <p class="lg">Quellen</p>
+  <h2 id="quellen-h" class="sec-title">Was je Quelle im Archiv liegt</h2>
+  <p>Gespeichert wird nur, was sich geändert hat, dann aber unverändert und mit Prüfsumme. Auch gescheiterte Abrufe werden protokolliert, damit Lücken sichtbar bleiben. Bedingungen und Links stehen in <a href="{{ root }}methodik/#sources">Methodik und Quellen</a>.</p>
+ </div>
+ <div class="idee-fig">{{ m.figure(**f21) }}</div>
+</section>
+{% endif %}
+
+{% if f04 %}
+{% set key_html = m.legend() %}
+<section class="idee-sec" aria-labelledby="episode-h">
+ <div class="idee-note">
+  <p class="lg">Beispiel</p>
+  <h2 id="episode-h" class="sec-title">Was eine Episode ist</h2>
+  <p>Eine Episode ist der zusammenhängende Meldezeitraum einer Packung, mit ihrer Folge von Status und angekündigten Terminen. Sie beginnt mit dem amtlichen Beginn der Vertriebseinschränkung, ersatzweise dem Meldedatum oder dem ersten Auftreten im Archiv, und endet mit dem Status „verfügbar“, dem Verschwinden aus einer vollständigen Datei oder einer neuen Meldung.</p>
+  <p>Fällt das Ende zwischen zwei weit auseinanderliegende Aufnahmen, ist es nur als Intervall bekannt. Dann nennt das Radar eine Spanne statt eines Datums.</p>
+  {% if beispiel_pfad %}<p class="keys">{{ m.key("Packungsseite öffnen", root ~ beispiel_pfad, ic="arrow-right") }}</p>{% endif %}
+ </div>
+ <div class="idee-fig">{{ m.figure(id=f04.id, kind=f04.kind, legend=f04.legend, svg_wide=f04.svg_wide ~ key_html, svg_narrow=f04.svg_narrow ~ key_html, caption=f04.caption, table=f04.table, source=f04.source) }}</div>
+</section>
+{% endif %}
+
+<section class="idee-sec" aria-labelledby="integritaet-h">
+ <div class="idee-note">
+  <p class="lg">Datenintegrität</p>
+  <h2 id="integritaet-h" class="sec-title">Aufgebaut nach ALCOA+</h2>
+  <p>Das Archiv folgt im Aufbau den ALCOA+-Grundsätzen der Datenintegrität aus dem GxP-Umfeld.</p>
+ </div>
+ <div class="idee-fig">
+  <div class="screen idee-table">
+   <div class="table-wrap" tabindex="0">
+    <table id="data-integrity" class="compact">
+     <caption>Grundsätze und ihre Umsetzung</caption>
+     <thead><tr><th scope="col">Grundsatz</th><th scope="col">Umsetzung</th></tr></thead>
+     <tbody>
+      <tr><th scope="row">Original, dauerhaft</th><td>Jede Fassung wird unverändert gespeichert (gzip), nach dem Schreiben zurückgelesen und gegen die SHA-256 der Originalbytes geprüft, dann atomar umbenannt; eine optionale zweite Kopie wird über Prüfsummen verglichen.</td></tr>
+      <tr><th scope="row">Zuordenbar, zeitnah, vollständig</th><td>Eine nur angehängte Manifestzeile je Abrufversuch, auch für gescheiterte: Quelle, URL, Zeit, HTTP-Status, Prüfsumme.</td></tr>
+      <tr><th scope="row">Konsistent</th><td>Die Datenbank wird deterministisch aus dem Archiv neu gebaut.</td></tr>
+      <tr><th scope="row">Richtig</th><td>Amtliche Felder stehen wörtlich mit Quelle und Stand; eigene Auswertungen sind gekennzeichnet.</td></tr>
+     </tbody>
+    </table>
+   </div>
+  </div>
+  <p class="idee-after">Das sind Entscheidungen im Aufbau, keine Validierung: Das Radar ist kein validiertes computergestütztes System im GxP-Sinn.</p>
+ </div>
+</section>
+
+<section class="idee-sec" aria-labelledby="grenzen-h">
+ <div class="idee-note">
+  <p class="lg">Grenzen</p>
+  <h2 id="grenzen-h" class="sec-title">Was dieser Aufbau nicht leistet</h2>
+ </div>
+ <div class="idee-fig">
+  <ul class="module idee-limits">
+   <li><strong>Eine Hauptquelle.</strong> Was nicht an das BASG gemeldet ist, fehlt. Lagerbestände sieht das Radar nicht.</li>
+   <li><strong>Kurze tägliche Historie.</strong>{% if archiv and archiv.start %} Erst seit dem {{ archiv.start }} wird täglich archiviert.{% endif %} Ältere Episoden sind nur grob datiert, viele Enden nur als Intervall bekannt.</li>
+   <li><strong>Grobe Verknüpfung.</strong> Auslandsmeldungen hängen über den Wirkstoffcode (ATC) an österreichischen Packungen, die Wirkstoffzuordnung ist regelbasiert.</li>
+   <li><strong>Ein Rechner.</strong> Das Archiv läuft auf einem einzigen Rechner; ein verpasster BASG-Tag lässt sich nicht nachholen.</li>
+  </ul>
+  <p class="keys">{{ m.key("Modell und Prüfung", root ~ "projekt/modell/", ic="arrow-right") }}{{ m.key("Methodik und Quellen", root ~ "methodik/", ic="file-text") }}</p>
+ </div>
+</section>
+{% endblock %}

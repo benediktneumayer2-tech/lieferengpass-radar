@@ -1,0 +1,86 @@
+/* Page "Modell und Prüfung": section rhythm, the plainly stated weakness, chart anatomy of F09–F11, F15, F25–F27, F36. */
+
+.md-notice { display: grid; gap: 6px; margin: 0 0 24px; }
+.md-notice p { max-width: 50rem; margin: 0; }
+.md-sec { margin: 0 0 32px; min-width: 0; }
+.md-sec > .sec-title { padding-top: 12px; border-top: 1px solid var(--rule-strong); }
+.md-text { max-width: 46rem; }
+.md-text p { margin: 0 0 8px; }
+p.md-text { margin: 0 0 12px; }
+.md-tiles { margin: 12px 0 0; max-width: 46rem; }
+.md-sec .fig-src { overflow-wrap: anywhere; }
+.md-table { margin: 0 0 16px; }
+.md-table caption { text-align: left; }
+.md-readouts { margin: 0 0 20px; max-width: 50rem; }
+.md-readouts .lg { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0 0 6px; }
+.md-readouts .tiles { margin: 0 0 6px; }
+.md-small-text { max-width: 50rem; margin: 4px 0 0; font-size: .875rem; line-height: 1.45; color: var(--ink-2); }
+.md-weak { margin: 0 0 16px; border-left: 3px solid var(--warn); }
+.md-weak p { max-width: 48rem; margin: 0 0 8px; }
+.md-weak p:last-child { margin-bottom: 0; }
+.md-weak-head { font-size: 1.125rem; line-height: 1.3; }
+#vorab .two-col { margin-top: 8px; }
+#vorab h3 { margin: 0 0 6px; }
+
+/* legends and heads inside these figures keep the tag on one line with the title */
+#fig-f10 .fig-head .lg, #fig-f25 .fig-head .lg, #fig-f27 .fig-head .lg, #fig-f36 .fig-head .lg { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+
+/* shared chart marks */
+.md-note { font: 400 12.5px var(--font); fill: var(--screen-muted) !important; }
+.md-small { font: 400 12.5px var(--font-mono); font-variant-numeric: tabular-nums; fill: var(--screen-muted) !important; }
+.md-big { font: 500 17px var(--font-mono); font-variant-numeric: tabular-nums; }
+.md-row { font-size: 13.5px; }
+.md-key { font: 400 12.5px var(--font); fill: var(--screen-muted) !important; }
+.md-call { font: 500 12.5px var(--font-mono); font-variant-numeric: tabular-nums; paint-order: stroke; stroke: var(--screen-bg); stroke-width: 3.5px; stroke-linejoin: round; }
+.md-date { font: 400 12.5px var(--font-mono); font-variant-numeric: tabular-nums; fill: var(--screen-muted) !important; }
+.md-zero { stroke: var(--screen-text); stroke-width: 1.25; }
+.md-panel-note { font: 600 12.5px var(--font); paint-order: stroke; stroke: var(--screen-bg); stroke-width: 3.5px; stroke-linejoin: round; }
+
+/* F10 reuses the marks of F22 */
+.ch-f10 .f22-k { font: 400 12.5px var(--font); fill: var(--screen-muted); }
+.ch-f10 .mk { stroke-width: 1.25; }
+.ch-f10 .mk-hollow { stroke-width: 1.3; }
+.ch-f10 .mk-g .mk { stroke-width: 2; }
+.ch-f10 .mk-g .mk-hollow { stroke-width: 1.75; }
+.ch-f10 .ch-tick { font-size: 11.5px; }
+.ch-f10 .f22-band { stroke: var(--ch-comp); stroke-width: .75; }
+
+/* F15 */
+.md-span { fill: color-mix(in srgb, var(--ch-base) 26%, var(--screen-bg)); stroke: var(--ch-base); stroke-width: 1; }
+.md-span-test { fill: color-mix(in srgb, var(--ch-main) 16%, var(--screen-bg)); stroke: var(--ch-main); stroke-dasharray: 4 3; }
+.md-span-t { font: 500 12px var(--font); }
+.md-tick { stroke: var(--screen-text); stroke-width: 1.25; }
+.md-now { stroke: var(--screen-accent); stroke-width: 1.5; }
+.md-now-m { fill: var(--screen-accent); }
+.ch .md-now-t { font: 600 12.5px var(--font-mono); fill: var(--screen-accent); paint-order: stroke; stroke: var(--screen-bg); stroke-width: 3.5px; stroke-linejoin: round; }
+.md-rail { stroke: var(--screen-line-strong); stroke-width: 1; }
+
+/* F25 */
+.md-stair { fill: none; stroke: var(--c); stroke-width: 2; stroke-linejoin: round; }
+.md-stair-test { stroke-width: 2.5; }
+.md-p50 { stroke: var(--screen-line-strong); stroke-width: 1; stroke-dasharray: 3 3; }
+.md-p50-t { font: 500 12px var(--font); fill: var(--screen-muted) !important; paint-order: stroke; stroke: var(--screen-bg); stroke-width: 3px; }
+.md-diag-t { font: 500 12.5px var(--font); paint-order: stroke; stroke: var(--screen-bg); stroke-width: 3px; }
+.ch-f25 .mk { stroke-width: 1.5; }
+.ch-f25 .mk-g .mk-hollow { stroke-width: 1.75; }
+
+/* F26 */
+.md-bar-a { fill: var(--ch-main); stroke: var(--ch-main); stroke-width: 1; }
+.md-bar-b { fill: color-mix(in srgb, var(--ch-comp) 22%, var(--screen-bg)); stroke: var(--ch-comp); stroke-width: 1.25; }
+.md-bar-v { font: 400 12.5px var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* F27 */
+.md-band { fill: color-mix(in srgb, var(--ch-base) 24%, transparent); stroke: var(--ch-base); stroke-width: .75; }
+.md-range { stroke: var(--ch-base); stroke-width: 1.25; }
+.md-exp { fill: none; stroke: var(--ch-base); stroke-width: 1.75; }
+.md-gap { stroke: var(--ch-main); stroke-width: 1; }
+
+/* F36 */
+.md-line { fill: none; stroke: var(--ch-main); stroke-width: 1.75; stroke-linejoin: round; }
+.md-mean { stroke: var(--screen-text); stroke-width: 1; stroke-dasharray: 5 3; }
+
+@media (forced-colors: active) {
+  .md-span, .md-span-test, .md-zero, .md-tick, .md-now, .md-rail, .md-stair, .md-exp, .md-range, .md-gap, .md-line, .md-mean, .md-bar-a, .md-bar-b { stroke: CanvasText; }
+  .md-span, .md-span-test, .md-bar-b, .md-band { fill: Canvas; }
+  .md-bar-a, .md-now-m { fill: CanvasText; }
+}

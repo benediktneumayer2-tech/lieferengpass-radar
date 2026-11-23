@@ -9,6 +9,7 @@
 
 <section id="warning-summary" class="block own" aria-labelledby="ws-h">
  <h2 id="ws-h">Hinweisstufen und bisherige Trefferquote</h2>
+ {% if f05 %}{{ m.figure(**f05) }}{% endif %}
  <div class="table-wrap" tabindex="0">
  <table class="rows">
   <caption>Wie oft folgte bisher eine BASG-Meldung? Rückblick {{ fw.period[0]|de }} bis {{ fw.period[1]|de }}</caption>
@@ -57,6 +58,14 @@
  </table>
  </div>
  <p class="small">„Gegenüber vergleichbaren Fällen“ vergleicht mit Wirkstoffen gleicher Produktzahl, gleicher Engpass-Vorgeschichte und gleichen Jahres.{% if reg.holder_data %} Die Quoten der beiden Hinweise sind nicht direkt vergleichbar: Die erste zählt Meldungen zum Wirkstoff, die zweite nur Meldungen der Produkte eines bestimmten Inhabers.{% endif %} <a href="{{ root }}methodik/#fruehwarnung">Wie die Hinweise entstehen</a></p>
+</section>
+{% endif %}
+
+{% if f35 or f06 %}
+<section id="country-overview" class="block own" aria-labelledby="co-h">
+ <h2 id="co-h">Woher die Hinweise kommen</h2>
+ {% if f35 %}{{ m.figure(**f35) }}{% endif %}
+ {% if f06 %}{{ m.figure(**f06) }}{% endif %}
 </section>
 {% endif %}
 

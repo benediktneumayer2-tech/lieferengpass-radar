@@ -17,7 +17,7 @@ Das Projekt schließt diese Lücken nur mit öffentlichen Daten:
 | **Z3-Schätzung**: Wahrscheinlichkeit einer neuen BASG-Meldung je Wirkstoff binnen 4, 8, 12 Wochen, fünf eingefrorene Verfahren | eine ehrliche, vorab festgelegte Prüfung statt nachträglich angepasster Zahlen |
 | **Statische Website** mit Lage, Suche, Packungs- und Wirkstoffseiten, Überfällig, Woche, Frühwarnliste, Methodik | für Fachleute (Apotheken, Ärzt:innen, Spitalapotheken, Forschung, Journalismus, Verwaltung); amtlich und eigen getrennt, ohne Tracking |
 
-Die Website wird lokal gebaut und ist noch nicht öffentlich bereitgestellt.
+Die Website läuft unter https://lieferengpass-radar.at und lässt sich auch lokal bauen.
 
 ## Wie die Teile zusammenspielen
 
@@ -80,11 +80,11 @@ Hauptvergleich laut Prüfplan: `z3_v0` gegen die Stufenregel `stufen_v0` nach 8 
 | Tagesarchiv | **läuft** in der Referenzinstanz seit 17.10.2026; BASG lückenlos (beobachtet 10.11.2026); 1.321 Dateien, 600 MB |
 | Quellen | **umgesetzt**: BASG, 12 Auslandslisten (DE nur intern, EU, IT, CZ, SK, HU, SI, BE, ES, US, FR, PL), ASP-Liste, EudraGMDP, Produktregister CZ/ES, EKO aus dem RIS, Infektionsdaten. Die Referenzinstanz archiviert einige mehr ([Unterschiede](DATENQUELLEN.md#4-unterschiede-zur-referenzinstanz)). |
 | Datenbank, Episoden, Kennzahlen | **umgesetzt**; in der Referenzinstanz 53 BASG-Schnappschüsse seit 2021, 5.503 Episoden |
-| Website | **umgesetzt, nur lokal**; 5.558 Seiten in der Referenzinstanz; Impressum und Datenschutz mit Platzhaltern |
+| Website | **umgesetzt, online** unter https://lieferengpass-radar.at; 5.600 Seiten in der Referenzinstanz; Impressum und Datenschutz in dieser Fassung mit Platzhaltern |
 | Frühwarnliste | **umgesetzt** als Hinweis nach Länderzahl (A 5+, B 3–4, C 2 Länder) mit bisheriger Trefferquote |
 | Z3-Verfahren | **umgesetzt und eingefroren**; Vorhersagen nur im Protokoll, nicht auf der Website |
 | Prospektive Prüfung | **beginnt 01.01.2027**; noch keine gültige Bewertung |
-| Z1/Z2-Prognosen, E-Mail-Überblick, offene Exporte, zweiter Abruf in der Cloud, öffentliche Website | **geplant**, nicht umgesetzt |
+| Z1/Z2-Prognosen, E-Mail-Überblick, offene Exporte, zweiter Abruf in der Cloud | **geplant**, nicht umgesetzt |
 
 ## Wichtige Zahlen und ihre Bedingungen
 

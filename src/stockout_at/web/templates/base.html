@@ -7,7 +7,7 @@
 <meta name="description" content="{% block description %}Offenes Archiv und Auswertung der österreichischen Meldungen zu Vertriebseinschränkungen von Arzneimitteln (BASG).{% endblock %}">
 <meta name="referrer" content="no-referrer">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="{{ root }}assets/style.css">
+<link rel="stylesheet" href="{{ root }}assets/style.css?v={{ style_version }}">
 </head>
 <body data-generated="{{ generated }}" data-basg-fetch="{{ basg_fetch }}">
 <a class="skip" href="#main">Zum Inhalt springen</a>
@@ -19,21 +19,18 @@
   <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-head" d="M0,0 L8,4 L0,8 z"/></marker>
  </defs>
 </svg>
-<header id="header" class="site-header">
- <div class="wrap header-row">
-  <a class="brand" href="{{ root or './' }}">{{ SITE_TITLE }}</a>
-  <nav aria-label="Hauptnavigation">
-   <ul>
-    <li><a href="{{ root }}fruehwarnung/">Frühwarnung</a></li>
-    <li><a href="{{ root }}ueberfaellig/">Überfällig</a></li>
-    <li><a href="{{ root }}woche/">Woche</a></li>
-    <li><a href="{{ root }}wirkstoffe/">Wirkstoffe A–Z</a></li>
-    <li><a href="{{ root }}methodik/">Methodik</a></li>
-   </ul>
-  </nav>
- </div>
+{% macro nav(rail=false) -%}
+{% for group, items in NAV %}{% if rail and loop.last %}<div class="grille" aria-hidden="true"></div>{% endif %}{% if group %}<p class="lg{{ ' on' if group == nav_group }}">{{ group }}</p>{% endif %}<ul{% if not group %} class="nav-end"{% endif %}>{% for label, path in items %}<li><a href="{{ (root ~ path) or './' }}"{% if path == nav_current %} class="cur" aria-current="{{ 'page' if nav_exact else 'true' }}"{% endif %}>{{ label }}</a></li>{% endfor %}</ul>{% endfor %}
+{%- endmacro %}
+<header id="header" class="topbar">
+ <a class="brand" href="{{ root or './' }}">{{ SITE_TITLE }}</a>
+ <p class="fresh{{ ' is-stale' if stale }}"><span class="led" aria-hidden="true"></span><span class="fresh-w"><span class="f-on">aktuell</span><span class="f-off">veraltet</span></span> <span><span class="fresh-l">BASG-Stand </span><span class="num">{{ basg_fetch_local|replace(", ", " · ") if basg_fetch else sid }}</span></span></p>
+ <details class="menu"><summary class="key">Menü</summary><nav aria-label="Hauptnavigation">{{ nav() }}</nav></details>
 </header>
-<div class="wrap">
+<div class="shell">
+<aside class="rail"><nav aria-label="Hauptnavigation">{{ nav(rail=true) }}</nav></aside>
+<div class="col">
+<div class="notices">
  <p id="audience" class="notice"><strong>Für Fachkreise:</strong> Apotheken, Ärztinnen und Ärzte, Krankenhäuser. Fragen zur eigenen Medikation beantworten Apotheke oder Arztpraxis.</p>
  {% if stale %}
  <p class="banner" role="status"><strong>Daten möglicherweise veraltet:</strong> Der letzte erfolgreiche BASG-Abruf ({{ basg_fetch_local }}) liegt beim Erzeugen dieser Seite mehr als {{ stale_hours }} Stunden zurück.</p>
@@ -41,18 +38,19 @@
  <p class="banner" id="stale-client" role="status" hidden><strong>Daten möglicherweise veraltet:</strong> Diese Seite wurde am {{ generated_local }} erzeugt; der letzte erfolgreiche BASG-Abruf liegt mehr als {{ stale_hours }} Stunden zurück. Maßgeblich ist die aktuelle BASG-Liste.</p>
 </div>
 <script>(function(){var b=document.body,t=Date.parse(b.getAttribute("data-basg-fetch")||b.getAttribute("data-generated"));if(t&&Date.now()-t>{{ stale_hours }}*36e5){document.getElementById("stale-client").hidden={{ 'true' if stale else 'false' }};}})();</script>
-<main id="main" class="wrap" tabindex="-1">
+{% if project_tab %}<nav class="subnav" aria-label="Projekt">{% for label, path in PROJECT_PAGES %}<a href="{{ root ~ path }}"{% if path == project_tab %} class="cur" aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</nav>{% endif %}
+<main id="main" class="page" tabindex="-1">
 {% block main %}{% endblock %}
 </main>
 <footer id="footer-sources" class="site-footer">
- <div class="wrap">
-  <p><strong>Stand der Daten:</strong> BASG-Liste vom <span class="num">{{ sid }}</span> (producedOn) · Stichtag <span class="num">{{ ref|de }}</span> · Seite erzeugt <span class="num">{{ generated_local }}</span> · letzter erfolgreicher BASG-Abruf <span class="num">{{ basg_fetch_local }}</span></p>
-  <p><strong>Quellen:</strong> Bundesamt für Sicherheit im Gesundheitswesen (BASG), <a href="https://webservices.basg.gv.at/medicineshortage/export/v1/download">Vertriebseinschränkungen (Export)</a>; ELGA TermGit, <a href="https://termgit.elga.gv.at/CodeSystem-asp-liste.html">ASP-Liste</a>{% if asp_version %} (Version {{ asp_version }}){% endif %}; Engpasslisten weiterer Behörden für die <a href="{{ root }}fruehwarnung/">Frühwarnliste</a> (siehe <a href="{{ root }}methodik/#fruehwarnung">Methodik</a>). Dieses Angebot ist kein Angebot des BASG.</p>
-  <p>Code: Apache-2.0 · Eigene Texte und Auswertungen: CC BY 4.0 · Daten der Quellen: nach deren Bedingungen (siehe <a href="{{ root }}methodik/#sources">Methodik</a>)</p>
-  <p><strong>Hinweis:</strong> Information für Fachkreise ohne Gewähr. Keine Therapie- oder Austauschempfehlung. Maßgeblich ist die amtliche BASG-Liste.</p>
-  <p><a href="{{ root }}impressum/">Impressum</a> · <a href="{{ root }}datenschutz/">Datenschutz</a> · <a href="{{ root }}methodik/">Methodik und Quellen</a></p>
- </div>
+ <p><strong>Stand der Daten:</strong> BASG-Liste vom <span class="num">{{ sid }}</span> (producedOn) · Stichtag <span class="num">{{ ref|de }}</span> · Seite erzeugt <span class="num">{{ generated_local }}</span> · letzter erfolgreicher BASG-Abruf <span class="num">{{ basg_fetch_local }}</span></p>
+ <p><strong>Quellen:</strong> Bundesamt für Sicherheit im Gesundheitswesen (BASG), <a href="https://webservices.basg.gv.at/medicineshortage/export/v1/download">Vertriebseinschränkungen (Export)</a>; ELGA TermGit, <a href="https://termgit.elga.gv.at/CodeSystem-asp-liste.html">ASP-Liste</a>{% if asp_version %} (Version {{ asp_version }}){% endif %}; Engpasslisten weiterer Behörden für die <a href="{{ root }}fruehwarnung/">Frühwarnliste</a> (siehe <a href="{{ root }}methodik/#fruehwarnung">Methodik</a>). Dieses Angebot ist kein Angebot des BASG.</p>
+ <p>Code: Apache-2.0 · Eigene Texte und Auswertungen: CC BY 4.0 · Daten der Quellen: nach deren Bedingungen (siehe <a href="{{ root }}methodik/#sources">Methodik</a>)</p>
+ <p><strong>Hinweis:</strong> Information für Fachkreise ohne Gewähr. Keine Therapie- oder Austauschempfehlung. Maßgeblich ist die amtliche BASG-Liste.</p>
+ <p><a href="{{ root }}impressum/">Impressum</a> · <a href="{{ root }}datenschutz/">Datenschutz</a> · <a href="{{ root }}methodik/">Methodik und Quellen</a></p>
 </footer>
+</div>
+</div>
 {% block scripts %}{% endblock %}
 </body>
 </html>

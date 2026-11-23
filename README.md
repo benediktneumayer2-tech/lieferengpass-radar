@@ -4,7 +4,7 @@
 
 **An early-warning tool for medicine shortages in Austria: a Python command-line tool for Linux that archives public shortage registers every day and turns them into shortage histories, an early-warning list and a static website.**
 
-The website is meant for pharmacies, hospital pharmacies, physicians and public-health staff; it is not online yet, so you build it yourself. *Lieferengpass* is German for "supply shortage". Austria's official shortage register, published by the Federal Office for Safety in Health Care (BASG), shows only today's state:
+The website is meant for pharmacies, hospital pharmacies, physicians and public-health staff; it runs at [lieferengpass-radar.at](https://lieferengpass-radar.at), and you can also build it yourself. *Lieferengpass* is German for "supply shortage". Austria's official shortage register, published by the Federal Office for Safety in Health Care (BASG), shows only today's state:
 
 - Ended reports disappear, so you cannot see whether, or for how long, a product was short before.
 - You cannot see how often an announced delivery date has already been pushed back.
@@ -48,7 +48,7 @@ flowchart LR
     A --> D[("2 Database<br/>episodes,<br/>foreign reports")]
     D --> F["3 Early-warning list<br/>by country count"]
     D --> Z["3 Z3 forecast<br/>frozen"]
-    D --> W["4 Website<br/>static, local"]
+    D --> W["4 Website<br/>static"]
     F --> W
     Z --> P[("Prediction log<br/>counts from 1 Jan 2027")]
 ```
@@ -60,7 +60,7 @@ flowchart LR
 | Early warning and Z3 | ranks substances into tiers by the number of countries reporting a shortage (A: 5 or more, B: 3–4, C: 2); the frozen Z3 model writes daily probabilities to a log | `fruehwarnung.py`, `modell.py`, `models/` · [MODELL_UND_BEWERTUNG.md](documentation/MODELL_UND_BEWERTUNG.md) |
 | Website (`stockout site`) | static pages: today's situation, history per package, available equivalents, overdue dates, early-warning list | `site.py`, `web/` · [WEBSITE.md](documentation/WEBSITE.md) |
 
-Official BASG fields appear verbatim; everything derived is labelled "Eigene Auswertung" (own analysis). The Z3 forecast stays in the log, not on the website.
+Official BASG fields appear verbatim; everything derived is labelled "Eigene Auswertung" (own analysis). Z3 forecasts for individual substances stay in the log; the website shows them only in aggregate, in six probability classes.
 
 ![Early-warning list built by the reference instance on 10 Nov 2026: tiers A (5 or more countries, 96 substances, so far 18.4% followed by a BASG report within 8 weeks), B (3 or 4 countries, 181 substances, 10.7%) and C (2 countries, 173 substances, 8.1%), compared with 6.8% for substances with a past shortage and no foreign signal; below, two hints from BASG registers with their hit rates so far.](documentation/assets/fruehwarnliste.png)
 
@@ -150,8 +150,9 @@ These are design choices, not a validation: the radar is not a validated compute
 
 ## What's new since v0.1-prereg
 
-The frozen models and the test plan are unchanged (same hashes). The changes concern how data are archived and read, plus one added check and one pre-registered follow-up analysis.
+The frozen models and the test plan are unchanged (same hashes). The changes concern how data are archived and read, plus one added check, one pre-registered follow-up analysis and the public website.
 
+- **23 Nov 2026 – website online and redesigned.** The reference instance runs at [lieferengpass-radar.at](https://lieferengpass-radar.at). Its start page compares forecasts with new BASG reports every day, in six probability classes, with no value for any single substance and no verdict before 30 Apr 2027. New project pages explain the idea, the model, its known weaknesses and every tested idea, including the negative ones. The documentation sentence "no forecast is shown on the website" now reads "no forecast for individual substances", with a [dated note](documentation/MODELL_UND_BEWERTUNG.md).
 - **20 Nov 2026 – signal speed: no measurable gain, follow-up fixed.** A retrospective search tested whether the speed at which shortage reports spread across countries improves the forecast. Verdict "unclear": no gain shown, a large one unlikely; nothing went into a model. Countries archived daily only since October 2026 are tested forward under a rule fixed on 17 Nov 2026: [analysis/modellsuche/tempo_folge](analysis/modellsuche/tempo_folge/README.md).
 - **20 Nov 2026 – citation.** Zenodo release `v0.1.1-prereg` archives the two pre-registered additions; models and test plan unchanged.
 - **17 Nov 2026 – additional pre-registered check.** Do Z3 warnings come true more often when a second, independent model at the level of the marketing authorisation holder agrees? Rule, dates and hashes: [analysis/paketsuche/zusatzpruefung](analysis/paketsuche/zusatzpruefung/README.md).
@@ -162,14 +163,14 @@ The frozen models and the test plan are unchanged (same hashes). The changes con
 
 ## Status and limits
 
-| Part | Status on 20 Nov 2026 |
+| Part | Status on 23 Nov 2026 |
 |---|---|
 | Daily archive | running on the reference instance since 17 Oct 2026; no BASG day missing; raw copies of further sources since 16 Nov 2026 |
 | Episodes | history back to 10 Apr 2021 from 28 snapshots, 10 of them truncated |
 | Z3 forecast | frozen, logged daily; prospective test from 1 Jan 2027, with one additional pre-registered check |
 | Follow-up analysis | signal speed of the newly archived countries, pre-registered; evaluation from Sep 2027 |
-| Website | built locally, not yet public |
-| Planned | forecasts of whether a delivery date holds and when a shortage ends; open data exports; public website |
+| Website | online at [lieferengpass-radar.at](https://lieferengpass-radar.at) |
+| Planned | forecasts of whether a delivery date holds and when a shortage ends; open data exports |
 
 **What it is not:** not a service of BASG or any other authority, and no view of stock levels. It runs on one machine without notifications, and linking foreign reports by ATC code is coarse. All known limits: [ENTWICKLUNG.md](documentation/ENTWICKLUNG.md#bekannte-grenzen-und-technische-schulden).
 

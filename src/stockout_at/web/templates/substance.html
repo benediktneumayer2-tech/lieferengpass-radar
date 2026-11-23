@@ -3,18 +3,24 @@
 {% import "_foreign.html" as f %}
 {% block title %}Wirkstoff {{ s.label }}{% endblock %}
 {% block main %}
+<div class="radar r-sub">
 <p class="crumb"><a href="{{ root }}wirkstoffe/">Wirkstoffe A–Z</a></p>
 <h1 class="page-title">Wirkstoff: {{ s.label }}</h1>
-<p class="lead"><span class="num">{{ s.packages|length }}</span> Packungen mit diesem Wirkstoff sind im Archiv der BASG-Liste enthalten, <span class="num">{{ s.current }}</span> davon in der aktuellen Liste, <span class="num">{{ s.active }}</span> aktiv eingeschränkt. Zusammenfassung von Salzformen zum Grundstoff: {{ m.own() }}</p>
+<dl class="tiles r-tiles">
+ {{ m.readout("Packungen im Archiv", s.packages|length) }}
+ {{ m.readout("in aktueller Liste", s.current) }}
+ {{ m.readout("aktiv eingeschränkt", s.active) }}
+</dl>
+<p class="lead">Alle Packungen mit diesem Wirkstoff aus dem Archiv der BASG-Liste. Zusammenfassung von Salzformen zum Grundstoff: {{ m.own() }}</p>
 
 <section id="reported-packages" class="block" aria-labelledby="rep-h">
  <h2 id="rep-h">Gemeldete Packungen</h2>
  <div class="table-wrap" tabindex="0">
- <table class="rows">
+ <table class="rows stack">
   <thead><tr><th scope="col">Packung</th><th scope="col">Status (BASG, Stand {{ sid }})</th><th scope="col">Angekündigt (BASG)</th><th scope="col"><span class="vh">Verlauf 12 Monate</span><span aria-hidden="true">Verlauf</span></th></tr></thead>
   <tbody>
   {% for p in s.packages %}
-   <tr><th scope="row">{{ m.pkg_cell(p, root) }}</th><td data-l="Status">{{ m.status(p.current_status) }}{% if not p.current_status %} <span class="small">(zuletzt {{ p.last_seen|de }})</span>{% endif %}</td><td class="num" data-l="Angekündigt">{{ p.announced or "–" }}{% if p.overdue %} <span class="overdue small">überfällig seit {{ p.overdue.days_overdue }} Tagen</span>{% endif %}</td><td class="mini-cell">{{ mini(p.package_key) }}</td></tr>
+   <tr><th scope="row">{{ m.pkg_cell(p, root) }}</th><td data-l="Status">{{ m.status(p.current_status) }}{% if not p.current_status %} <span class="small">(zuletzt {{ p.last_seen|de }})</span>{% endif %}</td><td class="num wide" data-l="Angekündigt">{{ p.announced or "–" }}{% if p.overdue %} <span class="overdue small">überfällig seit {{ p.overdue.days_overdue }} Tagen</span>{% endif %}</td><td class="mini-cell">{{ mini(p.package_key) }}</td></tr>
   {% endfor %}
   </tbody>
  </table>
@@ -26,12 +32,12 @@
  <p class="small">Gleichwertig heißt hier: gleiche Wirkstoffe, gleiche Stärke und gleiche Darreichungsform laut ASP-Liste{% if asp_version %} (Version {{ asp_version }}){% endif %}. Die Spalte „lieferbar“ ist die Angabe der ASP-Liste, nicht geprüft.</p>
  {% for g in s.groups %}
  <div class="table-wrap" tabindex="0">
- <table class="compact">
+ <table class="rows">
   <caption>{{ g.equiv_key }}: <span class="num">{{ g.authorised }}</span> zugelassene Packungen, <span class="num">{{ g.reported }}</span> gemeldet, <span class="num">{{ g.unreported|length }}</span> nicht gemeldet</caption>
   <thead><tr><th scope="col">Packung (ASP-Liste)</th><th scope="col">PZN</th><th scope="col">Zulassungsinhaber</th><th scope="col">lieferbar (ASP)</th><th scope="col">BASG-Liste (aktuell)</th></tr></thead>
   <tbody>
   {% for u in g.unreported %}
-   <tr><th scope="row">{% if u.p %}<a href="{{ root }}{{ u.p.path }}">{{ u.name }}</a>{% else %}{{ u.name }}{% endif %}</th><td class="num">{{ u.pzn }}</td><td>{{ u.inhaber }}</td><td>{{ "ja" if u.lieferbar else "nein" }}</td><td>{{ u.basg_status or "nicht gelistet" }}</td></tr>
+   <tr><th scope="row">{% if u.p %}<a href="{{ root }}{{ u.p.path }}">{{ u.name }}</a>{% else %}{{ u.name }}{% endif %}</th><td class="num" data-l="PZN">{{ u.pzn }}</td><td data-l="Zulassungsinhaber">{{ u.inhaber }}</td><td data-l="lieferbar (ASP)">{{ "ja" if u.lieferbar else "nein" }}</td><td data-l="BASG-Liste">{{ u.basg_status or "nicht gelistet" }}</td></tr>
   {% else %}
    <tr><td colspan="5">Alle Packungen dieser Gruppe sind gemeldet.</td></tr>
   {% endfor %}
@@ -49,4 +55,5 @@
  <h2 id="disc-h">Hinweis</h2>
  <p>Die Liste nicht gemeldeter Packungen ist nur ein Hinweis für Rückfragen bei Großhandel oder Zulassungsinhaber. Sie ist <strong>keine Therapie- oder Austauschempfehlung</strong> und sagt nichts über die tatsächliche Verfügbarkeit aus. Die Entscheidung über eine Umstellung liegt bei den behandelnden Fachleuten.</p>
 </section>
+</div>
 {% endblock %}

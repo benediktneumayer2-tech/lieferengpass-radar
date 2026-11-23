@@ -4,7 +4,7 @@
 
 **Ein Frühwarnwerkzeug für Arzneimittel-Lieferengpässe in Österreich: eine Python-Kommandozeile für Linux, die öffentliche Engpassregister täglich sichert und daraus Engpassverläufe, eine Frühwarnliste und eine statische Website erzeugt.**
 
-Die Website ist für Apotheken, Spitalapotheken, Ärzt:innen und das öffentliche Gesundheitswesen gedacht; sie ist noch nicht online und wird lokal gebaut. Im Register des BASG (Bundesamt für Sicherheit im Gesundheitswesen) stehen täglich die Lieferengpässe, die Zulassungsinhaber für einzelne Arzneimittel-Packungen gemeldet haben, mit Status und angekündigtem Liefertermin. Das Register zeigt aber nur den heutigen Stand:
+Die Website ist für Apotheken, Spitalapotheken, Ärzt:innen und das öffentliche Gesundheitswesen gedacht; sie läuft unter [lieferengpass-radar.at](https://lieferengpass-radar.at) und lässt sich auch selbst bauen. Im Register des BASG (Bundesamt für Sicherheit im Gesundheitswesen) stehen täglich die Lieferengpässe, die Zulassungsinhaber für einzelne Arzneimittel-Packungen gemeldet haben, mit Status und angekündigtem Liefertermin. Das Register zeigt aber nur den heutigen Stand:
 
 - Beendete Meldungen verschwinden. Ob und wie lange ein Präparat schon einmal knapp war, steht im Register nicht mehr.
 - Wie oft ein angekündigter Liefertermin schon verschoben wurde, sieht man nicht.
@@ -48,7 +48,7 @@ flowchart LR
     A --> D[("2 Datenbank<br/>Episoden,<br/>Auslandsmeldungen")]
     D --> F["3 Frühwarnliste<br/>nach Länderzahl"]
     D --> Z["3 Z3-Schätzung<br/>eingefroren"]
-    D --> W["4 Website<br/>statisch, lokal"]
+    D --> W["4 Website<br/>statisch"]
     F --> W
     Z --> P[("Protokoll<br/>zählt ab 01.01.2027")]
 ```
@@ -60,7 +60,7 @@ flowchart LR
 | Frühwarnung und Z3 | stuft Wirkstoffe nach der Zahl der Länder mit laufender Meldung (A: ab 5, B: 3–4, C: 2); das eingefrorene Modell Z3 schreibt täglich Wahrscheinlichkeiten in ein Protokoll | `fruehwarnung.py`, `modell.py`, `models/` · [MODELL_UND_BEWERTUNG.md](documentation/MODELL_UND_BEWERTUNG.md) |
 | Website (`stockout site`) | statische Seiten: Lage am Stichtag, Verlauf je Packung, gleichwertige lieferbare Packungen, überfällige Termine, Frühwarnliste | `site.py`, `web/` · [WEBSITE.md](documentation/WEBSITE.md) |
 
-Amtliche BASG-Felder stehen wörtlich da; Abgeleitetes trägt die Kennzeichnung „Eigene Auswertung“. Die Z3-Schätzung steht nur im Protokoll, nicht auf der Website.
+Amtliche BASG-Felder stehen wörtlich da; Abgeleitetes trägt die Kennzeichnung „Eigene Auswertung“. Z3-Schätzungen für einzelne Wirkstoffe stehen nur im Protokoll; die Website zeigt sie nur gebündelt in sechs Wahrscheinlichkeitsklassen.
 
 ![Frühwarnliste der Referenzinstanz, Stand 10.11.2026: oben eine Tabelle der Hinweisstufen A (5 oder mehr Länder, 96 Wirkstoffe, bisher 18,4 % binnen 8 Wochen eine BASG-Meldung), B (3 oder 4 Länder, 181 Wirkstoffe, 10,7 %) und C (2 Länder, 173 Wirkstoffe, 8,1 %) sowie der Vergleich ohne Auslandsblick mit 6,8 %; darunter die Hinweise aus den BASG-Registern mit ihren bisherigen Trefferquoten.](documentation/assets/fruehwarnliste.png)
 
@@ -150,8 +150,9 @@ Das sind Entscheidungen im Aufbau, keine Validierung: Das Radar ist kein validie
 
 ## Neu seit v0.1-prereg
 
-Die eingefrorenen Modelle und der Prüfplan sind unverändert (gleiche Hashes). Geändert hat sich, wie Daten archiviert und gelesen werden; dazu kommen eine Zusatzprüfung und eine vorab festgelegte Folgeauswertung.
+Die eingefrorenen Modelle und der Prüfplan sind unverändert (gleiche Hashes). Geändert hat sich, wie Daten archiviert und gelesen werden; dazu kommen eine Zusatzprüfung und eine vorab festgelegte Folgeauswertung und die öffentliche Website.
 
+- **23.11.2026 – Website online und neu gestaltet.** Die Referenzinstanz läuft unter [lieferengpass-radar.at](https://lieferengpass-radar.at). Ihre Startseite vergleicht täglich Vorhersagen mit neuen BASG-Meldungen, in sechs Wahrscheinlichkeitsklassen, ohne Wert für einen einzelnen Wirkstoff und ohne Urteil vor dem 30.04.2027. Neue Projektseiten erklären Idee, Modell, bekannte Schwächen und alle geprüften Ideen, auch die negativen. Der Dokumentationssatz „Keine Vorhersage wird auf der Website gezeigt“ lautet nun „Keine Vorhersage für einzelne Wirkstoffe“, mit [datiertem Hinweis](documentation/MODELL_UND_BEWERTUNG.md).
 - **20.11.2026 – Signaltempo: kein messbarer Gewinn, Folgeprüfung festgelegt.** Eine Rückschau prüfte, ob das Tempo, mit dem sich Engpassmeldungen über Länder ausbreiten, die Prognose verbessert. Urteil „unklar“: kein Gewinn nachgewiesen, ein großer unwahrscheinlich; nichts davon ging in ein Modell. Länder, die erst seit Oktober 2026 täglich archiviert werden, werden nach einer am 17.11.2026 festgelegten Regel vorwärts geprüft: [analysis/modellsuche/tempo_folge](analysis/modellsuche/tempo_folge/FOLGEPRUEFUNG.md).
 - **20.11.2026 – Zitierbarkeit.** Das Zenodo-Release `v0.1.1-prereg` archiviert die beiden Vorab-Festlegungen; Modelle und Prüfplan unverändert.
 - **17.11.2026 – zusätzliche Vorab-Prüfung.** Treffen Z3-Warnungen öfter ein, wenn ein zweites, unabhängiges Modell auf Ebene der Zulassungsinhaber zustimmt? Regel, Termine und Hashes: [analysis/paketsuche/zusatzpruefung](analysis/paketsuche/zusatzpruefung/ZUSATZPRUEFPLAN.md).
@@ -162,14 +163,14 @@ Die eingefrorenen Modelle und der Prüfplan sind unverändert (gleiche Hashes). 
 
 ## Stand und Grenzen
 
-| Teil | Stand am 20.11.2026 |
+| Teil | Stand am 23.11.2026 |
 |---|---|
 | Tagesarchiv | läuft in der Referenzinstanz seit 17.10.2026; seither kein BASG-Tag fehlend; seit 16.11.2026 auch Rohkopien weiterer Quellen |
 | Episoden | Vorgeschichte ab 10.04.2021 aus 28 Einzelaufnahmen, davon 10 abgeschnitten |
 | Z3-Schätzung | eingefroren, schreibt täglich ins Protokoll; prospektive Prüfung ab 01.01.2027, dazu eine vorab festgelegte Zusatzprüfung |
 | Folgeauswertung | Signaltempo der neu archivierten Länder, vorab festgelegt; Auswertung ab September 2027 |
-| Website | lokal gebaut, noch nicht öffentlich |
-| Geplant | Prognosen, ob ein Termin hält und wann eine Meldung endet; offene Datenexporte; öffentliche Website |
+| Website | online unter [lieferengpass-radar.at](https://lieferengpass-radar.at) |
+| Geplant | Prognosen, ob ein Termin hält und wann eine Meldung endet; offene Datenexporte |
 
 **Was das Radar nicht ist:** kein Angebot des BASG oder einer anderen Behörde und keine Sicht auf Lagerbestände. Es läuft auf einem Rechner ohne Benachrichtigungen, und die Verknüpfung mit dem Ausland über den ATC-Code ist grob. Alle bekannten Grenzen: [ENTWICKLUNG.md](documentation/ENTWICKLUNG.md#bekannte-grenzen-und-technische-schulden).
 

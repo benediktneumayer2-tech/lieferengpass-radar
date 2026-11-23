@@ -1,0 +1,117 @@
+/* Radar pages: package, substance, A-Z, overdue, week. Scoped to .radar so the other pages keep their look. */
+
+/* the two kinds of content stay apart: official register text on raised paper with a neutral edge, own analyses with an accent edge */
+.radar .official { background-color: var(--screen-raised); border-left: 3px solid var(--screen-line-strong); }
+.radar .own { border-left: 3px solid var(--screen-accent); }
+.radar .official-label { font-family: var(--font); font-variant-caps: normal; letter-spacing: 0; color: var(--screen-muted); border-color: var(--screen-line-strong); vertical-align: .08em; }
+.radar .block > h2 .own-label, .radar .block > h2 .official-label { margin-left: 4px; }
+.radar .lead .official-label { color: var(--ink-2); border-color: var(--line-strong); }
+
+/* readouts */
+.r-tiles { grid-template-columns: repeat(auto-fit, minmax(7.25rem, 1fr)); }
+.r-tiles .lg { font-size: 1rem; line-height: 1.1; }
+.r-tiles dd { font-size: 1.1875rem; }
+
+/* package head: the state of the package first, on e-paper; its identity in wells */
+.r-pkg .pkg-name { margin-bottom: 10px; }
+.r-pkg .facts { grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); }
+.r-pkg .facts > .st { background: var(--screen-bg); border-color: var(--screen-rim); --ink: var(--screen-text); --ink-2: var(--screen-muted); }
+.r-pkg .facts .status { white-space: normal; }
+.r-pkg .facts dd { line-height: 1.3; }
+
+/* timeline: on wide screens the legend stands beside the drawing */
+.r-pkg .timeline-block .tl-wide svg.tl { margin: 0; }
+.r-pkg .tl-label.s-ev, .r-pkg .tl-label.s-s4 { paint-order: stroke; stroke: var(--screen-raised); stroke-width: 3.5px; stroke-linejoin: round; }
+.r-pkg .legend { margin-bottom: 10px; }
+@media (min-width: 1280px) {
+  .r-pkg .timeline-block { display: grid; grid-template-columns: minmax(0, 1fr) 216px; column-gap: 20px; align-items: center; }
+  .r-pkg .timeline-block > h2, .r-pkg .timeline-block > .table-wrap, .r-pkg .timeline-block > p { grid-column: 1 / -1; }
+  .r-pkg .timeline-block > .legend { flex-direction: column; gap: 3px; margin: 0; }
+  .r-pkg .timeline-block > .legend li { align-items: flex-start; line-height: 1.25; }
+  .r-pkg .timeline-block > .legend svg { margin-top: 2px; }
+}
+
+/* history as text: dense, dates in mono, derived rows carry a quiet accent mark */
+.r-pkg table.events th, .r-pkg table.events td { padding-top: 4px; padding-bottom: 4px; }
+.r-pkg table.events tbody th.num { padding-left: 8px; font-family: var(--font-mono); font-size: .8125rem; color: var(--ink-2); }
+.r-pkg table.events tr:has(.own-label) th.num { box-shadow: inset 2px 0 0 var(--screen-accent); }
+.r-pkg table.events .own-label { padding: 0 4px; border-color: transparent; font-weight: 400; }
+.r-pkg .ep-row th { padding-top: 5px; padding-bottom: 5px; }
+
+/* official entry beside the own analysis */
+.pkg-split { display: grid; gap: 0 16px; min-width: 0; }
+.pkg-split > *, .pkg-side > * { min-width: 0; }
+@media (min-width: 1100px) { .pkg-split { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: start; } }
+.r-pkg .fields { margin: 0 0 8px; }
+.r-pkg .fields div { padding: 4px 0; }
+.r-pkg .fields div:last-child { border-bottom: 0; }
+.r-pkg table.compact { font-size: .875rem; }
+.r-pkg table.compact td, .r-pkg table.compact th { padding-right: 6px; }
+.r-pkg abbr[title] { cursor: help; }
+
+/* lists */
+.radar table.rows tbody th, .radar table.rows td { padding-top: 5px; padding-bottom: 5px; }
+.radar table.rows td.num { font-family: var(--font-mono); font-size: .875rem; }
+.radar table.rows td.num .small { font-family: var(--font); }
+.radar table.rows td.num.wide { font-family: var(--font); font-size: .9375rem; }
+@media (min-width: 1000px) { .radar table.rows td.wide { white-space: nowrap; } }
+.radar #overdue-table td.overdue { color: var(--screen-err); font-weight: 500; }
+.radar .overdue.small { color: var(--screen-err); }
+.r-pkg .overdue { color: var(--screen-err); }
+.radar tbody tr:hover > * { background: color-mix(in srgb, var(--screen-selected) 45%, transparent); }
+
+/* phones: a row is the name, then status with its mini timeline, then the numbers side by side */
+@media (max-width: 600px) {
+  .radar table.rows tbody th, .radar table.rows td { padding-top: 1px; padding-bottom: 1px; }
+  .radar table.rows.stack tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px 10px; }
+  .radar table.rows.stack tbody th { grid-column: 1 / -1; grid-row: 1; }
+  .radar table.rows.stack td[data-l="Status"], .radar table.rows.stack td[data-l="zuletzt"] { grid-column: 1 / span 2; grid-row: 2; min-width: 0; }
+  .radar table.rows.stack td[data-l="Status"]::before { display: none; }
+  .radar table.rows.stack .mini-cell { grid-column: 3; grid-row: 2; padding-top: 5px; min-width: 0; }
+  .radar table.rows.stack .mini-cell svg { width: 100%; max-width: 120px; height: auto; margin-left: auto; }
+  .radar table.rows.stack td[data-l]:not([data-l="Status"]):not([data-l="zuletzt"])::before { display: block; content: attr(data-l); font-size: .8125rem; line-height: 1.2; }
+  .radar table.rows.stack td.wide { grid-column: 1 / -1; }
+  .radar table.rows.stack td.wide::before { display: inline !important; content: attr(data-l) ": " !important; }
+  .radar table.rows td.r { text-align: left; }
+  .r-pkg .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .r-pkg .facts > .w { grid-column: 1 / -1; }
+  /* foreign reports: the two dates side by side */
+  .radar table.fr tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px 10px; }
+  .radar table.fr tbody th, .radar table.fr td[data-l="Produkte"], .radar table.fr td[data-l="Zulassungsinhaber"], .radar table.fr td[data-l="Bezug"] { grid-column: 1 / -1; }
+  .radar table.fr td[data-l^="Gemeldet"]::before, .radar table.fr td[data-l^="Erwartet"]::before { display: block; content: attr(data-l); line-height: 1.2; }
+}
+
+/* A-Z: a ledger, one row per letter */
+.r-az .letters { position: relative; }
+.r-az .letter-block { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; margin-bottom: 8px; padding: 10px 12px; scroll-margin-top: 72px; }
+.r-az .letter-block > h2:first-child { margin: 0; padding: 0; border: 0; font: 500 1.375rem/1.2 var(--font-mono); font-variant-caps: normal; letter-spacing: 0; color: var(--screen-accent); }
+.r-az .sub-list { padding-left: 0; list-style: none; columns: 15rem; column-gap: 20px; font-size: .9375rem; }
+.r-az .sub-list li { padding: 1px 0; line-height: 1.35; }
+.r-az .sub-list .small { font-family: var(--font-mono); font-size: .8125rem; white-space: nowrap; }
+@media (min-width: 1000px) { .r-az .letters a { min-width: 32px; min-height: 36px; } }
+
+/* week */
+.r-week .week-lists section { margin-bottom: 16px; }
+.r-week .week-lists .block > h2:first-child .num { font-family: var(--font-mono); font-weight: 500; font-variant-caps: normal; }
+
+/* F23 */
+.f23 { margin: 0 0 8px; }
+.f23-skip { display: inline-flex; align-items: center; min-height: 44px; font-size: .9375rem; }
+.f23 .sec-head { margin-bottom: 4px; }
+.f23 .sec-title { margin: 0; }
+.f23 .tiles { margin-bottom: 12px; }
+.f23-past { fill: var(--screen-sunk); }
+.f23-ln { fill: none; stroke: var(--c); stroke-width: 1.25; stroke-opacity: .78; stroke-linejoin: round; }
+.f23-ln:hover { stroke-width: 2.5; stroke-opacity: 1; }
+.f23-dn { stroke-dasharray: 5 3; stroke-width: 1.75; stroke-opacity: 1; }
+.f23-dot { fill: none; stroke: var(--c); stroke-width: 4.5; stroke-linecap: round; }
+.f23-today { stroke: var(--screen-text); stroke-width: 1.5; }
+.f23-break { stroke: var(--rule-strong); stroke-width: 1; stroke-dasharray: 4 3; }
+.f23-swatch { stroke: var(--screen-line-strong); stroke-width: 1; }
+@media (forced-colors: active) { .f23-ln, .f23-dot, .f23-today { stroke: CanvasText; } .f23-past { fill: Canvas; } }
+
+/* small fixes: a PZN never splits from its label; the three substance counts share one row on phones */
+.radar .pzn { white-space: nowrap !important; }
+.r-sub .r-tiles { grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr)); }
+.r-sub .r-tiles .tile { padding: 8px; }
+.r-sub .r-tiles .lg { letter-spacing: .5px; }

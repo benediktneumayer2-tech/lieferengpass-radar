@@ -2,12 +2,26 @@
 {% import "_macros.html" as m %}
 {% block title %}Überfällige Termine{% endblock %}
 {% block main %}
+<div class="radar r-overdue">
 <h1 class="page-title">Überfällige Termine am {{ ref|de }}</h1>
 <p class="lead">Aktiv eingeschränkte Packungen („Nicht verfügbar“ oder „eingeschränkt verfügbar“), deren angekündigter Termin für die Wiederbelieferung vor dem Stichtag liegt. Längste Überschreitung zuerst. Status und Termin: {{ m.official(sid) }}; Tage überfällig und Verschiebungen: {{ m.own() }}</p>
+{% if f23 %}
+<section class="f23" aria-labelledby="f23-h">
+ <div class="sec-head"><h2 id="f23-h" class="sec-title">Wie weit rutschen angekündigte Termine?</h2><a class="f23-skip" href="#overdue-table">Zur Tabelle</a></div>
+ <dl class="tiles r-tiles">
+  {{ m.readout("Packungen mit Termin", f23.n_with_date) }}
+  {{ m.readout("davon Termin geändert", f23.n_packages) }}
+  {{ m.readout("Änderungen (später / früher)", f23.n_changes ~ " (" ~ f23.n_later ~ " / " ~ f23.n_earlier ~ ")") }}
+  {{ m.readout("Median der Änderung", f23.median) }}
+  {{ m.readout("erst nach Ablauf geändert", f23.n_after_due ~ " von " ~ f23.n_changes) }}
+ </dl>
+ {{ m.figure(id="f23", kind="live", legend="Angekündigte Termine im Tagesarchiv seit " ~ f23.start, svg_wide=f23.wide, svg_narrow=f23.narrow, caption=f23.caption, table=f23.table, source=f23.source) }}
+</section>
+{% endif %}
 <section class="block" aria-labelledby="od-h">
 <h2 id="od-h" class="vh">Tabelle</h2>
 <div class="table-wrap" tabindex="0">
-<table id="overdue-table" class="rows">
+<table id="overdue-table" class="rows stack">
  <caption><span class="num">{{ overdue|length }}</span> überfällige Termine</caption>
  <thead><tr><th scope="col">Packung</th><th scope="col">Status (BASG)</th><th scope="col">Angekündigt (BASG)</th><th scope="col" class="r">Tage überfällig</th><th scope="col" class="r">Verschiebungen</th><th scope="col"><span class="vh">Verlauf 12 Monate</span><span aria-hidden="true">Verlauf</span></th></tr></thead>
  <tbody>
@@ -20,4 +34,5 @@
 </table>
 </div>
 </section>
+</div>
 {% endblock %}

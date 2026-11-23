@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Befunde{% endblock %}
+{% block description %}Was im Projekt geprüft wurde und was es ergab, auch dort, wo kein Gewinn oder kein klares Ergebnis herauskam.{% endblock %}
+{% block main %}
+<div class="hero">
+ <p class="lg">Befunde</p>
+ <h1 class="hero-title">Was geprüft wurde und was davon trägt.</h1>
+ <p class="lead">Die meisten Ideen brachten im Rückblick keinen nachweisbaren Gewinn. Diese Seite führt sie trotzdem auf, mit Zahl, Unsicherheit und der Entscheidung, die daraus folgte.</p>
+</div>
+
+{% if beginn %}
+<p class="notice bf-notice"><strong>Alle Zahlen hier sind Rückblicke und keine Validierung.</strong> Die prospektive Prüfung beginnt am <span class="num">{{ beginn }}</span>, ihr erster Bericht am <span class="num">{{ go }}</span> wird in jedem Fall veröffentlicht. Eine neue BASG-Meldung heißt nicht, dass ein Arzneimittel fehlt.</p>
+{% endif %}
+
+{% if ledger %}
+<section id="ledger" class="bf-sec" aria-labelledby="ledger-h">
+ <div class="sec-head"><h2 id="ledger-h" class="sec-title">Die Bilanz</h2>{{ m.tag("Rückblick · nicht validiert", "warn") }}</div>
+ <p class="bf-intro">{{ ledger.n }} geprüfte Ideen. Das Urteil gilt für den Rückblick: <strong>trägt</strong> heißt, der Bereich schließt „kein Unterschied“ aus; <strong>kein Gewinn</strong>, die Idee verbesserte nichts; <strong>unklar</strong>, ein Effekt ist weder gezeigt noch ausgeschlossen; <strong>zu wenige Fälle</strong>, für eine Aussage reicht die Zahl nicht. Die Modellsuche bekommt <strong>kein Urteil</strong>: Ihr Herausforderer wurde rückblickend ausgewählt und wird nur mitgerechnet.</p>
+ <dl class="tiles bf-tiles">
+  {% for name, value in ledger.counts %}{{ m.readout(name, value) }}{% endfor %}
+
+ </dl>
+ <div class="screen bf-ledger-screen">
+  <div class="table-wrap" tabindex="0" role="region" aria-labelledby="ledger-c">
+   <table class="rows bf-ledger">
+    <caption id="ledger-c">Geprüfte Ideen mit Urteil, Befund und Folge</caption>
+    <thead><tr><th scope="col">Idee</th><th scope="col">Urteil</th><th scope="col">Befund</th><th scope="col">Was daraus wurde</th></tr></thead>
+    {% for g in ledger.groups %}
+    <tbody>
+     <tr class="bf-group"><th colspan="4" scope="colgroup">{{ g.name }}{% for id, label in g.figs %} <a href="#fig-{{ id }}">{{ label }}</a>{% endfor %}</th></tr>
+     {% for r in g.rows %}
+     <tr>
+      <th scope="row">{{ r.idee }}</th>
+      <td data-l="Urteil">{{ m.tag(r.urteil, r.tone) }}</td>
+      <td data-l="Befund">{% if r.befund %}<span class="num bf-num">{{ r.befund }}</span> {% endif %}<span class="small">{{ r.einheit }}</span></td>
+      <td data-l="Folge">{{ r.folge }}</td>
+     </tr>
+     {% endfor %}
+    </tbody>
+    {% endfor %}
+   </table>
+  </div>
+ </div>
+ <p class="bf-foot"><strong>Stufen, Tempo und Modellsuche:</strong> {{ REFERENZ_SATZ }}</p>
+</section>
+{% endif %}
+
+{% if f07 %}
+<section id="ereignisse" class="bf-sec" aria-labelledby="ereignisse-h">
+ <h2 id="ereignisse-h" class="sec-title">Ereignisse in Österreich</h2>
+ <p class="bf-intro">Folgt auf ein Ereignis im österreichischen Markt häufiger eine neue Meldung als bei vergleichbaren Wirkstoffen? {{ f07_satz }}</p>
+ {{ m.figure(**f07) }}
+</section>
+{% endif %}
+
+{% if f18 %}
+<section id="stufen" class="bf-sec" aria-labelledby="stufen-h">
+ <h2 id="stufen-h" class="sec-title">Die Stufen der Frühwarnliste</h2>
+ <p class="bf-intro">Von vier Verfeinerungen hat eine getragen und wurde übernommen. Die anderen drei brachten keinen Gewinn und wurden verworfen.</p>
+ {{ m.figure(**f18) }}
+</section>
+{% endif %}
+
+{% if f19 %}
+<section id="tempo" class="bf-sec" aria-labelledby="tempo-h">
+ <h2 id="tempo-h" class="sec-title">Das Tempo der Signale</h2>
+ <div class="module bf-verdict">
+  <p class="bf-verdict-head"><span class="lg">Urteil</span> {{ m.tag(tempo.urteil, "warn") }}</p>
+  <p>{{ tempo.text }}</p>
+  <p class="small">{{ tempo.folge }}</p>
+ </div>
+ {{ m.figure(**f19) }}
+</section>
+{% endif %}
+
+{% if f20 %}
+<section id="modellsuche" class="bf-sec" aria-labelledby="modellsuche-h">
+ <h2 id="modellsuche-h" class="sec-title">Die Modellsuche</h2>
+ <div class="module bf-verdict">
+  <p class="bf-verdict-head"><span class="lg">Entscheidung</span> {{ m.tag("z3_v0 bleibt", "info") }}</p>
+  <p>{{ suche.entscheidung }}</p>
+  <p class="small">Der Herausforderer: {{ suche.beschreibung }}</p>
+ </div>
+ {{ m.figure(**f20) }}
+</section>
+{% endif %}
+
+{% if ausland %}
+<section id="folgen" class="module prose bf-end" aria-labelledby="folgen-h">
+ <h2 id="folgen-h" class="sec-title">Was das für die Prognose heißt</h2>
+ <p>{{ ausland }}</p>
+ <p class="keys">{{ m.key("Modell und Prüfung", root ~ "projekt/modell/", ic="arrow-right") }}{{ m.key("Methodik", root ~ "methodik/", ic="file-text") }}</p>
+</section>
+{% endif %}
+{% endblock %}

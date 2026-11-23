@@ -1,0 +1,95 @@
+/* Figures and charts. All chart colours and fonts live here; SVG markup carries classes only. */
+
+/* figure: legend and kind tag, screen with the chart, caption, source, numbers as a table */
+.fig { margin: 0 0 16px; min-width: 0; }
+.fig-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; margin: 0 0 6px; }
+.fig-screen { padding: 12px 8px; }
+.fig-w { display: none; }
+.fig-n svg { display: block; width: 100%; max-width: 440px; height: auto; margin: 0 auto; }
+.fig-w svg { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; }
+@media (min-width: 680px) { .fig-w { display: block; } .fig-n { display: none; } .fig-screen { padding: 16px; } }
+.fig figcaption { margin-top: 8px; font-size: .9375rem; line-height: 1.45; color: var(--ink-2); }
+.fig figcaption p { max-width: 50rem; margin: 0 0 4px; }
+.fig-ref { color: var(--ink); font-weight: 600; }
+.fig-src { font-size: .8125rem; }
+.fig-table { margin-top: 4px; }
+.fig-table > summary { display: inline-flex; align-items: center; min-height: 44px; color: var(--link); font-size: .9375rem; cursor: pointer; }
+.fig-table > summary::before, .fw-details summary::before { content: ""; flex: none; margin-right: 8px; border-left: 6px solid currentColor; border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+.fig-table[open] > summary::before, .fw-details[open] summary::before { transform: rotate(90deg); }
+.screen .fig-table .table-wrap { padding: 0; background: none; border: 0; }
+.fig-table .table-wrap { padding: 8px 12px; background: var(--screen-bg); border: 1px solid var(--screen-rim); border-radius: 6px; --ink: var(--screen-text); --ink-2: var(--screen-muted); --line: var(--screen-line); --line-strong: var(--screen-line-strong); color: var(--screen-text); }
+
+/* chart anatomy */
+.ch { overflow: visible; font-family: var(--font); }
+.ch text { fill: var(--screen-text); }
+.ch-lbl { font-size: 14px; }
+/* labels keep a halo in the screen colour, so gridlines never run through words */
+.ch-lbl, .ch-sub { paint-order: stroke; stroke: var(--screen-bg); stroke-width: 4px; stroke-linejoin: round; }
+.ch-strong { font-weight: 600; }
+.ch-sub { font-size: 12.5px; fill: var(--screen-muted) !important; font-family: var(--font-mono); }
+.ch-col { font: 600 15px var(--font-legend); font-variant-caps: all-small-caps; letter-spacing: 1px; fill: var(--screen-muted) !important; }
+.ch-val { font: 400 13.5px var(--font-mono); font-variant-numeric: tabular-nums; }
+.ch-val.ch-strong { font-weight: 500; }
+.ch-tick { font: 400 12.5px var(--font-mono); font-variant-numeric: tabular-nums; fill: var(--screen-muted) !important; }
+.ch-axt { font-size: 13px; fill: var(--screen-muted) !important; }
+.ch-axis { stroke: var(--screen-line-strong); stroke-width: 1; }
+.ch-grid { stroke: var(--screen-line); stroke-width: 1; }
+.ch-ref { stroke: var(--screen-line-strong); stroke-width: 1; }
+.ch-sep { stroke: var(--screen-line); stroke-width: 1; }
+.ch-stem { stroke-width: 1; }
+.ch-wh { fill: none; stroke-width: 1.25; }
+
+/* series: told apart by marker shape and direct label as well as colour */
+.ser-main { --c: var(--ch-main); }
+.ser-comp { --c: var(--ch-comp); }
+.ser-base { --c: var(--ch-base); }
+.ch-stem, .ch-wh { stroke: var(--c); }
+.mk { fill: var(--c); stroke: var(--screen-bg); stroke-width: 2; paint-order: stroke; }
+.mk-hollow { fill: var(--screen-bg); stroke: var(--c); stroke-width: 1.75; paint-order: normal; }
+.mk-hit { fill: transparent; stroke: none; }
+.mk-g:hover .mk { stroke-width: 2.75; }
+
+@media (forced-colors: active) {
+  .mk, .ch-wh, .ch-stem, .ch-axis, .ch-ref { stroke: CanvasText; }
+  .mk { fill: CanvasText; }
+  .mk-hollow { fill: Canvas; }
+  .ch text { fill: CanvasText !important; }
+}
+
+/* package timeline */
+/* the wide drawing only where its axis text still renders at 11 px or more */
+.timeline-block svg.tl { display: block; width: 100%; height: auto; overflow: visible; }
+.tl-wide svg.tl { max-width: 880px; margin: 0 auto; }
+.tl-narrow svg.tl { max-width: 440px; margin: 0 auto; }
+.tl-narrow { display: none; }
+@media (max-width: 779px) { .tl-wide { display: none; } .tl-narrow { display: block; } }
+.tl-track { fill: var(--screen-sunk); stroke: var(--screen-line); stroke-width: 1; }
+.tl-grid { stroke: var(--screen-line); stroke-width: 1; }
+.tl-axis { font: 14.5px var(--font-mono); fill: var(--screen-muted); font-variant-numeric: tabular-nums; }
+.tl-narrow .tl-axis { font-size: 13px; }
+.tl-band.s-nv { fill: var(--nv); }
+.tl-band.s-ev { fill: url(#stripes); }
+.tl-band.s-s4 { fill: url(#dots); }
+.tl-band.s-other { fill: var(--other); }
+.tl-band { stroke: var(--nv); stroke-width: .75; }
+.tl-unc { fill: url(#hatch); stroke: var(--hatch); stroke-width: .75; stroke-dasharray: 3 2; }
+.tl-label { font: 600 14px var(--font); fill: var(--screen-text); }
+.tl-narrow .tl-label { font-size: 13px; }
+.tl-label.s-nv { fill: #ffffff; }
+.tl-resupply { stroke: var(--screen-text); stroke-width: 1.25; stroke-dasharray: 4 3; }
+.tl-shift { stroke: var(--ch-main); stroke-width: 1.75; }
+.arrow-head { fill: var(--ch-main); }
+.tl-ref { stroke: var(--screen-accent); stroke-width: 1.5; }
+.tl-reftext { fill: var(--screen-accent); font-weight: 500; }
+.tl-obs { stroke: var(--screen-line-strong); stroke-width: 1.5; }
+.tl-obs.on { stroke: var(--screen-text); }
+.hatch-bg { fill: var(--screen-raised); }
+.hatch-ln { stroke: var(--hatch); stroke-width: 1.5; }
+.stripes-bg { fill: var(--ev); }
+.stripes-ln { stroke: var(--ev-ln); stroke-width: 1.5; }
+.dots-bg { fill: var(--s4); }
+.dots-dt { fill: var(--s4-dt); }
+svg.mini { display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 8px 0 12px; padding: 0; color: var(--ink-2); font-size: .8125rem; list-style: none; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend svg { flex: none; overflow: visible; }

@@ -14,7 +14,7 @@
  {% if groups %}
  <p class="small">Laufende Engpassmeldungen anderer Behörden zum selben Wirkstoff (ATC {{ atc }}). Produktnamen und Daten wie von der jeweiligen Behörde veröffentlicht; die Zuordnung über den ATC-Code ist eine eigene Auswertung und kein Beleg für einen Engpass in Österreich. Meldungen des BfArM (Deutschland) werden erst nach dessen Zustimmung gezeigt.</p>
  <div class="table-wrap" tabindex="0">
- <table class="rows">
+ <table class="rows fr">
   <thead><tr><th scope="col">Land</th><th scope="col">Produkte laut Behörde</th><th scope="col">Zulassungsinhaber</th><th scope="col">Gemeldet seit</th><th scope="col">Erwartet bis</th>{% if show_match %}<th scope="col">Bezug zu dieser Packung</th>{% endif %}</tr></thead>
   <tbody>
   {% for g in groups %}

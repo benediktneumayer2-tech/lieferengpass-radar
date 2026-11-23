@@ -42,13 +42,15 @@
   <div><dt>Fehlende Tage seit Beginn</dt><dd class="num">{{ coverage.basg_missing_days|length }}</dd></div>
   <div><dt>Letzter erfolgreicher BASG-Abruf</dt><dd class="num">{{ basg_fetch_local }}</dd></div>
  </dl>
+ {% if f29 %}{{ m.figure(**f29) }}{% endif %}
+ {% if f21 %}{{ m.figure(**f21) }}{% endif %}
  <div class="table-wrap" tabindex="0">
  <table class="compact">
   <caption>Letzter erfolgreicher Abruf je Quelle</caption>
   <thead><tr><th scope="col">Quelle</th><th scope="col">letzter Erfolg (UTC)</th><th scope="col" class="r">Fassungen</th><th scope="col" class="r">Fehlversuche 7 Tage</th></tr></thead>
   <tbody>
-  {% for name, src in coverage.sources.items() %}
-   <tr><th scope="row">{{ {"basg": "BASG", "bfarm": "BfArM (nur privat archiviert)", "ema": "EMA"}.get(name, name) }}</th><td class="num">{{ src.last_ok or "–" }}</td><td class="r num">{{ src.versions }}</td><td class="r num">{{ src.failures_7d }}</td></tr>
+  {% for name, src in listed_sources.items() %}
+   <tr><th scope="row">{{ {"basg": "BASG", "ema": "EMA"}.get(name, name) }}</th><td class="num">{{ src.last_ok or "–" }}</td><td class="r num">{{ src.versions }}</td><td class="r num">{{ src.failures_7d }}</td></tr>
   {% endfor %}
   </tbody>
  </table>

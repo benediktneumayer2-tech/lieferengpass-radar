@@ -22,3 +22,66 @@
 {% macro pkg_cell(p, root) -%}
 <a href="{{ root }}{{ p.path }}">{{ p.label }}</a>{% if p.pzn %} <span class="pzn">PZN <span class="num">{{ p.pzn }}</span></span>{% endif %}
 {%- endmacro %}
+
+{# Tabler Icons 3.35.0 (MIT, licence in assets/fonts/TablerIcons-LICENSE.txt), outline, path data only. #}
+{% set ICONS = {
+ "alert-triangle": "M12 9v4 M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z M12 16h.01",
+ "arrow-right": "M5 12l14 0 M13 18l6 -6 M13 6l6 6",
+ "circle-check": "M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M9 12l2 2l4 -4",
+ "circle-dot": "M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0",
+ "clock": "M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0 M12 7v5l3 3",
+ "code": "M7 8l-4 4l4 4 M17 8l4 4l-4 4 M14 4l-4 16",
+ "external-link": "M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6 M11 13l9 -9 M15 4h5v5",
+ "file-text": "M14 3v4a1 1 0 0 0 1 1h4 M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z M9 9l1 0 M9 13l6 0 M9 17l6 0",
+ "info-circle": "M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0 M12 9h.01 M11 12h1v4h1",
+ "lock": "M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0 M8 11v-4a4 4 0 1 1 8 0v4",
+ "menu-2": "M4 6l16 0 M4 12l16 0 M4 18l16 0",
+ "search": "M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0 M21 21l-6 -6"
+} %}
+
+{% macro icon(name, size=16) -%}
+<svg class="ic" width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="{{ ICONS[name] }}"/></svg>
+{%- endmacro %}
+
+{# tone: neutral, accent, info or warn #}
+{% macro tag(text, tone="neutral") -%}<span class="tag tone-{{ tone }}">{{ text }}</span>{%- endmacro %}
+
+{# One tile inside <dl class="tiles">. small=true for long values such as a hash or DOI. #}
+{% macro readout(label, value, small=false) -%}
+<div class="tile"><dt class="lg">{{ label }}</dt><dd{% if small %} class="sm"{% endif %}>{{ value }}</dd></div>
+{%- endmacro %}
+
+{# At most one signal key per region. #}
+{% macro key(label, href, signal=false, ic=none) -%}
+<a class="key{{ ' key-signal' if signal }}" href="{{ href }}">{% if ic %}{{ icon(ic) }}{% endif %}{{ label }}</a>
+{%- endmacro %}
+
+{# Every chart goes through this macro. kind: "live", "plan" or "rueckblick". Anything that is not live or plan
+   is treated as retrospective, so a mistyped kind can never drop the tag `Rückblick · nicht validiert`.
+   referenz=false only for retrospective figures whose inputs are all shown on this site (F07).
+   table: {"caption": str, "head": [str, ...], "rows": [[str, ...], ...]}; the first column is the row header. #}
+{% macro figure(id, kind, legend, svg_wide, svg_narrow, caption, table, source, referenz=true) %}
+{% set retro = kind not in ("live", "plan") %}
+<figure class="fig" id="fig-{{ id }}">
+ <div class="fig-head">
+  <p class="lg">{{ legend }}</p>
+  {% if kind == "live" %}{{ own() }}{% elif kind == "plan" %}{{ tag("vorab festgelegt", "info") }}{% else %}{{ tag("Rückblick · nicht validiert", "warn") }}{% endif %}
+
+ </div>
+ <div class="screen fig-screen"><div class="fig-w">{{ svg_wide|safe }}</div><div class="fig-n">{{ svg_narrow|safe }}</div></div>
+ <figcaption>
+  <p>{{ caption }}</p>
+  {% if retro and referenz %}<p class="fig-ref">{{ REFERENZ_SATZ }}</p>{% endif %}
+  {% if source %}<p class="fig-src">Quelle: {{ source }}</p>{% endif %}
+ </figcaption>
+ {% if table %}
+ <details class="fig-table"><summary>Zahlen als Tabelle</summary>
+  <div class="table-wrap" tabindex="0"><table class="compact">
+   <caption>{{ table.caption }}</caption>
+   <thead><tr>{% for h in table.head %}<th scope="col"{% if not loop.first %} class="r"{% endif %}>{{ h }}</th>{% endfor %}</tr></thead>
+   <tbody>{% for row in table.rows %}<tr>{% for c in row %}{% if loop.first %}<th scope="row">{{ c }}</th>{% else %}<td class="r num">{{ c }}</td>{% endif %}{% endfor %}</tr>{% endfor %}</tbody>
+  </table></div>
+ </details>
+ {% endif %}
+</figure>
+{% endmacro %}

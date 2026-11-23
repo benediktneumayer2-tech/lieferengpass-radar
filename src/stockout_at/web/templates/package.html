@@ -3,17 +3,18 @@
 {% import "_foreign.html" as f %}
 {% block title %}{{ p.label }}{% if p.pzn %} (PZN {{ p.pzn }}){% endif %}{% endblock %}
 {% block main %}
+<div class="radar r-pkg">
 <div class="pkg-head">
  <h1 class="pkg-name">{{ p.label }}</h1>
  <dl class="facts">
+  <div class="st"><dt>Status (BASG)</dt><dd>{{ m.status(p.current_status) }}</dd></div>
+  {% if p.announced %}<div class="st"><dt>Angekündigt (BASG)</dt><dd class="num">{{ p.announced }}</dd></div>{% endif %}
+  {% if p.overdue %}<div class="st"><dt>Überfällig {{ m.own() }}</dt><dd class="num overdue">seit {{ p.overdue.days_overdue }} Tagen</dd></div>{% endif %}
   {% if p.pzn %}<div><dt>PZN</dt><dd class="num">{{ p.pzn }}</dd></div>{% endif %}
   {% if p.zulassungsnummer %}<div><dt>Zulassungsnummer</dt><dd class="num">{{ p.zulassungsnummer }}</dd></div>{% endif %}
-  {% if p.substance %}<div><dt>Wirkstoff</dt><dd>{{ p.substance }}</dd></div>{% endif %}
+  {% if p.substance %}<div class="w"><dt>Wirkstoff</dt><dd>{{ p.substance }}</dd></div>{% endif %}
   {% if p.darreichungsform %}<div><dt>Darreichungsform</dt><dd>{{ p.darreichungsform }}{% if p.staerke %}, {{ p.staerke }}{% endif %}</dd></div>{% endif %}
   {% if p.atc5 or p.atc3 %}<div><dt>ATC</dt><dd class="num">{{ p.atc5 or p.atc3 }}</dd></div>{% endif %}
-  <div><dt>Status (BASG)</dt><dd>{{ m.status(p.current_status) }}</dd></div>
-  {% if p.announced %}<div><dt>Angekündigt (BASG)</dt><dd class="num">{{ p.announced }}</dd></div>{% endif %}
-  {% if p.overdue %}<div><dt>Überfällig {{ m.own() }}</dt><dd class="num overdue">seit {{ p.overdue.days_overdue }} Tagen</dd></div>{% endif %}
  </dl>
 </div>
 
@@ -46,10 +47,9 @@
  {% endif %}
 </section>
 
-<div class="split">
+<div class="pkg-split">
 <section id="official-entry" class="block official" aria-labelledby="off-h">
- <h2 id="off-h">Amtlicher Eintrag</h2>
- <p>{{ m.official(official_sid) }}</p>
+ <h2 id="off-h">Amtlicher Eintrag {{ m.official(official_sid) }}</h2>
  {% if not is_current %}<p class="notice">In der aktuellen BASG-Liste (Stand <span class="num">{{ sid }}</span>) nicht mehr enthalten. Gezeigt wird der letzte Eintrag.</p>{% endif %}
  <dl class="fields">
  {% for label, value in official %}
@@ -59,13 +59,14 @@
  <p class="small">Wörtlich aus der BASG-Datei; Telefonnummern werden nicht angezeigt.</p>
 </section>
 
+<div class="pkg-side">
 <section id="own-analysis" class="block own" aria-labelledby="own-h">
  <h2 id="own-h">Auswertung {{ m.own() }}</h2>
  {% if episodes %}
  <div class="table-wrap" tabindex="0">
  <table class="compact">
   <caption>Episoden dieser Packung</caption>
-  <thead><tr><th scope="col">Episode</th><th scope="col">Beginn</th><th scope="col">Ende</th><th scope="col">Dauer</th><th scope="col" class="r">Verschiebungen</th></tr></thead>
+  <thead><tr><th scope="col">Nr.</th><th scope="col">Beginn</th><th scope="col">Ende</th><th scope="col">Dauer</th><th scope="col" class="r"><abbr title="Verschiebungen">Versch.</abbr></th></tr></thead>
   <tbody>
   {% for e in episodes %}
    <tr><th scope="row" class="num">{{ e.seq_no }}</th><td class="num">{{ e.start }}</td><td class="num">{{ e.end }}</td><td class="num">{{ e.duration }}</td><td class="r num">{{ e.shifts }}</td></tr>
@@ -79,7 +80,6 @@
  <p>Keine Episode, daher keine Auswertung.</p>
  {% endif %}
 </section>
-</div>
 
 <section id="substance-link" class="block" aria-labelledby="sub-h">
  <h2 id="sub-h">Wirkstoff</h2>
@@ -90,10 +90,13 @@
  {% endif %}
 </section>
 
-{{ f.foreign_section(foreign, p.atc5, true) }}
-
 <section class="block no-forecast" aria-labelledby="fc-h">
  <h2 id="fc-h">Prognose</h2>
  <p><strong>Noch keine Prognose.</strong> Eine Einschätzung, ob der angekündigte Termin hält, wird erst angezeigt, wenn sie an genügend täglichen Daten geprüft und gut kalibriert ist. <a href="{{ root }}methodik/#prognose">Mehr in der Methodik</a></p>
 </section>
+</div>
+</div>
+
+{{ f.foreign_section(foreign, p.atc5, true) }}
+</div>
 {% endblock %}

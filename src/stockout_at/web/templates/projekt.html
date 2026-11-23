@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Projekt{% endblock %}
+{% block main %}
+<div class="hero">
+ <p class="lg">Das Projekt</p>
+ <h1 class="hero-title">Das amtliche Engpassregister zeigt nur heute. Der Radar merkt sich jeden Tag.</h1>
+ <p class="lead">Die BASG-Liste wird täglich archiviert, so bekommt jede Packung eine Geschichte: seit wann gemeldet, wie oft der Termin verschoben wurde, wie es endete. Amtliche Angaben stehen wörtlich da, eigene Auswertungen sind gekennzeichnet.</p>
+ <ol class="story-steps" aria-label="Das Projekt in drei Schritten">
+  <li><a href="#archivieren"><span class="step-n" aria-hidden="true">1</span>Archivieren</a></li>
+  <li><a href="#verknuepfen"><span class="step-n" aria-hidden="true">2</span>Verknüpfen</a></li>
+  <li><a href="#pruefen"><span class="step-n" aria-hidden="true">3</span>Prüfen</a></li>
+ </ol>
+</div>
+
+<div class="project-grid">
+<div class="story-col">
+<section id="archivieren" class="story" aria-labelledby="st1-h">
+ <h2 id="st1-h" class="sec-title"><span class="step-n" aria-hidden="true">1</span>Archivieren: jede Packung bekommt eine Geschichte</h2>
+ {% if archiv %}
+ <p>{{ archiv.text }}</p>
+ {{ m.figure(**archiv.figure) }}
+ <p class="keys">{{ m.key("Diese Packung", root ~ archiv.path, ic="arrow-right") }}{{ m.key("Idee und Aufbau", root ~ "projekt/idee/", ic="arrow-right") }}</p>
+ {% else %}
+ <p>Jeder Stand der BASG-Liste bleibt erhalten, so wird aus der Tagesliste eine Geschichte je Packung.</p>
+ <p class="keys">{{ m.key("Idee und Aufbau", root ~ "projekt/idee/", ic="arrow-right") }}</p>
+ {% endif %}
+</section>
+
+<section id="verknuepfen" class="story" aria-labelledby="st2-h">
+ <h2 id="st2-h" class="sec-title"><span class="step-n" aria-hidden="true">2</span>Verknüpfen: was andere Länder schon melden</h2>
+ {% if verknuepfen %}
+ <p>{{ verknuepfen.text }}</p>
+ {{ m.figure(**verknuepfen.figure) }}
+ {% else %}
+ <p>Der Radar gleicht die österreichische Liste mit den Engpasslisten anderer Behörden ab. Ein Hinweis, keine Prognose.</p>
+ {% endif %}
+ <p class="keys">{{ m.key("Zur Frühwarnung", root ~ "fruehwarnung/", ic="arrow-right") }}</p>
+</section>
+
+<section id="pruefen" class="story" aria-labelledby="story-h">
+ <h2 id="story-h" class="sec-title"><span class="step-n" aria-hidden="true">3</span>Prüfen: ein Modell gegen die einfache Regel</h2>
+ <p>{{ story }}</p>
+ {{ m.figure(**f08) }}
+ <p class="keys">{{ m.key("Modell und Prüfung", root ~ "projekt/modell/", ic="arrow-right") }}</p>
+</section>
+</div>
+
+<aside class="module bench" aria-labelledby="bench-h">
+ <div class="sec-head"><h2 id="bench-h" class="lg">Prüfstand</h2>{{ m.tag("vorab festgelegt", "info") }}</div>
+ <p class="bench-phase"><span class="led led-{{ bench.led }}" aria-hidden="true"></span><span>{{ bench.text }}</span></p>
+ <dl class="tiles">
+  {{ m.readout("Prüfplan", bench.hash, small=true) }}
+  {{ m.readout("Eingefroren", bench.frozen, small=true) }}
+  {{ m.readout("Beginn", bench.start, small=true) }}
+  {{ m.readout("Go/No-Go", bench.go, small=true) }}
+  {{ m.readout("DOI", bench.doi, small=true) }}
+ </dl>
+ <p class="keys">{{ m.key("Code", bench.repository, ic="code") }}{{ m.key("Zenodo", "https://doi.org/" ~ bench.doi, ic="external-link") }}</p>
+</aside>
+</div>
+{% endblock %}

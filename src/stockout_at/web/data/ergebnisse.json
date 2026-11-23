@@ -1,0 +1,1324 @@
+{
+ "_hinweis": "Bereits veröffentlichte Zahlen für die Website. art: rueckblick = retrospektiv, nicht validiert; plan = vorab festgelegt. Verfahren und Merkmale aus Quellen, die diese Website nicht zeigt, fehlen absichtlich.",
+ "referenzinstanz_satz": "Zahlen der Referenzinstanz; sie nutzt auch Quellen, die diese Website nicht zeigt.",
+ "z3_rueckblick": {
+  "art": "rueckblick",
+  "quelle": "Prüfbericht Z3 v0 (reports/Z3 v0 Prüfbericht.md, öffentlich), Abschnitt „Ergebnis: gelernt 2024–2025, geprüft 2026“",
+  "stand": "2026-10-21",
+  "abhaengig_von_nicht_gezeigten_quellen": true,
+  "bedingungen": {
+   "lernen": [
+    "2024-01-01",
+    "2025-12-31"
+   ],
+   "pruefen": [
+    "2026-01-01",
+    "2026-10-20"
+   ],
+   "horizont_wochen": 8,
+   "faelle": 23461,
+   "meldungen": 714,
+   "grundrate": 0.03
+  },
+  "verfahren": [
+   {
+    "id": "z3_v0",
+    "name": "Modell Z3 v0",
+    "brier": 0.02742,
+    "skill_gegen_grundrate": 0.071,
+    "auc": 0.819,
+    "average_precision": 0.155,
+    "top25": 0.249,
+    "top50": 0.202,
+    "top100": 0.166,
+    "anteil_meldungen_top100": 0.4
+   },
+   {
+    "id": "z3_v0_ohne_ausland",
+    "name": "Z3 v0 ohne Auslandsmeldungen",
+    "brier": 0.02766,
+    "auc": 0.81,
+    "average_precision": 0.145,
+    "top25": 0.214,
+    "top50": 0.192
+   },
+   {
+    "id": "stufen_v0",
+    "name": "Stufenregel nach Länderzahl",
+    "brier": 0.02861,
+    "skill_gegen_grundrate": 0.031,
+    "auc": 0.728,
+    "average_precision": 0.078,
+    "top25": 0.157,
+    "top50": 0.138,
+    "top100": 0.109,
+    "anteil_meldungen_top100": 0.26
+   },
+   {
+    "id": "vorgeschichte",
+    "name": "Nur frühere Engpässe in Österreich",
+    "brier": 0.02868,
+    "skill_gegen_grundrate": 0.028,
+    "auc": 0.733,
+    "top25": 0.072,
+    "top50": 0.072,
+    "top100": 0.072,
+    "anteil_meldungen_top100": 0.17
+   },
+   {
+    "id": "grundrate",
+    "name": "Grundrate (zufällige Auswahl)",
+    "brier": 0.02952,
+    "skill_gegen_grundrate": 0.0,
+    "auc": 0.5,
+    "top25": 0.03,
+    "top50": 0.03,
+    "top100": 0.03,
+    "anteil_meldungen_top100": 0.07
+   }
+  ],
+  "differenz_z3_minus_stufen": [
+   {
+    "mass": "AUC",
+    "wert": 0.091,
+    "ki95": [
+     0.065,
+     0.118
+    ],
+    "einheit": ""
+   },
+   {
+    "mass": "Brier-Gewinn",
+    "wert": 0.0012,
+    "ki95": [
+     0.0007,
+     0.0017
+    ],
+    "einheit": ""
+   },
+   {
+    "mass": "Top 50 je Stichtag",
+    "wert": 6.4,
+    "ki95": [
+     1.9,
+     10.3
+    ],
+    "einheit": "Prozentpunkte"
+   }
+  ],
+  "intervall_hinweis": "95-%-Intervalle ziehen ganze Wirkstoffe neu; Fälle desselben Wirkstoffs an aufeinanderfolgenden Stichtagen sind nicht unabhängig.",
+  "horizonte_auc": [
+   {
+    "wochen": 4,
+    "z3_v0": 0.812,
+    "stufen_v0": 0.732
+   },
+   {
+    "wochen": 8,
+    "z3_v0": 0.819,
+    "stufen_v0": 0.728
+   },
+   {
+    "wochen": 12,
+    "z3_v0": 0.814,
+    "stufen_v0": 0.72
+   }
+  ],
+  "kalibrierung_8_wochen_prozent": {
+   "spalten": [
+    "vorhergesagt",
+    "beobachtet"
+   ],
+   "zehntel": [
+    [
+     0.7,
+     0.6
+    ],
+    [
+     0.8,
+     0.2
+    ],
+    [
+     0.9,
+     0.4
+    ],
+    [
+     1.1,
+     0.6
+    ],
+    [
+     1.3,
+     1.0
+    ],
+    [
+     1.8,
+     1.7
+    ],
+    [
+     2.5,
+     3.0
+    ],
+    [
+     3.6,
+     2.8
+    ],
+    [
+     6.0,
+     5.3
+    ],
+    [
+     14.2,
+     14.9
+    ]
+   ],
+   "lesart": "Im oberen Bereich, auf den es ankommt, stimmt die Schätzung gut. Unten liegt sie etwas zu hoch."
+  },
+  "vorlauf": {
+   "neue_meldungen": 178,
+   "liste": "die 50 Wirkstoffe mit der höchsten Schätzung je Tag",
+   "verfahren": [
+    {
+     "id": "z3_v0",
+     "tag_davor": 0.25,
+     "tag_davor_ki95": [
+      0.2,
+      0.32
+     ],
+     "median_tage_auf_liste": 59,
+     "irgendwann_in_8_wochen": 0.37,
+     "wechsel_top50_je_tag": 0.023
+    },
+    {
+     "id": "z3_v0_ohne_ausland",
+     "tag_davor": 0.26,
+     "median_tage_auf_liste": 70,
+     "irgendwann_in_8_wochen": 0.29,
+     "wechsel_top50_je_tag": 0.009
+    },
+    {
+     "id": "stufen_v0",
+     "tag_davor": 0.16,
+     "median_tage_auf_liste": 71,
+     "irgendwann_in_8_wochen": 0.18,
+     "wechsel_top50_je_tag": 0.013
+    }
+   ]
+  },
+  "nachtrag_2026_11_16": {
+   "quelle": "Prüfbericht Z3 v0, Abschnitt „Änderungen nach dem Einfrieren“, Punkt 3",
+   "auc_zeitpunktgenau": {
+    "z3_v0": 0.813,
+    "stufen_v0": 0.715
+   },
+   "text": "Ganz zeitpunktgenau nachgerechnet liegt die AUC bei 0,813 für z3_v0 und 0,715 für die Stufenregel; die Zahlen oben sind nicht wesentlich zu günstig. Mit dem Ziel des Prüfplans („beginnt oder erscheint erstmals“) liegt der Brier-Score bei etwa 0,030 und die Top-50-Quote bei etwa 21–22 %. Prospektive Zahlen 2027 sind mit diesem Niveau zu vergleichen."
+  },
+  "grenzen": [
+   "Die BASG-Vorgeschichte vor dem 17.10.2026 stammt aus einzelnen Schnappschüssen. Kurze Engpässe fehlen, und der Beginn einer Meldung kann vor ihrer Veröffentlichung liegen.",
+   "Auslandsmeldungen tragen das Datum ihrer ersten Veröffentlichung bzw. ihres Beginns. Ältere Meldungen kennt man teils nur aus dem Internet Archive.",
+   "Fälle desselben Wirkstoffs an aufeinanderfolgenden Stichtagen sind nicht unabhängig. Die Intervalle berücksichtigen das nur über die Wirkstoffe, nicht über die Zeit.",
+   "Das ist ein Rückblick. Ob die Schätzung im Voraus trägt, zeigt erst die prospektive Prüfung."
+  ]
+ },
+ "z3_gewichte_8_wochen": {
+  "art": "rueckblick",
+  "quelle": "models/z3_v0.json, horizonte.\"56\".gewichte_geprueft (gelernt 2024–2025); Prüfsumme im Feld sha256 der Datei: 4041b80cd0b532356d66db7e838b9ab7d10bc2a423912a849338eef46a5f666a",
+  "stand": "2026-10-21",
+  "einheit": "logarithmische Chance",
+  "hinweis": "Keine Intervalle für einzelne Gewichte. Ein Merkmal aus einer Quelle, die diese Website nicht zeigt, fehlt hier absichtlich.",
+  "gruppen": [
+   {
+    "gruppe": "Markt",
+    "bezug": "4–9 lieferbare Produkte",
+    "merkmale": [
+     {
+      "id": "groesse_1",
+      "name": "nur 1 lieferbares Produkt",
+      "gewicht": -0.9254
+     },
+     {
+      "id": "groesse_2_3",
+      "name": "2–3 Produkte",
+      "gewicht": -0.4814
+     },
+     {
+      "id": "groesse_10plus",
+      "name": "10 oder mehr Produkte",
+      "gewicht": 0.5228
+     }
+    ]
+   },
+   {
+    "gruppe": "Vorgeschichte in Österreich",
+    "bezug": "nie gemeldet",
+    "merkmale": [
+     {
+      "id": "frueher_engpass",
+      "name": "früherer Engpass",
+      "gewicht": 0.7472
+     },
+     {
+      "id": "engpass_365",
+      "name": "Engpass im letzten Jahr",
+      "gewicht": 0.1272
+     },
+     {
+      "id": "ende_90",
+      "name": "Engpass endete vor höchstens 90 Tagen",
+      "gewicht": -0.0231
+     }
+    ]
+   },
+   {
+    "gruppe": "Meldungen im Ausland",
+    "bezug": "kein Land meldet",
+    "merkmale": [
+     {
+      "id": "laender_1",
+      "name": "1 Land meldet",
+      "gewicht": 0.1935
+     },
+     {
+      "id": "laender_2",
+      "name": "2 Länder",
+      "gewicht": 0.4158
+     },
+     {
+      "id": "laender_3_4",
+      "name": "3–4 Länder",
+      "gewicht": 0.4142
+     },
+     {
+      "id": "laender_5plus",
+      "name": "5 oder mehr Länder",
+      "gewicht": 0.4507
+     },
+     {
+      "id": "inhaber_1plus",
+      "name": "derselbe Inhaber meldet im Ausland",
+      "gewicht": 0.3825
+     },
+     {
+      "id": "inhaber_3plus",
+      "name": "derselbe Inhaber in 3 oder mehr Ländern",
+      "gewicht": 0.4127
+     },
+     {
+      "id": "ausland_neu_28",
+      "name": "neue Auslandsmeldung in den letzten 28 Tagen",
+      "gewicht": 0.2945
+     }
+    ]
+   },
+   {
+    "gruppe": "Register (letzte 56 Tage)",
+    "bezug": "kein Ereignis",
+    "merkmale": [
+     {
+      "id": "marktaustritt_56",
+      "name": "Marktaustritt eines anderen Produkts",
+      "gewicht": -0.1529
+     },
+     {
+      "id": "eko_56",
+      "name": "EKO-Streichung eines anderen Produkts",
+      "gewicht": 0.1785
+     }
+    ]
+   }
+  ],
+  "spannen": [
+   {
+    "name": "ATC-Hauptgruppe (14 Gruppen)",
+    "von": -0.4526,
+    "bis": 0.2303
+   },
+   {
+    "name": "Quartal",
+    "von": -0.1023,
+    "bis": 0.1331
+   }
+  ],
+  "achsenabschnitt": -3.8747
+ },
+ "stufen_schaerfen": {
+  "art": "rueckblick",
+  "quelle": "documentation/MODELL_UND_BEWERTUNG.md (öffentlich), Abschnitt 6, Lauf vom 20.10.2026",
+  "stand": "2026-10-20",
+  "abhaengig_von_nicht_gezeigten_quellen": true,
+  "zeilen": [
+   {
+    "idee": "Fünf oder mehr Länder statt „gleicher Inhaber in drei oder mehr Ländern“ als höchste Stufe",
+    "urteil": "trägt",
+    "wert": 16,
+    "ki95": [
+     2,
+     32
+    ],
+    "einheit": "spätere BASG-Meldungen mehr im Jahr 2026 (41 statt 25)",
+    "zusatz": "bei ähnlicher Quote (17,7 % gegenüber 16,1 %)",
+    "folge": "übernommen"
+   },
+   {
+    "idee": "Unterschiedliche Gewichte für einzelne Länder",
+    "urteil": "kein Gewinn",
+    "wert": -0.017,
+    "ki95": [
+     -0.044,
+     0.008
+    ],
+    "einheit": "AUC-Differenz",
+    "folge": "verworfen"
+   },
+   {
+    "idee": "Grund der Auslandsmeldung (Herstellung, Nachfrage, Logistik, kommerziell)",
+    "urteil": "kein Gewinn",
+    "folge": "verworfen"
+   },
+   {
+    "idee": "Stärke und Darreichungsform passen zu österreichischen Packungen",
+    "urteil": "kein Gewinn",
+    "folge": "verworfen"
+   }
+  ]
+ },
+ "weitere_signale_text": {
+  "art": "rueckblick",
+  "quelle": "documentation/MODELL_UND_BEWERTUNG.md (öffentlich), Abschnitt 7; Zahlen mit Intervall kommen live aus data/derived/json/rueckblick.json (nur die freigegebenen Schlüssel, siehe Plan F07)",
+  "nur_text": [
+   {
+    "idee": "Preisband-Runden 2017–2025",
+    "urteil": "kein Gewinn",
+    "text": "keine Häufung von Meldungen"
+   },
+   {
+    "idee": "Infektionswellen (ERVISS)",
+    "urteil": "kein Gewinn",
+    "text": "ein Effekt nur durch die Saison 2022/23; ab 2023 ohne Effekt"
+   },
+   {
+    "idee": "Ein einzelnes meldendes Land",
+    "urteil": "kein Gewinn",
+    "text": "kein messbarer Vorsprung gegenüber Wirkstoffen, die in Österreich schon einmal knapp waren; wird nicht gelistet"
+   },
+   {
+    "idee": "GMP-Mängel bei Wirkstoffherstellern",
+    "urteil": "zu wenige Fälle",
+    "text": "werden täglich mitgeschrieben; für eine Aussage gibt es bisher zu wenige Fälle"
+   }
+  ]
+ },
+ "auslandsdaten_im_modell": {
+  "art": "rueckblick",
+  "quelle": "Prüfbericht Z3 v0 (öffentlich), Abschnitt „Herausforderer“",
+  "text": "Auslandsmeldungen bringen im Rückblick weniger als erwartet: Dasselbe Modell ohne sie erreicht eine AUC von 0,810 statt 0,819. Der größte Teil der Trennschärfe stammt aus Produktzahl und Vorgeschichte in Österreich; die Auslandsmeldungen heben vor allem die obersten Einträge (Top 25: 24,9 % gegenüber 21,4 %). Ob das prospektiv hält, ist die wichtigste Nebenfrage der Prüfung."
+ },
+ "signaltempo": {
+  "art": "rueckblick",
+  "quelle": "README (öffentlich), „What's new“, 20.11.2026; analysis/modellsuche/tempo_folge/README.md (öffentlich)",
+  "stand": "2026-11-17",
+  "urteil": "unklar",
+  "odds_ratio_je_standardabweichung": {
+   "von": 0.99,
+   "bis": 1.04,
+   "untergrenze_ueber_1": false,
+   "schwelle": 1.1
+  },
+  "text": "Geprüft wurde, ob das Tempo, mit dem sich Engpassmeldungen über Länder ausbreiten, die Prognose verbessert. Kein Kandidat schlug das Vergleichsmodell; alle Odds Ratios lagen zwischen 0,99 und 1,04 je Standardabweichung, keine Untergrenze über 1. Ein großer Gewinn ist unwahrscheinlich, ein kleiner ließ sich weder zeigen noch ausschließen, und die Gegenprobe mit einem bekannten Signal gelang im zweiten Schritt nicht. Deshalb gilt formal keine Aussage. Nichts aus der Suche ging in ein Modell.",
+  "folge": "Für weitere, erst seit Oktober 2026 täglich archivierte Länderlisten wird die Frage vorwärts geprüft: Stichtage 02.11.2026 bis 28.06.2027, Auswertung frühestens September 2027, Regel mit Prüfsumme festgelegt am 17.11.2026."
+ },
+ "vorab_registrierung": {
+  "art": "plan",
+  "quelle": "models/pruefplan.json; README (öffentlich), Abschnitt „Pre-registration“; documentation/MODELL_UND_BEWERTUNG.md, Abschnitt 12",
+  "pruefplan_sha256": "35a230a0a9bd8da4810849d5599442d33bb44769431bfc29be093b8fd6974479",
+  "pruefplan_kurz": "35a230a0a9bd",
+  "doi_alle_versionen": "10.5281/zenodo.24168686",
+  "doi_v0_1_prereg": "10.5281/zenodo.24168687",
+  "doi_neueste_version": "10.5281/zenodo.24397453",
+  "repository": "https://github.com/benediktneumayer2-tech/lieferengpass-radar",
+  "bestehensregel": "Bestanden, wenn Z3 v0 nach 8 Wochen einen niedrigeren Brier-Score und eine höhere Trefferquote der 50 höchsten Wirkstoffe je Stichtag hat als die Stufenregel (Punktschätzer); 95-%-Intervalle über Wirkstoffe werden berichtet.",
+  "verfahren": [
+   {
+    "id": "z3_v0",
+    "rolle": "Hauptmodell",
+    "sha256": "4041b80cd0b532356d66db7e838b9ab7d10bc2a423912a849338eef46a5f666a"
+   },
+   {
+    "id": "stufen_v0",
+    "rolle": "Vergleich: Stufenregel der Frühwarnliste als Quote je Stufe",
+    "sha256": "e9cd505816e6984b6227d193c98e1f7ef56fb1c40cccccb0ca27d978aee1b126"
+   },
+   {
+    "id": "z3_v0_ohne_ausland",
+    "rolle": "Diagnose: dasselbe Modell ohne Auslandsmeldungen",
+    "sha256": "2b9b4ffdb3ce545ebb193b81a50f4060df3cf61ffc3bfb3453c7a96e7a0c9cb7"
+   }
+  ],
+  "verfahren_hinweis": "Der Prüfplan nennt fünf Verfahren; zwei davon dienen nur der internen Bewertung und stehen im Repository.",
+  "zeitleiste": [
+   {
+    "von": "2024-01-01",
+    "bis": "2025-12-31",
+    "text": "Lernzeit"
+   },
+   {
+    "von": "2026-01-01",
+    "bis": "2026-10-20",
+    "text": "Rückblickende Prüfung"
+   },
+   {
+    "am": "2026-10-17",
+    "text": "Tägliche Archivierung beginnt"
+   },
+   {
+    "am": "2026-10-21",
+    "text": "Verfahren und Prüfplan eingefroren; seither täglich ein Vorhersageprotokoll"
+   },
+   {
+    "am": "2026-11-12",
+    "text": "Öffentlich auf GitHub und Zenodo (v0.1-prereg)"
+   },
+   {
+    "am": "2026-11-16",
+    "text": "Zusatzprüfung festgelegt: Zustimmung eines zweiten Modells"
+   },
+   {
+    "am": "2026-11-17",
+    "text": "Folgeauswertung festgelegt: Signaltempo weiterer Länder"
+   },
+   {
+    "am": "2027-01-01",
+    "text": "Beginn der prospektiven Prüfung"
+   },
+   {
+    "am": "2027-02-26",
+    "text": "Erste auswertbare 8-Wochen-Fälle"
+   },
+   {
+    "am": "2027-04-30",
+    "text": "Go/No-Go: erster Bericht nach dem Prüfplan, in jedem Fall veröffentlicht"
+   },
+   {
+    "am": "2027-08-23",
+    "text": "Entscheidende Auswertung der Zusatzprüfung möglich"
+   },
+   {
+    "am": "2027-09-01",
+    "text": "Früheste Auswertung der Folgeauswertung"
+   }
+  ],
+  "phasen": [
+   {
+    "bis": "2026-12-31",
+    "led": "aus",
+    "text": "Eingefroren. Die prospektive Prüfung beginnt am 01.01.2027."
+   },
+   {
+    "bis": "2027-04-30",
+    "led": "arbeitet",
+    "text": "Die prospektive Prüfung läuft. Erster Bericht am 30.04.2027."
+   },
+   {
+    "bis": null,
+    "led": "aus",
+    "text": "Bericht zum Go/No-Go: siehe Repository."
+   }
+  ],
+  "pruefsummen_hinweis": "Die Prüfsummen stehen im Feld sha256 der jeweiligen Datei in models/ und werden über deren Inhalt ohne dieses Feld berechnet; sha256sum über die ganze Datei ergibt einen anderen Wert."
+ },
+ "wie_gebaut": {
+  "quelle": "README (öffentlich), Abschnitt „How it was built“",
+  "text": "Der Radar wurde mit KI-Coding-Agenten (Claude Code) entwickelt. Von Benedikt Neumayer stammen das Fachwissen und die Spezifikation: welche Quellen genutzt werden, wann eine Engpass-Episode beginnt und endet, der Prüfplan und die Entscheidung, ihn einzufrieren, die genannten Grenzen und die Kontrolle der Ergebnisse. Den größten Teil des Codes haben die Agenten geschrieben."
+ },
+ "signaltempo_tabelle": {
+  "art": "rueckblick",
+  "quelle": "Eigene Rückblick-Auswertung zum Signaltempo, Stand 17.11.2026; der ausführliche Bericht ist nicht öffentlich",
+  "stand": "2026-11-17",
+  "abhaengig_von_nicht_gezeigten_quellen": true,
+  "urteil": "unklar",
+  "einheit": "Odds Ratio je Standardabweichung",
+  "schwelle": 1.1,
+  "vergleichsmodell": "E_S3z_C, der eingefrorene Herausforderer",
+  "horizont_tage": 56,
+  "faelle": {
+   "alle": 188383,
+   "alle_meldungen": 5982,
+   "signal": 141644,
+   "signal_meldungen": 5717
+  },
+  "variante": "Saubere Variante: Der Auslandsteil nutzt nur Italien, Polen, Ungarn, EMA und FDA, und eine Meldung zählt erst ab dem ersten Archivstand, in dem sie steht.",
+  "intervalle": "Die Bereiche der fünf Prüfungen sind nach Holm korrigiert. Die beiden Kontrollen gehören nicht zu diesen fünf Prüfungen.",
+  "zeilen": [
+   {
+    "id": "g1",
+    "name": "Ausbreitung im Ausland",
+    "alle": {
+     "or": 1.001,
+     "ki": [
+      0.969,
+      1.034
+     ]
+    },
+    "signal": {
+     "or": 1.002,
+     "ki": [
+      0.966,
+      1.041
+     ]
+    }
+   },
+   {
+    "id": "g2",
+    "name": "Lage der Zulassungsinhaber",
+    "alle": {
+     "or": 1.007,
+     "ki": [
+      0.935,
+      1.044
+     ]
+    },
+    "signal": {
+     "or": 1.012,
+     "ki": [
+      0.93,
+      1.053
+     ]
+    }
+   },
+   {
+    "id": "g3",
+    "name": "Inland und ähnliche Wirkstoffe",
+    "alle": {
+     "or": 1.019,
+     "ki": [
+      0.951,
+      1.067
+     ]
+    },
+    "signal": {
+     "or": 1.021,
+     "ki": [
+      0.951,
+      1.068
+     ]
+    }
+   },
+   {
+    "id": "g4",
+    "name": "Momentum (Summe der Anstiege)",
+    "alle": {
+     "or": 1.011,
+     "ki": [
+      0.96,
+      1.052
+     ]
+    },
+    "signal": {
+     "or": 1.013,
+     "ki": [
+      0.958,
+      1.057
+     ]
+    }
+   },
+   {
+    "id": "alle",
+    "name": "Kombination",
+    "alle": {
+     "or": 1.039,
+     "ki": [
+      0.956,
+      1.111
+     ]
+    },
+    "signal": {
+     "or": 1.043,
+     "ki": [
+      0.953,
+      1.119
+     ]
+    }
+   }
+  ],
+  "kontrollen": [
+   {
+    "id": "positiv",
+    "name": "Bekanntes Signal wiederfinden",
+    "or": 1.093,
+    "ki": [
+     1.012,
+     1.175
+    ],
+    "zusatzwert": "gefunden",
+    "prognosegewinn": "nicht gefunden",
+    "prognosegewinn_1e5": 2.4,
+    "prognosegewinn_ki": [
+     -1.5,
+     6.6
+    ],
+    "ergebnis": "nicht bestanden"
+   },
+   {
+    "id": "negativ",
+    "name": "Vertauschtes Tempo nicht finden",
+    "or": 0.989,
+    "ki": [
+     0.965,
+     1.014
+    ],
+    "zusatzwert": "nicht gefunden",
+    "prognosegewinn": "nicht gefunden",
+    "ergebnis": "bestanden"
+   }
+  ],
+  "urteil_text": "Kein Bereich liegt ganz über 1, ein Gewinn ist also nicht gezeigt. Zwei Obergrenzen liegen über der Schwelle von 1,10 (1,111 und 1,119), ein kleiner Nutzen ist also auch nicht ausgeschlossen. Die zweite Messung fand das bekannte Kontrollsignal nicht wieder. Nach der vorab festgelegten Regel gilt deshalb keine Aussage als belastbar.",
+  "grenzen": "Die Testjahre 2024 bis 2026 wurden hier zum vierten Mal genutzt; deshalb waren Gruppen, Schwellen und Regeln vorab festgelegt."
+ },
+ "modellsuche_zusammenfassung": {
+  "art": "rueckblick",
+  "quelle": "Eigene Rückblick-Auswertung der Modellsuche, Stand 16.11.2026; der ausführliche Bericht ist nicht öffentlich",
+  "stand": "2026-11-16",
+  "abhaengig_von_nicht_gezeigten_quellen": true,
+  "name": "E_S3z_C",
+  "rolle": "Herausforderer, nicht Teil des Prüfplans",
+  "beschreibung": "Ein Mittel aus zwei Modellen, das zusätzlich die Lage der österreichischen Zulassungsinhaber und Zählgrößen statt Stufen nutzt. Gezeigt wird nur die Form, die man im Betrieb zeitpunktgenau rechnen könnte.",
+  "vergleich": "z3_v0, je Testjahr nach seinem Rezept neu gelernt, mit zeitpunktgenauer Vorgeschichte",
+  "horizont_tage": 56,
+  "brier_einheit": "Brier-Gewinn in 10⁻⁵, positiv heißt: Herausforderer besser",
+  "brier_gewinn": [
+   {
+    "jahr": "2024",
+    "wert": 43.0,
+    "ki95": [
+     23.2,
+     63.0
+    ]
+   },
+   {
+    "jahr": "2025",
+    "wert": 19.8,
+    "ki95": [
+     5.3,
+     33.4
+    ]
+   },
+   {
+    "jahr": "2026",
+    "wert": 44.9,
+    "ki95": [
+     9.1,
+     76.0
+    ]
+   },
+   {
+    "jahr": "alle Jahre",
+    "wert": 34.8,
+    "ki95": [
+     21.1,
+     47.2
+    ]
+   }
+  ],
+  "top50_einheit": "Differenz der Top-50-Quote in Prozentpunkten",
+  "top50_differenz": [
+   {
+    "jahr": "2024",
+    "wert": 0.4,
+    "ki95": [
+     -1.1,
+     2.3
+    ]
+   },
+   {
+    "jahr": "2025",
+    "wert": 1.2,
+    "ki95": [
+     -0.7,
+     3.2
+    ]
+   },
+   {
+    "jahr": "2026",
+    "wert": 2.3,
+    "ki95": [
+     -0.3,
+     5.2
+    ]
+   },
+   {
+    "jahr": "alle Jahre",
+    "wert": 1.2,
+    "ki95": [
+     0.1,
+     2.5
+    ]
+   }
+  ],
+  "versuche": {
+   "innen_rund": 6400,
+   "aussen_kandidaten": 157
+  },
+  "ehrlichkeit": "Die Jahre 2024 und 2025 haben die Auswahl mitbestimmt. 2026 ist von den inneren Suchen unberührt, aber nicht ganz von der Wahl, was kombiniert wird. Die Top-50-Bereiche der einzelnen Jahre schließen 0 ein.",
+  "entscheidung": "z3_v0 bleibt das Hauptmodell der prospektiven Prüfung. Das vorab festgelegte Modell nach rund 6.400 rückblickenden Versuchen zu ersetzen, würde die Vorab-Festlegung schwächen. Der Herausforderer ist eingefroren und wird nur mitgerechnet."
+ },
+ "vorhersage_gegen_meldung": {
+  "art": "rueckblick",
+  "quelle": "Simuliertes Vorhersageprotokoll 2026 mit den geprüften Gewichten von z3_v0; Ziel wie im Prüfplan (eine Meldung beginnt oder erscheint erstmals binnen 8 Wochen); Stichtage alle 14 Tage ab 01.01.2026",
+  "hinweis": "Rückblick, simuliert, nicht validiert. Das Archiv vor dem 17.10.2026 ist lückenhaft und sieht kurze Meldungen nicht.",
+  "abhaengig_von_nicht_gezeigten_quellen": true,
+  "basg_stand": "2026-11-23",
+  "schritt_tage": 14,
+  "klassen": [
+   "unter 1 %",
+   "1–2 %",
+   "2–4 %",
+   "4–8 %",
+   "8–16 %",
+   "ab 16 %"
+  ],
+  "horizonte": {
+   "56": {
+    "faelle": 27506,
+    "wirkstoffe": 1530,
+    "treffer": 901,
+    "wirkstoffe_mit_meldung": 249,
+    "punkte": [
+     {
+      "klassen": [
+       0
+      ],
+      "n": 9030,
+      "wirkstoffe": 617,
+      "treffer": 43,
+      "wirkstoffe_mit_meldung": 17,
+      "vorhergesagt": 0.0077425,
+      "beobachtet": 0.0047619,
+      "ki95": [
+       0.0028039,
+       0.0080761
+      ]
+     },
+     {
+      "klassen": [
+       1
+      ],
+      "n": 7397,
+      "wirkstoffe": 608,
+      "treffer": 99,
+      "wirkstoffe_mit_meldung": 33,
+      "vorhergesagt": 0.0136806,
+      "beobachtet": 0.0133838,
+      "ki95": [
+       0.0092051,
+       0.0194223
+      ]
+     },
+     {
+      "klassen": [
+       2
+      ],
+      "n": 5106,
+      "wirkstoffe": 465,
+      "treffer": 145,
+      "wirkstoffe_mit_meldung": 53,
+      "vorhergesagt": 0.0283634,
+      "beobachtet": 0.028398,
+      "ki95": [
+       0.0213114,
+       0.0377501
+      ]
+     },
+     {
+      "klassen": [
+       3
+      ],
+      "n": 3176,
+      "wirkstoffe": 349,
+      "treffer": 185,
+      "wirkstoffe_mit_meldung": 65,
+      "vorhergesagt": 0.0562133,
+      "beobachtet": 0.0582494,
+      "ki95": [
+       0.0444252,
+       0.076033
+      ]
+     },
+     {
+      "klassen": [
+       4
+      ],
+      "n": 1959,
+      "wirkstoffe": 261,
+      "treffer": 236,
+      "wirkstoffe_mit_meldung": 90,
+      "vorhergesagt": 0.1116647,
+      "beobachtet": 0.1204696,
+      "ki95": [
+       0.097387,
+       0.1481255
+      ]
+     },
+     {
+      "klassen": [
+       5
+      ],
+      "n": 838,
+      "wirkstoffe": 123,
+      "treffer": 193,
+      "wirkstoffe_mit_meldung": 68,
+      "vorhergesagt": 0.2036296,
+      "beobachtet": 0.2303103,
+      "ki95": [
+       0.181497,
+       0.2876383
+      ]
+     }
+    ],
+    "stichtage": 20
+   }
+  }
+ },
+ "modell_rueckblick": {
+  "art": "rueckblick",
+  "quelle": "Simuliertes Vorhersageprotokoll 2026 mit den geprüften Gewichten von z3_v0; Ziel wie im Prüfplan; Stichtage alle 14 Tage ab 01.01.2026; die Gründe je neuer Meldung aus dem täglichen simulierten Protokoll",
+  "berechnung": "seiten/modell.py, rueckblick_block",
+  "hinweis": "Rückblick, simuliert, nicht validiert. Das Archiv vor dem 17.10.2026 ist lückenhaft und sieht kurze Meldungen nicht.",
+  "abhaengig_von_nicht_gezeigten_quellen": true,
+  "basg_stand": "2026-11-23",
+  "kalibrierung_horizonte": {
+   "28": {
+    "faelle": 28841,
+    "wirkstoffe": 1540,
+    "treffer": 506,
+    "wirkstoffe_mit_meldung": 240,
+    "punkte": [
+     {
+      "klassen": [
+       0
+      ],
+      "n": 17221,
+      "wirkstoffe": 959,
+      "treffer": 84,
+      "wirkstoffe_mit_meldung": 45,
+      "vorhergesagt": 0.0054237,
+      "beobachtet": 0.0048778,
+      "ki95": [
+       0.0035827,
+       0.0066378
+      ]
+     },
+     {
+      "klassen": [
+       1
+      ],
+      "n": 5433,
+      "wirkstoffe": 518,
+      "treffer": 76,
+      "wirkstoffe_mit_meldung": 44,
+      "vorhergesagt": 0.0142427,
+      "beobachtet": 0.0139886,
+      "ki95": [
+       0.0103413,
+       0.0188977
+      ]
+     },
+     {
+      "klassen": [
+       2
+      ],
+      "n": 3280,
+      "wirkstoffe": 387,
+      "treffer": 108,
+      "wirkstoffe_mit_meldung": 63,
+      "vorhergesagt": 0.0280546,
+      "beobachtet": 0.0329268,
+      "ki95": [
+       0.0253107,
+       0.0427343
+      ]
+     },
+     {
+      "klassen": [
+       3
+      ],
+      "n": 1965,
+      "wirkstoffe": 290,
+      "treffer": 111,
+      "wirkstoffe_mit_meldung": 67,
+      "vorhergesagt": 0.0554705,
+      "beobachtet": 0.0564885,
+      "ki95": [
+       0.0442929,
+       0.07179
+      ]
+     },
+     {
+      "klassen": [
+       4,
+       5
+      ],
+      "n": 942,
+      "wirkstoffe": 141,
+      "treffer": 127,
+      "wirkstoffe_mit_meldung": 69,
+      "vorhergesagt": 0.1069974,
+      "beobachtet": 0.1348195,
+      "ki95": [
+       0.1062207,
+       0.1696568
+      ]
+     }
+    ],
+    "stichtage": 21
+   },
+   "84": {
+    "faelle": 24791,
+    "wirkstoffe": 1530,
+    "treffer": 1115,
+    "wirkstoffe_mit_meldung": 249,
+    "punkte": [
+     {
+      "klassen": [
+       0
+      ],
+      "n": 2156,
+      "wirkstoffe": 320,
+      "treffer": 23,
+      "wirkstoffe_mit_meldung": 5,
+      "vorhergesagt": 0.0088772,
+      "beobachtet": 0.0106679,
+      "ki95": [
+       0.0043402,
+       0.0259804
+      ]
+     },
+     {
+      "klassen": [
+       1
+      ],
+      "n": 9673,
+      "wirkstoffe": 726,
+      "treffer": 91,
+      "wirkstoffe_mit_meldung": 27,
+      "vorhergesagt": 0.0138413,
+      "beobachtet": 0.0094076,
+      "ki95": [
+       0.0061278,
+       0.0144174
+      ]
+     },
+     {
+      "klassen": [
+       2
+      ],
+      "n": 5148,
+      "wirkstoffe": 477,
+      "treffer": 149,
+      "wirkstoffe_mit_meldung": 43,
+      "vorhergesagt": 0.0286207,
+      "beobachtet": 0.0289433,
+      "ki95": [
+       0.020829,
+       0.0400893
+      ]
+     },
+     {
+      "klassen": [
+       3
+      ],
+      "n": 3805,
+      "wirkstoffe": 379,
+      "treffer": 166,
+      "wirkstoffe_mit_meldung": 50,
+      "vorhergesagt": 0.056392,
+      "beobachtet": 0.0436268,
+      "ki95": [
+       0.0319185,
+       0.0593665
+      ]
+     },
+     {
+      "klassen": [
+       4
+      ],
+      "n": 2380,
+      "wirkstoffe": 283,
+      "treffer": 268,
+      "wirkstoffe_mit_meldung": 80,
+      "vorhergesagt": 0.1120806,
+      "beobachtet": 0.112605,
+      "ki95": [
+       0.0882509,
+       0.1426287
+      ]
+     },
+     {
+      "klassen": [
+       5
+      ],
+      "n": 1629,
+      "wirkstoffe": 206,
+      "treffer": 418,
+      "wirkstoffe_mit_meldung": 106,
+      "vorhergesagt": 0.2373133,
+      "beobachtet": 0.2565991,
+      "ki95": [
+       0.2123278,
+       0.3065093
+      ]
+     }
+    ],
+    "stichtage": 18
+   }
+  },
+  "gesamtzahl": {
+   "horizont_tage": 56,
+   "stichtage": 20,
+   "korrelation": -0.2,
+   "zeilen": [
+    {
+     "stichtag": "2026-01-01",
+     "wirkstoffe": 1373,
+     "erwartet": 43.58,
+     "bereich": [
+      31.23,
+      55.92
+     ],
+     "eingetroffen": 67
+    },
+    {
+     "stichtag": "2026-01-15",
+     "wirkstoffe": 1362,
+     "erwartet": 41.14,
+     "bereich": [
+      29.07,
+      53.2
+     ],
+     "eingetroffen": 67
+    },
+    {
+     "stichtag": "2026-01-29",
+     "wirkstoffe": 1339,
+     "erwartet": 38.96,
+     "bereich": [
+      27.19,
+      50.72
+     ],
+     "eingetroffen": 49
+    },
+    {
+     "stichtag": "2026-02-12",
+     "wirkstoffe": 1370,
+     "erwartet": 42.41,
+     "bereich": [
+      30.19,
+      54.64
+     ],
+     "eingetroffen": 37
+    },
+    {
+     "stichtag": "2026-02-26",
+     "wirkstoffe": 1377,
+     "erwartet": 42.49,
+     "bereich": [
+      30.25,
+      54.72
+     ],
+     "eingetroffen": 29
+    },
+    {
+     "stichtag": "2026-03-12",
+     "wirkstoffe": 1365,
+     "erwartet": 41.59,
+     "bereich": [
+      29.48,
+      53.7
+     ],
+     "eingetroffen": 24
+    },
+    {
+     "stichtag": "2026-03-26",
+     "wirkstoffe": 1402,
+     "erwartet": 46.49,
+     "bereich": [
+      33.74,
+      59.24
+     ],
+     "eingetroffen": 30
+    },
+    {
+     "stichtag": "2026-04-09",
+     "wirkstoffe": 1397,
+     "erwartet": 49.06,
+     "bereich": [
+      35.99,
+      62.14
+     ],
+     "eingetroffen": 40
+    },
+    {
+     "stichtag": "2026-04-23",
+     "wirkstoffe": 1385,
+     "erwartet": 48.35,
+     "bereich": [
+      35.37,
+      61.33
+     ],
+     "eingetroffen": 40
+    },
+    {
+     "stichtag": "2026-05-07",
+     "wirkstoffe": 1378,
+     "erwartet": 47.97,
+     "bereich": [
+      35.04,
+      60.9
+     ],
+     "eingetroffen": 44
+    },
+    {
+     "stichtag": "2026-05-21",
+     "wirkstoffe": 1370,
+     "erwartet": 47.09,
+     "bereich": [
+      34.27,
+      59.92
+     ],
+     "eingetroffen": 43
+    },
+    {
+     "stichtag": "2026-06-04",
+     "wirkstoffe": 1356,
+     "erwartet": 46.68,
+     "bereich": [
+      33.93,
+      59.44
+     ],
+     "eingetroffen": 35
+    },
+    {
+     "stichtag": "2026-06-18",
+     "wirkstoffe": 1398,
+     "erwartet": 52.32,
+     "bereich": [
+      38.89,
+      65.76
+     ],
+     "eingetroffen": 39
+    },
+    {
+     "stichtag": "2026-07-02",
+     "wirkstoffe": 1382,
+     "erwartet": 40.82,
+     "bereich": [
+      28.83,
+      52.81
+     ],
+     "eingetroffen": 34
+    },
+    {
+     "stichtag": "2026-07-16",
+     "wirkstoffe": 1372,
+     "erwartet": 40.2,
+     "bereich": [
+      28.3,
+      52.1
+     ],
+     "eingetroffen": 35
+    },
+    {
+     "stichtag": "2026-07-30",
+     "wirkstoffe": 1398,
+     "erwartet": 43.74,
+     "bereich": [
+      31.37,
+      56.11
+     ],
+     "eingetroffen": 49
+    },
+    {
+     "stichtag": "2026-08-13",
+     "wirkstoffe": 1388,
+     "erwartet": 43.93,
+     "bereich": [
+      31.55,
+      56.31
+     ],
+     "eingetroffen": 57
+    },
+    {
+     "stichtag": "2026-08-27",
+     "wirkstoffe": 1379,
+     "erwartet": 43.43,
+     "bereich": [
+      31.11,
+      55.74
+     ],
+     "eingetroffen": 64
+    },
+    {
+     "stichtag": "2026-09-10",
+     "wirkstoffe": 1365,
+     "erwartet": 42.25,
+     "bereich": [
+      30.08,
+      54.41
+     ],
+     "eingetroffen": 62
+    },
+    {
+     "stichtag": "2026-09-24",
+     "wirkstoffe": 1350,
+     "erwartet": 41.37,
+     "bereich": [
+      29.33,
+      53.41
+     ],
+     "eingetroffen": 56
+    }
+   ]
+  },
+  "blinde_flecken": {
+   "meldungen": 253,
+   "von": "2026-01-05",
+   "bis": "2026-10-19",
+   "gruppen": {
+    "treffer": {
+     "n": 67,
+     "ohne_auslandssignal": 0,
+     "gruende": {
+      "Erhöhter Mehrbedarf": 5,
+      "Kapazitätsengpässe bei der Herstellung": 12,
+      "Verzögerung bei der Herstellung": 23,
+      "Verzögerung bei der Auslieferung": 18,
+      "Verknappung des Wirkstoffes": 2,
+      "Sonstige Gründe": 7
+     }
+    },
+    "mitte": {
+     "n": 127,
+     "ohne_auslandssignal": 11,
+     "gruende": {
+      "Erhöhter Mehrbedarf": 31,
+      "Kapazitätsengpässe bei der Herstellung": 32,
+      "Verzögerung bei der Herstellung": 27,
+      "Verzögerung bei der Auslieferung": 22,
+      "Verknappung des Wirkstoffes": 1,
+      "Sonstige Gründe": 14
+     }
+    },
+    "ueberraschung": {
+     "n": 59,
+     "ohne_auslandssignal": 32,
+     "gruende": {
+      "Erhöhter Mehrbedarf": 16,
+      "Kapazitätsengpässe bei der Herstellung": 13,
+      "Verzögerung bei der Herstellung": 6,
+      "Verzögerung bei der Auslieferung": 10,
+      "Verknappung des Wirkstoffes": 0,
+      "Sonstige Gründe": 14
+     }
+    }
+   }
+  }
+ }
+}

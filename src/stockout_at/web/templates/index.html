@@ -2,51 +2,95 @@
 {% import "_macros.html" as m %}
 {% block title %}Lage heute{% endblock %}
 {% block main %}
-<h1 class="page-title">Arzneimittel-Engpässe in Österreich: Lage am {{ ref|de }}</h1>
-<p class="lead">Gedächtnis der amtlichen BASG-Liste: Status, Verlauf und angekündigte Termine je Packung. Amtliche Angaben wörtlich, eigene Auswertungen gekennzeichnet.</p>
+<div class="start-head">
+ <div class="start-title">
+  <p class="lg">Arzneimittel-Engpässe in Österreich</p>
+  <h1 class="hero-title">Lage heute</h1>
+ </div>
+ <section id="search" class="start-search" aria-labelledby="search-h">
+  <h2 id="search-h" class="vh">Packung oder Wirkstoff suchen</h2>
+  <form action="{{ root }}wirkstoffe/" method="get" role="search" data-search data-root="{{ root }}">
+   <label class="vh" for="q">Handelsname, Wirkstoff oder PZN</label>
+   <div class="search-row">
+    <input id="q" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="Handelsname, Wirkstoff oder PZN" aria-describedby="search-hint" aria-controls="search-results">
+    <button class="key key-signal" type="submit">{{ m.icon("search") }}Suchen</button>
+   </div>
+   <p id="search-hint" class="hint">Ohne JavaScript führt die Suche zur <a href="{{ root }}wirkstoffe/">Wirkstoffliste A–Z</a>.</p>
+  </form>
+  <div id="search-results" class="search-results" aria-live="polite"></div>
+ </section>
+</div>
 
-<section id="search" class="block search-block" aria-labelledby="search-h">
- <h2 id="search-h">Packung oder Wirkstoff suchen</h2>
- <form action="{{ root }}wirkstoffe/" method="get" role="search" data-search data-root="{{ root }}">
-  <label for="q">Handelsname, Wirkstoff oder PZN</label>
-  <div class="search-row">
-   <input id="q" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="z. B. Zolpidem oder 2426051" aria-describedby="search-hint" aria-controls="search-results">
-   <button type="submit">Suchen</button>
+<div class="start-rest">
+<section id="situation-summary" aria-labelledby="sit-h">
+ <div class="sec-head"><h2 id="sit-h" class="lg">Lage am {{ ref|de }}</h2>{{ m.official(sid) }}</div>
+ <div class="screen">
+  <dl class="tiles">
+   {{ m.readout("Gelistet", sit.packages) }}
+   {{ m.readout("Aktiv eingeschränkt", sit.active) }}
+   {{ m.readout("Mit Termin", sit.active_with_resupply_date) }}
+   <div class="tile"><dt class="lg">Überfällig</dt><dd><a href="{{ root }}ueberfaellig/">{{ n_overdue }}</a></dd></div>
+  </dl>
+  <p class="summary-line">Aktiv eingeschränkt heißt „Nicht verfügbar“ oder „eingeschränkt verfügbar“. Termine und Überfälligkeit: {{ m.own() }}</p>
+  {% if f01 %}{{ m.figure(**f01) }}{% endif %}
+  <details class="fig-table"><summary>Zahlen als Tabelle</summary>
+  <div class="two-col">
+   <div class="table-wrap" tabindex="0">
+    <table class="compact">
+     <caption>Gelistete Packungen nach Status</caption>
+     <thead><tr><th scope="col">Status (BASG)</th><th scope="col" class="r">Packungen</th><th scope="col"><span class="vh">Anteil</span></th></tr></thead>
+     <tbody>
+     {% for s, n in status_rows %}
+      <tr><th scope="row">{{ m.status(s) }}</th><td class="r num">{{ n }}</td><td class="bar-cell"><span class="bar {{ s|sclass }}" style="width:{{ (100 * n / sit.packages)|round(1) }}%"></span></td></tr>
+     {% endfor %}
+     </tbody>
+    </table>
+   </div>
+   <div class="table-wrap" tabindex="0">
+    <table class="compact">
+     <caption>Aktiv eingeschränkt nach ATC-Hauptgruppe {{ m.own() }}</caption>
+     <thead><tr><th scope="col">ATC-Gruppe</th><th scope="col" class="r">Packungen</th><th scope="col"><span class="vh">Anteil</span></th></tr></thead>
+     <tbody>
+     {% for code, name, n in atc_rows %}
+      <tr><th scope="row"><span class="num code">{{ code }}</span> {{ name }}</th><td class="r num">{{ n }}</td><td class="bar-cell"><span class="bar s-acc" style="width:{{ (100 * n / sit.active)|round(1) }}%"></span></td></tr>
+     {% endfor %}
+     </tbody>
+    </table>
+   </div>
   </div>
-  <p id="search-hint" class="hint">Ohne JavaScript führt die Suche zur <a href="{{ root }}wirkstoffe/">Wirkstoffliste A–Z</a>.</p>
- </form>
- <div id="search-results" class="search-results" aria-live="polite"></div>
+  </details>
+  <p class="hint">„verfügbar gemäß §4 (1)“ beendet keine Meldung: Das BASG listet solche Packungen, weil die Nachfrage nicht gedeckt ist, obwohl der Zulassungsinhaber keine Einschränkung meldet. Sie zählen hier nicht als aktiv eingeschränkt. <a href="{{ root }}methodik/">Methodik</a></p>
+ </div>
 </section>
 
-<section id="situation-summary" class="block" aria-labelledby="sit-h">
- <h2 id="sit-h">Lage heute</h2>
- <p>{{ m.official(sid) }}</p>
- <p class="summary-line"><span class="num">{{ sit.packages }}</span> Packungen gelistet, davon <strong><span class="num">{{ sit.active }}</span> aktiv eingeschränkt</strong> („Nicht verfügbar“ oder „eingeschränkt verfügbar“); <span class="num">{{ sit.active_with_resupply_date }}</span> davon mit angekündigtem Termin, <a href="{{ root }}ueberfaellig/"><span class="num">{{ n_overdue }}</span> Termine überfällig</a> {{ m.own() }}.</p>
- <div class="two-col">
-  <div class="table-wrap" tabindex="0">
-   <table class="compact">
-    <caption>Gelistete Packungen nach Status</caption>
-    <thead><tr><th scope="col">Status (BASG)</th><th scope="col" class="r">Packungen</th><th scope="col"><span class="vh">Anteil</span></th></tr></thead>
-    <tbody>
-    {% for s, n in status_rows %}
-     <tr><th scope="row">{{ m.status(s) }}</th><td class="r num">{{ n }}</td><td class="bar-cell"><span class="bar {{ s|sclass }}" style="width:{{ (100 * n / sit.packages)|round(1) }}%"></span></td></tr>
-    {% endfor %}
-    </tbody>
-   </table>
-  </div>
-  <div class="table-wrap" tabindex="0">
-   <table class="compact">
-    <caption>Aktiv eingeschränkt nach ATC-Hauptgruppe {{ m.own() }}</caption>
-    <thead><tr><th scope="col">ATC-Gruppe</th><th scope="col" class="r">Packungen</th><th scope="col"><span class="vh">Anteil</span></th></tr></thead>
-    <tbody>
-    {% for code, name, n in atc_rows %}
-     <tr><th scope="row"><span class="num code">{{ code }}</span> {{ name }}</th><td class="r num">{{ n }}</td><td class="bar-cell"><span class="bar s-acc" style="width:{{ (100 * n / sit.active)|round(1) }}%"></span></td></tr>
-    {% endfor %}
-    </tbody>
-   </table>
-  </div>
+<section id="forecast-vs-report" aria-labelledby="f22-h">
+ <h2 id="f22-h" class="vh">Vorhersage gegen Meldung</h2>
+ {% if f22 %}
+ <div class="f22-grid">
+  {{ m.figure(**f22.figure) }}
+  <aside class="module f22-side" aria-labelledby="f22-side-h">
+   <h3 id="f22-side-h" class="lg">Stand und Phasen</h3>
+   <dl class="tiles">
+    {{ m.readout("Stand", f22.stand, small=true) }}
+    <div class="tile"><dt class="lg">Im Protokoll</dt><dd class="sm">{{ f22.im_protokoll }} <span class="f22-unit">Wirkstoffe</span></dd></div>
+   </dl>
+   {% for ph in f22.phases %}
+   <div class="f22-phase">
+    <p class="f22-ph"><span class="led led-{{ ph.led }}" aria-hidden="true"></span> <span class="f22-glyph f22-glyph-{{ ph.mark }}" aria-hidden="true"></span> <strong>{{ ph.name }}</strong> · {{ ph.label }}</p>
+    <p class="f22-word">{{ ph.word }}</p>
+    {% if ph.facts %}
+    <dl class="f22-facts">
+     {% for label, value in ph.facts %}<div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>{% endfor %}
+    </dl>
+    {% endif %}
+   </div>
+   {% endfor %}
+   <p class="f22-link">{{ m.key("So wird das Modell geprüft", root ~ "projekt/modell/", ic="arrow-right") }}</p>
+  </aside>
  </div>
- <p class="hint">„verfügbar gemäß §4 (1)“ beendet keine Meldung: Das BASG listet solche Packungen, weil die Nachfrage nicht gedeckt ist, obwohl der Zulassungsinhaber keine Einschränkung meldet. Sie zählen hier nicht als aktiv eingeschränkt. <a href="{{ root }}methodik/">Methodik</a></p>
+ {% else %}
+ <p class="notice">Die Grafik „Vorhersage gegen Meldung“ konnte in diesem Lauf nicht berechnet werden. <a href="{{ root }}projekt/modell/">So wird das Modell geprüft</a></p>
+ {% endif %}
 </section>
 
 <section id="early-warning" class="block own" aria-labelledby="ew-h">
@@ -56,9 +100,10 @@
 
 <section id="weekly-changes" class="block" aria-labelledby="week-h">
  <h2 id="week-h">Veränderungen der letzten 7 Tage ({{ week.from|de }}–{{ week.to|de }}) {{ m.own() }}</h2>
- {% set limit = 8 %}{% set ids = false %}
+ {% set limit = 5 %}{% set ids = false %}
  {% include "_week_lists.html" %}
  <p><a href="{{ root }}woche/">Alle neuen und beendeten Meldungen der Woche</a> · <a href="{{ root }}ueberfaellig/">Überfällige Termine ({{ n_overdue }})</a></p>
 </section>
+</div>
 {% endblock %}
 {% block scripts %}<script src="{{ root }}assets/search.js" defer></script>{% endblock %}

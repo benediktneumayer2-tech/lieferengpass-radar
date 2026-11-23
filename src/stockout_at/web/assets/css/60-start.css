@@ -1,0 +1,83 @@
+/* Start page: title row with search, situation readouts, figure F22 with its side panel. */
+
+.start-head { display: grid; gap: 8px 24px; margin: 0 0 16px; min-width: 0; }
+.start-title { min-width: 0; }
+.start-title .hero-title { margin: 2px 0 0; }
+.start-search { min-width: 0; }
+.start-search .search-row { margin-top: 0; }
+.start-search .search-row input { background: var(--surface-2); }
+.start-search .hint { margin: 4px 0 0; font-size: .8125rem; }
+@media (min-width: 900px) {
+  .start-head { grid-template-columns: minmax(0, 1fr) minmax(0, 30rem); align-items: end; }
+}
+@media (min-width: 600px) {
+  #situation-summary .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* figure and side panel: the side panel moves beside the figure once the figure keeps its full drawing size */
+.f22-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); min-width: 0; }
+.f22-grid .fig { margin: 0; }
+#fig-f22 .fig-head .lg { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+#fig-f22 .fig-w svg { max-width: none; }
+#fig-f22 .fig-n svg { max-width: 560px; }
+#fig-f22 figcaption p { max-width: 58rem; }
+@media (max-width: 759px) {
+  #fig-f22 .fig-w { display: none; }
+  #fig-f22 .fig-n { display: block; }
+  #fig-f22 .fig-screen { padding: 12px 8px; }
+}
+@media (min-width: 1240px) {
+  .f22-grid { grid-template-columns: minmax(0, 1fr) 296px; align-items: start; column-gap: 20px; }
+  .f22-side { position: sticky; top: calc(var(--topbar-h) + 12px); margin-top: 29px; }
+}
+
+.f22-side { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.f22-side h3 { margin: 0; }
+.f22-side .tiles { grid-template-columns: max-content minmax(0, 1fr); margin: 0; }
+.f22-unit { font: 400 .8125rem var(--font); white-space: nowrap; }
+.f22-side .tile { padding: 6px 10px; }
+.f22-phase { padding-top: 10px; border-top: 1px solid var(--line); }
+.f22-ph { margin: 0; padding-left: 25px; text-indent: -25px; font-size: .875rem; line-height: 1.35; color: var(--ink-2); }
+.f22-ph .led, .f22-ph .f22-glyph { text-indent: 0; }
+.f22-ph strong { color: var(--ink); }
+.f22-word { margin: 2px 0 0 25px; font-size: .875rem; font-weight: 600; color: var(--ink); }
+.f22-facts { margin: 4px 0 0 25px; font-size: .875rem; }
+.f22-facts div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 10px; padding: 1px 0; }
+.f22-facts dt { color: var(--ink-2); }
+.f22-facts dd { margin: 0; font-family: var(--font-mono); font-size: .8125rem; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ink); text-align: right; }
+.f22-link { margin: 4px 0 0; }
+.f22-link .key { width: 100%; }
+.f22-glyph { flex: none; display: inline-block; width: 10px; height: 10px; }
+.f22-glyph-band { height: 8px; background: color-mix(in srgb, var(--ch-comp) 24%, transparent); border: 1px solid color-mix(in srgb, var(--ch-comp) 60%, transparent); }
+.f22-glyph-circle { border: 1.6px solid var(--ch-main); border-radius: 50%; }
+.f22-glyph-diamond { background: var(--ch-main); transform: rotate(45deg) scale(.82); }
+
+/* chart anatomy of F22 */
+.ch-f22 .f22-l { font: 600 15px var(--font); }
+.ch-f22 .f22-t { font: 600 14px var(--font); }
+.ch-f22 .f22-k { font: 400 12.5px var(--font); fill: var(--screen-muted); }
+.ch-f22 .f22-note { paint-order: stroke; stroke: var(--screen-bg); stroke-width: 3.5px; stroke-linejoin: round; }
+.ch-f22 .f22-n { font: 500 12.5px var(--font-mono); font-variant-numeric: tabular-nums; }
+.ch-f22 .f22-s { font: 400 12.5px var(--font-mono); font-variant-numeric: tabular-nums; fill: var(--screen-muted); }
+.ch-f22 .f22-c { font: 500 12.5px var(--font-mono); }
+.ch-f22 .f22-note { font: 600 13px var(--font); }
+.f22-col { fill: color-mix(in srgb, var(--screen-sunk) 62%, transparent); }
+.f22-edge { stroke: var(--screen-line); stroke-width: 1; }
+.f22-base { stroke: var(--screen-line-strong); stroke-width: 1; }
+.f22-bar { fill: color-mix(in srgb, var(--ch-base) 42%, var(--screen-bg)); stroke: var(--ch-base); stroke-width: 1; }
+.f22-band { fill: color-mix(in srgb, var(--ch-comp) 22%, transparent); stroke: none; }
+.f22-band-key { stroke: color-mix(in srgb, var(--ch-comp) 60%, transparent); stroke-width: 1; }
+.f22-band-c { fill: none; stroke: color-mix(in srgb, var(--ch-comp) 60%, transparent); stroke-width: 1.25; }
+.f22-diag { stroke: var(--screen-text); stroke-width: 1; }
+.f22-arrow { fill: var(--ch-main); }
+.f22-pool { stroke: var(--ch-main); stroke-width: 1.25; }
+.ch-f22 .mk { stroke-width: 1.25; }
+.ch-f22 .mk-hollow { stroke-width: 1.3; }
+.ch-f22 .mk-g .mk { stroke-width: 2; }
+.ch-f22 .mk-g .mk-hollow { stroke-width: 1.75; }
+@media (forced-colors: active) {
+  .f22-bar, .f22-band, .f22-band-key, .f22-band-c, .f22-diag, .f22-edge, .f22-base { stroke: CanvasText; }
+  .f22-bar, .f22-band, .f22-col { fill: Canvas; }
+  .f22-arrow, .f22-glyph-diamond { fill: CanvasText; background: CanvasText; }
+  .f22-glyph-band, .f22-glyph-circle { border-color: CanvasText; }
+}

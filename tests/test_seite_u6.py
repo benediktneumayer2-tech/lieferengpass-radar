@@ -13,7 +13,7 @@ import pytest
 from stockout_at.archive import Archive
 from stockout_at.charts import NARROW, WIDE, num
 from stockout_at.charts.radar import f23
-from stockout_at.seiten.radar import termine
+from stockout_at.seiten.radar import KLASSEN, klasse, termine
 from stockout_at.site import generate
 from stockout_at.timeline import Ep
 
@@ -36,7 +36,18 @@ def _data(resupply, last="2026-11-23", end=None):
 def test_change_on_first_daily_snapshot_is_the_baseline():
     t = termine(_data([("2026-09-30", "2026-07-18"), ("2026-12-31", "2026-10-17"), ("2027-01-31", "2026-11-01")]), D("2026-11-23"))
     assert (t["n_changes"], t["n_later"], t["n_earlier"], t["median_days"]) == (1, 1, 0, 31)
-    assert t["lines"][0]["first"] == D("2026-12-31") and t["lines"][0]["start"] == D("2026-10-17")
+    assert t["moves"][0][2:] == (D("2026-12-31"), D("2027-01-31"))
+
+
+def test_size_classes_end_at_the_longest_months():
+    names = [n for n, _, _ in KLASSEN]
+    for days, name in ((-1, "vorgezogen"), (1, "bis 1 Monat"), (31, "bis 1 Monat"), (32, "1–3 Monate"), (92, "1–3 Monate"),
+                       (93, "3–6 Monate"), (184, "3–6 Monate"), (185, "6–12 Monate"), (366, "6–12 Monate"), (367, "über 1 Jahr")):
+        assert names[klasse(days)] == name, days
+    t = termine(_data([("2026-10-20", "2026-10-17"), ("2026-12-31", "2026-11-01"), ("2026-12-01", "2026-11-05")]), D("2026-11-23"))
+    by_name = {c["name"]: (c["n"], c["n_after"]) for c in t["classes"]}
+    assert by_name["vorgezogen"] == (1, 0) and by_name["1–3 Monate"] == (1, 1)  # +72 days, seen after 20.10.
+    assert sum(c["n"] for c in t["classes"]) == t["n_changes"] and sum(c["n_after"] for c in t["classes"]) == t["n_after_due"]
 
 
 def test_first_announcement_and_later_changes_do_not_count():

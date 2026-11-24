@@ -100,15 +100,22 @@
 .f23 .sec-head { margin-bottom: 4px; }
 .f23 .sec-title { margin: 0; }
 .f23 .tiles { margin-bottom: 12px; }
-.f23-past { fill: var(--screen-sunk); }
-.f23-ln { fill: none; stroke: var(--c); stroke-width: 1.25; stroke-opacity: .78; stroke-linejoin: round; }
-.f23-ln:hover { stroke-width: 2.5; stroke-opacity: 1; }
-.f23-dn { stroke-dasharray: 5 3; stroke-width: 1.75; stroke-opacity: 1; }
-.f23-dot { fill: none; stroke: var(--c); stroke-width: 4.5; stroke-linecap: round; }
-.f23-today { stroke: var(--screen-text); stroke-width: 1.5; }
-.f23-break { stroke: var(--rule-strong); stroke-width: 1; stroke-dasharray: 4 3; }
-.f23-swatch { stroke: var(--screen-line-strong); stroke-width: 1; }
-@media (forced-colors: active) { .f23-ln, .f23-dot, .f23-today { stroke: CanvasText; } .f23-past { fill: Canvas; } }
+/* bars: dark = changed only after the old date had passed, pale with a dark edge = changed before */
+.f23-a { fill: var(--ch-main); }
+.f23-b { fill: color-mix(in srgb, var(--ch-main) 18%, var(--screen-bg)); stroke: var(--ch-main); stroke-width: 1; }
+.f23-base { stroke: var(--screen-line-strong); stroke-width: 1; }
+.f23-mk { fill: var(--screen-accent); }
+.ch-f23 .f23-k { font: 400 13px var(--font); fill: var(--screen-muted); }
+.ch-f23 .f23-c { font: 600 14px var(--font); }
+.ch-f23 .f23-r { font: 400 12.5px var(--font); fill: var(--screen-muted); }
+.ch-f23 .f23-n { font: 500 13.5px var(--font-mono); font-variant-numeric: tabular-nums; }
+.ch-f23 .f23-i { font: 500 12.5px var(--font-mono); font-variant-numeric: tabular-nums; fill: var(--screen-bg); }
+.ch-f23 .f23-m { font: 600 13px var(--font); fill: var(--screen-accent); }
+@media (forced-colors: active) {
+  .f23-a, .f23-mk { fill: CanvasText; }
+  .f23-b { fill: Canvas; stroke: CanvasText; }
+  .ch-f23 .f23-i { fill: Canvas !important; }
+}
 
 /* small fixes: a PZN never splits from its label; the three substance counts share one row on phones */
 .radar .pzn { white-space: nowrap !important; }

@@ -152,6 +152,7 @@ These are design choices, not a validation: the radar is not a validated compute
 
 The frozen models and the test plan are unchanged (same hashes). The changes concern how data are archived and read, plus one added check, one pre-registered follow-up analysis and the public website.
 
+- **24 Nov 2026 – two website figures made clearer.** The figure on announced resupply dates now shows bars by size of each change, split into changes made before and only after the old date had passed. The calibration panel on the start page labels the ideal diagonal and the retrospective band directly. Data, classes and the fixed display rules are unchanged.
 - **23 Nov 2026 – website online and redesigned.** The reference instance runs at [lieferengpass-radar.at](https://lieferengpass-radar.at). Its start page compares forecasts with new BASG reports every day, in six probability classes, with no value for any single substance and no verdict before 30 Apr 2027. New project pages explain the idea, the model, its known weaknesses and every tested idea, including the negative ones. The documentation sentence "no forecast is shown on the website" now reads "no forecast for individual substances", with a [dated note](documentation/MODELL_UND_BEWERTUNG.md).
 - **20 Nov 2026 – signal speed: no measurable gain, follow-up fixed.** A retrospective search tested whether the speed at which shortage reports spread across countries improves the forecast. Verdict "unclear": no gain shown, a large one unlikely; nothing went into a model. Countries archived daily only since October 2026 are tested forward under a rule fixed on 17 Nov 2026: [analysis/modellsuche/tempo_folge](analysis/modellsuche/tempo_folge/README.md).
 - **20 Nov 2026 – citation.** Zenodo release `v0.1.1-prereg` archives the two pre-registered additions; models and test plan unchanged.
@@ -163,7 +164,7 @@ The frozen models and the test plan are unchanged (same hashes). The changes con
 
 ## Status and limits
 
-| Part | Status on 23 Nov 2026 |
+| Part | Status on 24 Nov 2026 |
 |---|---|
 | Daily archive | running on the reference instance since 17 Oct 2026; no BASG day missing; raw copies of further sources since 16 Nov 2026 |
 | Episodes | history back to 10 Apr 2021 from 28 snapshots, 10 of them truncated |

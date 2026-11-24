@@ -152,6 +152,7 @@ Das sind Entscheidungen im Aufbau, keine Validierung: Das Radar ist kein validie
 
 Die eingefrorenen Modelle und der Prüfplan sind unverändert (gleiche Hashes). Geändert hat sich, wie Daten archiviert und gelesen werden; dazu kommen eine Zusatzprüfung und eine vorab festgelegte Folgeauswertung und die öffentliche Website.
 
+- **24.11.2026 – zwei Grafiken der Website verständlicher.** Die Grafik zu angekündigten Lieferterminen zeigt nun Balken nach Größe jeder Änderung, getrennt nach Änderungen vor und erst nach Ablauf des alten Termins. Das Kalibrierungsfeld der Startseite beschriftet die ideale Diagonale und das Rückblick-Band direkt. Daten, Klassen und die festgeschriebenen Darstellungsregeln sind unverändert.
 - **23.11.2026 – Website online und neu gestaltet.** Die Referenzinstanz läuft unter [lieferengpass-radar.at](https://lieferengpass-radar.at). Ihre Startseite vergleicht täglich Vorhersagen mit neuen BASG-Meldungen, in sechs Wahrscheinlichkeitsklassen, ohne Wert für einen einzelnen Wirkstoff und ohne Urteil vor dem 30.04.2027. Neue Projektseiten erklären Idee, Modell, bekannte Schwächen und alle geprüften Ideen, auch die negativen. Der Dokumentationssatz „Keine Vorhersage wird auf der Website gezeigt“ lautet nun „Keine Vorhersage für einzelne Wirkstoffe“, mit [datiertem Hinweis](documentation/MODELL_UND_BEWERTUNG.md).
 - **20.11.2026 – Signaltempo: kein messbarer Gewinn, Folgeprüfung festgelegt.** Eine Rückschau prüfte, ob das Tempo, mit dem sich Engpassmeldungen über Länder ausbreiten, die Prognose verbessert. Urteil „unklar“: kein Gewinn nachgewiesen, ein großer unwahrscheinlich; nichts davon ging in ein Modell. Länder, die erst seit Oktober 2026 täglich archiviert werden, werden nach einer am 17.11.2026 festgelegten Regel vorwärts geprüft: [analysis/modellsuche/tempo_folge](analysis/modellsuche/tempo_folge/FOLGEPRUEFUNG.md).
 - **20.11.2026 – Zitierbarkeit.** Das Zenodo-Release `v0.1.1-prereg` archiviert die beiden Vorab-Festlegungen; Modelle und Prüfplan unverändert.
@@ -163,7 +164,7 @@ Die eingefrorenen Modelle und der Prüfplan sind unverändert (gleiche Hashes). 
 
 ## Stand und Grenzen
 
-| Teil | Stand am 23.11.2026 |
+| Teil | Stand am 24.11.2026 |
 |---|---|
 | Tagesarchiv | läuft in der Referenzinstanz seit 17.10.2026; seither kein BASG-Tag fehlend; seit 16.11.2026 auch Rohkopien weiterer Quellen |
 | Episoden | Vorgeschichte ab 10.04.2021 aus 28 Einzelaufnahmen, davon 10 abgeschnitten |

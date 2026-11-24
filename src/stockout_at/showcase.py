@@ -135,8 +135,11 @@ def f22_context(data: dict, results: dict) -> dict:
     caption = ("Oben: Jeder Punkt ist ein Wirkstoff, für den erstmals eine BASG-Meldung erschien, eingeordnet nach der "
                "Wahrscheinlichkeit, die das Modell am Tag davor nannte. Die Balken zeigen, wie sich alle Wirkstoffe verteilen. "
                f"Unten: Anteil der Wirkstoffe je Klasse, für die binnen {weeks} Wochen tatsächlich eine neue Meldung kam. "
-               "Auf der Diagonale stimmen Vorhersage und Wirklichkeit überein, die Striche zeigen den 95-%-Bereich. "
-               "Der Rückblick 2026 ist simuliert. Die Einlaufphase zählt nicht für die Prüfung. "
+               "Auf der Diagonale kommen Meldungen genau so oft wie vorhergesagt; darüber häufiger, darunter seltener. "
+               "Die orange Linie ist der Rückblick auf 2026: dieselbe Rechnung auf einem nachträglich simulierten "
+               "Vorhersageprotokoll mit Stichtagen alle 14 Tage, das Band um sie ist ihr 95-%-Bereich. "
+               "Bei den Punkten der Einlaufphase und der Prüfung zeigen senkrechte Striche den 95-%-Bereich. "
+               "Die Einlaufphase zählt nicht für die Prüfung. "
                f'Die Prüfung beginnt am {_day(data["beginn"])}, entschieden wird am {_day(go)} nach der vorab festgelegten Regel. '
                "Die Punkte oben zählen jede neue Meldung, die Prüfung selbst wertet nur ihre Stichtage alle 14 Tage. "
                f'Eine neue Meldung heißt nicht, dass ein Arzneimittel fehlt. {results["referenzinstanz_satz"]}')

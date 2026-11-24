@@ -8,7 +8,7 @@ of `stockout_at.live.build`: aggregates only, so nothing here can show a single 
 from __future__ import annotations
 
 from datetime import date
-from math import ceil, floor
+from math import atan2, ceil, degrees, floor, hypot
 
 from ..timeline import de
 from . import WIDE, Log, frame, line, marker, num, r, text, text_width, x_axis, y_axis
@@ -79,16 +79,20 @@ def _dots(n: int, cx: float, base: float, cols: int, pitch: float, size: float, 
 
 
 def _key(items: list[tuple], x0: float, y: float, right: float, step: float) -> tuple[list[str], float]:
-    """A printed key that wraps: (mark drawing function, label)."""
+    """A printed key that wraps: (mark drawing function, label); a label may run over several lines ("\\n").
+
+    Returns the marks and the y of the last line."""
     out: list[str] = []
-    x = x0
+    x, extra = x0, 0
     for draw, label in items:
-        width = 16 + text_width(label, 12.5)
+        lines = label.split("\n")
+        width = 16 + max(text_width(s, 12.5) for s in lines)
         if x + width > right and x > x0:
-            x, y = x0, y + step
-        out += [draw(x + 5, y - 4), text(x + 15, y, label, "f22-k")]
+            x, y, extra = x0, y + step * (1 + extra), 0
+        out += [draw(x + 5, y - 4), *(text(x + 15, y + i * (step - 2), s, "f22-k") for i, s in enumerate(lines))]
+        extra = max(extra, len(lines) - 1)
         x += width + 14
-    return out, y
+    return out, y + (step - 2) * extra
 
 
 def _count(cx: float, y: float, n: int, mark) -> list[str]:
@@ -101,7 +105,8 @@ def _bar_mark(x: float, y: float) -> str:
 
 
 def _band_mark(x: float, y: float) -> str:
-    return f'<rect class="f22-band f22-band-key" x="{r(x - 5)}" y="{r(y - 4)}" width="10" height="8"/>'
+    """The retrospective as in the plot: its line inside its band."""
+    return f'<rect class="f22-band" x="{r(x - 6)}" y="{r(y - 4.5)}" width="12" height="9"/>{line(x - 6, y, x + 6, y, "f22-band-c")}'
 
 
 def _diagonal_mark(x: float, y: float) -> str:
@@ -124,6 +129,20 @@ def _band(points: list[dict], x, y) -> list[str]:
     lower = "L".join(f"{r(px)} {r(lo)}" for px, lo, _, _ in reversed(coords))
     centre = "L".join(f"{r(px)} {r(mid)}" for px, _, _, mid in coords)
     return [f'<path class="f22-band" d="M{upper}L{lower}Z"/>', f'<path class="f22-band-c" d="M{centre}"/>']
+
+
+def _ideal(left: float, right: float, top: float, bottom: float, data_max: float) -> str:
+    """The word "Ideal" on the diagonal, just above it: at its upper end when the data stay clear of it, else at its lower end."""
+    w, h = right - left, bottom - top
+    c, s, angle = w / hypot(w, h), h / hypot(w, h), degrees(atan2(h, w))
+    near = max(16, 15 / s)  # distance of the word's ends from the corner, along the line; the word stays inside the plot
+    far = near + text_width("Ideal", 13)
+    if data_max + 10 < right - far * c:
+        px, py, anchor = right - near * c, top + near * s, "end"
+    else:
+        px, py, anchor = left + near * c, bottom - near * s, "start"
+    return (f'<text class="f22-ideal" x="{r(px)}" y="{r(py - 4)}" text-anchor="{anchor}" '
+            f'transform="rotate({r(-angle)} {r(px)} {r(py)})">Ideal</text>')
 
 
 def _points(data: dict, phase: str, shape: str, hollow: bool, name: str, x, y, dx: float, bottom: float, top: float,
@@ -214,7 +233,7 @@ def f22(data: dict, *, width: int, uid: str) -> str:
     for i, (cx, (a, b)) in enumerate(zip(centres, columns)):
         share = heute["je_klasse"][i] / heute["wirkstoffe"] if heute["wirkstoffe"] else 0.0
         bar = min(share / BAR_MAX, 1) * bars_h
-        percent = (num(share * 100) + (" %" if wide else "")) if heute["wirkstoffe"] else "–"
+        percent = (num(share * 100) + (" %" if wide or i == 0 else "")) if heute["wirkstoffe"] else "–"  # narrow: unit once
         half = min((b - a) / 2 - 3, 26 if wide else 12)
         if bar > 0:
             body.append(f'<rect class="f22-bar" x="{r(cx - half)}" y="{r(base)}" width="{r(2 * half)}" height="{r(bar)}"/>')
@@ -232,6 +251,9 @@ def f22(data: dict, *, width: int, uid: str) -> str:
         else:
             body.append(text(cx, top, str(first), "f22-n", "middle"))
     body.append(line(left, base, right, base, "f22-base"))
+    # what lies above and below the shared line, in the free space left of the first class
+    above, below = ("neu gemeldet", "alle Wirkstoffe") if wide else ("neu", "alle")
+    body += [text(0, base - 7, above, "f22-k"), text(0, base + 16, below, "f22-k")]
     for i, cx in enumerate(centres):
         body.append(text(cx, class_y, data["klassen"][i]["name" if wide else "kurz"], "f22-c", "middle"))
 
@@ -241,15 +263,26 @@ def f22(data: dict, *, width: int, uid: str) -> str:
     if wide:
         body.append(text(16, title_y, f"Wie oft kam binnen {weeks} Wochen wirklich eine Meldung?", "f22-t"))
         key_y = title_y + 20
-        legend = [(_band_mark, "Rückblick · simuliert · nicht validiert"), (_circle_mark, "Einlaufphase · zählt nicht für die Prüfung"),
-                  (_diamond_mark, "Prüfung · vorab festgelegt · Zwischenstand, kein Urteil"), (_diagonal_mark, "Vorhersage trifft ein")]
+        legend = [(_band_mark, "Rückblick 2026 · simuliert · nicht validiert · Band: 95-%-Bereich"),
+                  (_diagonal_mark, "Ideal: so oft wie vorhergesagt"), (_circle_mark, "Einlaufphase · zählt nicht für die Prüfung"),
+                  (_diamond_mark, "Prüfung · vorab festgelegt · Zwischenstand, kein Urteil")]
     else:
         body += [text(14, title_y, f"Wie oft kam binnen {weeks} Wochen", "f22-t"), text(14, title_y + 17, "wirklich eine Meldung?", "f22-t")]
         key_y = title_y + 37
-        legend = [(_band_mark, "Rückblick · simuliert"), (_circle_mark, "Einlaufphase"), (_diamond_mark, "Prüfung"),
-                  (_diagonal_mark, "Vorhersage trifft ein")]
+        legend = [(_band_mark, "Rückblick 2026 · simuliert\nBand: 95-%-Bereich"), (_diagonal_mark, "Ideal: so oft wie vorhergesagt"),
+                  (_circle_mark, "Einlaufphase"), (_diamond_mark, "Prüfung")]
     key, key_y = _key(legend, left if wide else 0, key_y, right, 17)
     body += key
+
+    # notes on the state of the points stand under the key, so that the plot keeps its corners for the two halves
+    note = status_sentence(data)
+    pooled = any(len(p["klassen"]) > 1 for ph in ("einlauf", "pruefung") for p in data[ph]["punkte"])
+    notes = [*(_wrap("Waagrechte Linie: Klassen zusammengelegt", 200 if wide else 44) if pooled else []),
+             *(_wrap(note, 200 if wide else 44) if note else [])]
+    for part in notes:
+        key_y += 20
+        body.append(text(left if wide else 0, key_y, part, "f22-note"))
+
     plot_top = key_y + 29
     bottom = plot_top + (208 if wide else 190)
     y = Log(AXIS, (bottom, plot_top))
@@ -260,22 +293,19 @@ def f22(data: dict, *, width: int, uid: str) -> str:
     body += [line(a, plot_top, a, bottom, "f22-edge") for a, _ in columns[1:]]
     body.append(x_axis(x, bottom, ticks=X_TICKS, fmt=_tick,
                        label="vorhergesagte Wahrscheinlichkeit einer neuen Meldung, in %" if wide else "vorhergesagte Wahrscheinlichkeit, in %"))
+    # the two halves, quiet and behind the data: above the diagonal reports came more often than predicted
+    body += [text(left + 8, plot_top + 16, "häufiger als vorhergesagt", "f22-half"),
+             text(right - 8, bottom - 10, "seltener als vorhergesagt", "f22-half", "end")]
     band = data["rueckblick"]["punkte"] if data["rueckblick"] else []
     if band:
         body += _band(band, x, y)
     body.append(line(x(AXIS[0]), y(AXIS[0]), x(AXIS[1]), y(AXIS[1]), "f22-diag"))
+    data_x = [x(_in_axis(p["vorhergesagt"] * 100)) for p in [*band, *data["einlauf"]["punkte"], *data["pruefung"]["punkte"]]]
+    body.append(_ideal(left, right, plot_top, bottom, max(data_x, default=left)))
 
     both = bool(data["einlauf"]["punkte"] and data["pruefung"]["punkte"])
     for (phase, shape, hollow, name), dx in zip(PHASES, (-3, 3) if both else (0, 0)):
         body += _points(data, phase, shape, hollow, name, x, y, dx, bottom, plot_top, columns)
-
-    # short notes in the corner below the diagonal, which the band never reaches
-    note = status_sentence(data)
-    pooled = any(len(p["klassen"]) > 1 for ph in ("einlauf", "pruefung") for p in data[ph]["punkte"])
-    lines = [*(_wrap("Waagrechte Linie: Klassen zusammengelegt", 200 if wide else 20) if pooled else []),
-             *(_wrap(note, 200 if wide else 17) if note else [])]
-    for i, part in enumerate(lines):
-        body.append(text(right - 8, bottom - 12 - (len(lines) - 1 - i) * 16, part, "f22-note", "end"))
 
     e, p = data["einlauf"], data["pruefung"]
     desc = (f'Feld a: Von {num(heute["wirkstoffe"])} Wirkstoffen am letzten Protokolltag liegen je Klasse '

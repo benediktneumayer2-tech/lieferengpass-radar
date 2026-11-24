@@ -60,6 +60,8 @@ Festgelegt am 23.11.2026, vor Beginn der prospektiven Prüfung. Bis zum Bericht 
 - **Zusammenlegen:** Ein Punkt braucht mindestens 30 Wirkstoffe. Kleinere Randklassen werden mit der Nachbarklasse zur Mitte hin zusammengelegt, nie weggelassen.
 - **Kein Urteil vor dem 30.04.2027**, kein Vergleich mit der Stufenregel auf der Startseite. Die Grafik bleibt auch stehen, wenn sie schlecht aussieht.
 
+24.11.2026: Beschriftung klarer gemacht (Diagonale als „Ideal: so oft wie vorhergesagt“, die beiden Hälften des Kalibrierungsfelds benannt, Rückblick im Schlüssel als Linie mit Band, Hinweis zum Stand über dem Feld), Inhalt unverändert.
+
 ## Datenschutz und Technik
 
 - Statisches HTML, keine Cookies, kein Tracking, keine Analysewerkzeuge, keine Anfragen an Dritte; Schriften, Skripte und Grafiken kommen von der eigenen Seite (Datenschutzseite; Test `test_links_resolve_and_no_external_assets`).

@@ -48,7 +48,8 @@
 .f22-link { margin: 4px 0 0; }
 .f22-link .key { width: 100%; }
 .f22-glyph { flex: none; display: inline-block; width: 10px; height: 10px; }
-.f22-glyph-band { height: 8px; background: color-mix(in srgb, var(--ch-comp) 24%, transparent); border: 1px solid color-mix(in srgb, var(--ch-comp) 60%, transparent); }
+/* the retrospective as in the chart: its line inside its band */
+.f22-glyph-band { width: 12px; height: 9px; background: linear-gradient(transparent 3.5px, color-mix(in srgb, var(--ch-comp) 60%, transparent) 3.5px 5px, transparent 5px), color-mix(in srgb, var(--ch-comp) 22%, transparent); }
 .f22-glyph-circle { border: 1.6px solid var(--ch-main); border-radius: 50%; }
 .f22-glyph-diamond { background: var(--ch-main); transform: rotate(45deg) scale(.82); }
 
@@ -61,12 +62,15 @@
 .ch-f22 .f22-s { font: 400 12.5px var(--font-mono); font-variant-numeric: tabular-nums; fill: var(--screen-muted); }
 .ch-f22 .f22-c { font: 500 12.5px var(--font-mono); }
 .ch-f22 .f22-note { font: 600 13px var(--font); }
+/* the two halves of panel b and the word on the diagonal: quiet, with a halo so gridlines never cross them */
+.ch-f22 .f22-half, .ch-f22 .f22-ideal { paint-order: stroke; stroke: var(--screen-bg); stroke-width: 3.5px; stroke-linejoin: round; }
+.ch-f22 .f22-half { font: 400 12.5px var(--font); fill: var(--screen-muted); }
+.ch-f22 .f22-ideal { font: 600 13px var(--font); }
 .f22-col { fill: color-mix(in srgb, var(--screen-sunk) 62%, transparent); }
 .f22-edge { stroke: var(--screen-line); stroke-width: 1; }
 .f22-base { stroke: var(--screen-line-strong); stroke-width: 1; }
 .f22-bar { fill: color-mix(in srgb, var(--ch-base) 42%, var(--screen-bg)); stroke: var(--ch-base); stroke-width: 1; }
 .f22-band { fill: color-mix(in srgb, var(--ch-comp) 22%, transparent); stroke: none; }
-.f22-band-key { stroke: color-mix(in srgb, var(--ch-comp) 60%, transparent); stroke-width: 1; }
 .f22-band-c { fill: none; stroke: color-mix(in srgb, var(--ch-comp) 60%, transparent); stroke-width: 1.25; }
 .f22-diag { stroke: var(--screen-text); stroke-width: 1; }
 .f22-arrow { fill: var(--ch-main); }
@@ -76,8 +80,9 @@
 .ch-f22 .mk-g .mk { stroke-width: 2; }
 .ch-f22 .mk-g .mk-hollow { stroke-width: 1.75; }
 @media (forced-colors: active) {
-  .f22-bar, .f22-band, .f22-band-key, .f22-band-c, .f22-diag, .f22-edge, .f22-base { stroke: CanvasText; }
+  .f22-bar, .f22-band, .f22-band-c, .f22-diag, .f22-edge, .f22-base { stroke: CanvasText; }
   .f22-bar, .f22-band, .f22-col { fill: Canvas; }
   .f22-arrow, .f22-glyph-diamond { fill: CanvasText; background: CanvasText; }
-  .f22-glyph-band, .f22-glyph-circle { border-color: CanvasText; }
+  .f22-glyph-circle { border-color: CanvasText; }
+  .f22-glyph-band { background: linear-gradient(Canvas 3.5px, CanvasText 3.5px 5px, Canvas 5px); border: 1px solid CanvasText; }
 }

@@ -15,7 +15,7 @@
   {{ m.readout("Median der Änderung", f23.median) }}
   {{ m.readout("erst nach Ablauf geändert", f23.n_after_due ~ " von " ~ f23.n_changes) }}
  </dl>
- {{ m.figure(id="f23", kind="live", legend="Angekündigte Termine im Tagesarchiv seit " ~ f23.start, svg_wide=f23.wide, svg_narrow=f23.narrow, caption=f23.caption, table=f23.table, source=f23.source) }}
+ {{ m.figure(id="f23", kind="live", legend="Terminänderungen seit " ~ f23.start ~ ", nach Größe der Verschiebung", svg_wide=f23.wide, svg_narrow=f23.narrow, caption=f23.caption, table=f23.table, source=f23.source) }}
 </section>
 {% endif %}
 <section class="block" aria-labelledby="od-h">
